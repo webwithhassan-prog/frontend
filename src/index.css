@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-blue: #12224a;
+  --color-brand-blue-light: #2b5fe2;
+  --color-brand-blue-pale: #eaf1ff;
+  --color-brand-orange: #f76b1c;
+  --color-brand-orange-dark: #d9560f;
+  --color-brand-gold: #ffc93c;
+
+  --font-display: "Archivo Black", sans-serif;
+  --font-body: "Manrope", sans-serif;
+}
+
+body {
+  background-color: #fff;
+  color: var(--color-brand-blue);
+  font-family: var(--font-body);
+}
