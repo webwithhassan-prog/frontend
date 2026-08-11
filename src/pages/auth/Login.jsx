@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/authContext";
+import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
@@ -149,6 +149,13 @@ const Login = () => {
             Login
           </Button>
         </form>
+
+        <p className="text-center text-sm text-brand-blue/70 mt-4">
+          Don't have an account?{" "}
+          <a href="/signup" className="text-brand-orange font-semibold">
+            Sign up
+          </a>
+        </p>
       </Card>
     </section>
   );

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
-import { useAuth } from "../../context/authContext";
+import { useAuth } from "../../context/AuthContext";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 

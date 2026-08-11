@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../../services/api";
-import { useAuth } from "../../context/authContext";
+import { useAuth } from "../../context/AuthContext";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 
-const packageOptions = [
-  { value: "dietplan", label: "Customized Dietplan" },
-  { value: "workout", label: "Live Workout Sessions" },
-  { value: "combo", label: "Both Combined" },
-];
-
 const durations = [30, 90, 180];
+
+const packageLabels = {
+  dietplan: "Customized Dietplan",
+  workout: "Live Workout Sessions",
+  combo: "Both Combined",
+};
 
 const featuresByType = {
   dietplan: [
@@ -42,12 +42,14 @@ const featuresByType = {
 const Plans = () => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedType, setSelectedType] = useState("dietplan");
   const [selectedDuration, setSelectedDuration] = useState(30);
   const [checkingOut, setCheckingOut] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { role } = useAuth();
+  const [searchParams] = useSearchParams();
+
+  const selectedType = searchParams.get("type") || "dietplan";
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -102,6 +104,7 @@ const Plans = () => {
 
   const handleCheckout = () => {
     setError("");
+    console.log("role from context:", role);
 
     if (selection.length === 0) {
       setError("This package/duration combination isn\u2019t available yet.");
@@ -128,11 +131,10 @@ const Plans = () => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
       >
-        PACKAGES
+        {packageLabels[selectedType]?.toUpperCase() || "PACKAGES"}
       </motion.h1>
       <p className="text-brand-blue/70 text-center mb-12">
-        Choose a package, then a duration — Dietplan, Live Workout Sessions, or
-        both together.
+        Pick a duration to see pricing and get started.
       </p>
 
       {loading ? (
@@ -140,23 +142,6 @@ const Plans = () => {
       ) : (
         <Card className="max-w-xl mx-auto">
           <div className="space-y-5">
-            <div>
-              <label className="text-sm text-brand-blue/60 mb-1 block">
-                Package
-              </label>
-              <select
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
-                className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-              >
-                {packageOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
             <div>
               <label className="text-sm text-brand-blue/60 mb-1 block">
                 Duration
@@ -175,7 +160,7 @@ const Plans = () => {
             </div>
 
             <ul className="space-y-2 pt-2">
-              {featuresByType[selectedType].map((f) => (
+              {(featuresByType[selectedType] || []).map((f) => (
                 <li
                   key={f}
                   className="flex items-center gap-2 text-sm text-brand-blue/70"

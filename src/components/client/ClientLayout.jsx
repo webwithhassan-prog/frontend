@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { LogOut } from "lucide-react";
-import { useAuth } from "../../context/authContext";
+import { useAuth } from "../../context/AuthContext";
 import logo from "../../assets/logo.jpeg";
 
 const ClientLayout = () => {
