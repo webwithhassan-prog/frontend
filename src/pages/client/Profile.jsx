@@ -27,6 +27,8 @@ const Profile = () => {
   const [allUpcomingClasses, setAllUpcomingClasses] = useState([]);
   const [showFullWeek, setShowFullWeek] = useState(false);
   const [ebooks, setEbooks] = useState([]);
+  const [recordedContent, setRecordedContent] = useState([]);
+  const [contentLocked, setContentLocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -63,6 +65,18 @@ const Profile = () => {
         id.toString(),
       );
       setEbooks(ebooksRes.data.filter((e) => purchasedIds.includes(e._id)));
+
+      try {
+        const contentRes = await api.get(`/content/client/${clientId}`);
+        setRecordedContent(contentRes.data);
+        setContentLocked(false);
+      } catch (contentErr) {
+        if (contentErr.response?.status === 403) {
+          setContentLocked(true);
+        } else {
+          console.error(contentErr);
+        }
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -149,6 +163,12 @@ const Profile = () => {
     </Card>
   );
 
+  const contentByCategory = recordedContent.reduce((acc, item) => {
+    if (!acc[item.category]) acc[item.category] = [];
+    acc[item.category].push(item);
+    return acc;
+  }, {});
+
   return (
     <div>
       <motion.h1
@@ -164,7 +184,7 @@ const Profile = () => {
       ) : (
         <>
           {/* Status */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <Card>
               <p className="text-brand-blue/60 text-sm mb-1">Status</p>
               <span
@@ -192,6 +212,33 @@ const Profile = () => {
               </p>
             </Card>
           </div>
+
+          {/* Usage quotas */}
+          {(client?.has_dietplan || client?.has_premium) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+              {client?.has_dietplan && (
+                <Card>
+                  <p className="text-brand-blue/60 text-sm mb-1">Diet Plans</p>
+                  <p className="text-brand-blue text-sm">
+                    {client.diet_plans_total - client.diet_plans_used} of{" "}
+                    {client.diet_plans_total} remaining
+                  </p>
+                </Card>
+              )}
+              {client?.has_premium && (
+                <Card>
+                  <p className="text-brand-blue/60 text-sm mb-1">
+                    Premium Sessions
+                  </p>
+                  <p className="text-brand-blue text-sm">
+                    {client.premium_sessions_total -
+                      client.premium_sessions_used}{" "}
+                    of {client.premium_sessions_total} remaining
+                  </p>
+                </Card>
+              )}
+            </div>
+          )}
 
           {/* Upcoming classes */}
           <div className="flex items-center justify-between mb-4">
@@ -235,6 +282,50 @@ const Profile = () => {
               {classesToShow.map(renderClassCard)}
             </div>
           )}
+
+          {/* Recorded Library */}
+          <h2 className="font-display text-lg text-brand-blue mb-4">
+            RECORDED LIBRARY
+          </h2>
+          {contentLocked ? (
+            <Card className="mb-12 border-brand-orange border-2 text-center max-w-lg">
+              <p className="text-brand-blue font-semibold mb-4">
+                Your subscription isn't active — renew to unlock the recorded
+                library.
+              </p>
+              <Button onClick={() => navigate("/plans")}>View Packages</Button>
+            </Card>
+          ) : recordedContent.length === 0 ? (
+            <p className="text-brand-blue/70 mb-12">
+              No recorded videos available yet.
+            </p>
+          ) : (
+            Object.entries(contentByCategory).map(([category, items]) => (
+              <div key={category} className="mb-8">
+                <p className="text-brand-blue/60 text-xs uppercase tracking-wide mb-3">
+                  {category}
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {items.map((item) => (
+                    <Card key={item._id}>
+                      <div className="aspect-video mb-3 rounded-lg overflow-hidden bg-brand-blue-pale">
+                        <iframe
+                          src={item.youtube_link.replace("watch?v=", "embed/")}
+                          title={item.title}
+                          className="w-full h-full"
+                          allowFullScreen
+                        />
+                      </div>
+                      <h3 className="font-display text-brand-blue text-sm">
+                        {item.title}
+                      </h3>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            ))
+          )}
+          <div className="mb-4" />
 
           {/* My E-Books */}
           <h2 className="font-display text-lg text-brand-blue mb-4">

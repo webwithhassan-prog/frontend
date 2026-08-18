@@ -60,6 +60,17 @@ const Enrollments = () => {
     fetchClients();
   };
 
+  const handleDeliverDietPlan = async (id) => {
+    try {
+      await api.put(`/clients/${id}/deliver-dietplan`);
+      fetchClients();
+    } catch (err) {
+      alert(
+        err.response?.data?.message || "Failed to mark diet plan delivered",
+      );
+    }
+  };
+
   return (
     <div>
       <motion.h1
@@ -82,6 +93,8 @@ const Enrollments = () => {
                 <th className="py-3 px-2">Status</th>
                 <th className="py-3 px-2">Days Remaining</th>
                 <th className="py-3 px-2">Packages</th>
+                <th className="py-3 px-2">Diet Plans</th>
+                <th className="py-3 px-2">Premium Sessions</th>
                 <th className="py-3 px-2">Actions</th>
               </tr>
             </thead>
@@ -145,6 +158,41 @@ const Enrollments = () => {
                         Premium
                       </label>
                     </div>
+                  </td>
+                  <td className="py-3 px-2">
+                    {client.has_dietplan ? (
+                      <div className="flex flex-col gap-1 items-start">
+                        <span className="text-xs text-brand-blue-light">
+                          {client.diet_plans_used} of {client.diet_plans_total}{" "}
+                          used
+                        </span>
+                        <button
+                          onClick={() => handleDeliverDietPlan(client._id)}
+                          disabled={
+                            client.diet_plans_used >= client.diet_plans_total
+                          }
+                          className="text-xs font-semibold px-3 py-1 rounded-full bg-brand-orange/10 text-brand-orange hover:bg-brand-orange/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          Deliver Diet Plan
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-brand-blue-light/50">
+                        —
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-3 px-2">
+                    {client.has_premium ? (
+                      <span className="text-xs text-brand-blue-light">
+                        {client.premium_sessions_used} of{" "}
+                        {client.premium_sessions_total} used
+                      </span>
+                    ) : (
+                      <span className="text-xs text-brand-blue-light/50">
+                        —
+                      </span>
+                    )}
                   </td>
                   <td className="py-3 px-2">
                     <div className="flex items-center gap-2 flex-wrap">

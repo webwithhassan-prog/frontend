@@ -324,6 +324,41 @@ const Home = () => {
           </div>
         </div>
       </section>
+      {/* How it works — real sequence, numbers earn their place */}
+      <section className="py-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.h2
+            className="font-display text-2xl md:text-3xl text-brand-blue text-center mb-14"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            HOW YOUR RISE WORKS
+          </motion.h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {steps.map((step, i) => (
+              <motion.div
+                key={step.n}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.4 }}
+                transition={{ duration: 0.5, delay: i * 0.15 }}
+              >
+                <p className="font-display text-brand-orange text-3xl mb-3">
+                  {step.n}
+                </p>
+                <h3 className="font-display text-brand-blue text-base mb-2">
+                  {step.title}
+                </h3>
+                <p className="text-brand-blue/70 text-sm leading-relaxed">
+                  {step.desc}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* 1-on-1 Consultation — expanded */}
       <section className="bg-white py-20">
@@ -387,42 +422,6 @@ const Home = () => {
               Book a Consultation
             </Button>
           </motion.div>
-        </div>
-      </section>
-
-      {/* How it works — real sequence, numbers earn their place */}
-      <section className="py-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <motion.h2
-            className="font-display text-2xl md:text-3xl text-brand-blue text-center mb-14"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-          >
-            HOW YOUR RISE WORKS
-          </motion.h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {steps.map((step, i) => (
-              <motion.div
-                key={step.n}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.4 }}
-                transition={{ duration: 0.5, delay: i * 0.15 }}
-              >
-                <p className="font-display text-brand-orange text-3xl mb-3">
-                  {step.n}
-                </p>
-                <h3 className="font-display text-brand-blue text-base mb-2">
-                  {step.title}
-                </h3>
-                <p className="text-brand-blue/70 text-sm leading-relaxed">
-                  {step.desc}
-                </p>
-              </motion.div>
-            ))}
-          </div>
         </div>
       </section>
 
