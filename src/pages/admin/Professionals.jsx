@@ -108,7 +108,8 @@ const Professionals = () => {
 
   const openScheduleModal = (request) => {
     setSelectedRequest(request);
-    setScheduleConsultant("");
+    // Pre-fill with the client's preferred consultant, if they picked one
+    setScheduleConsultant(request.preferred_consultant_ref?._id || "");
     setScheduleDatetime("");
     setIsScheduleModalOpen(true);
   };
@@ -168,8 +169,17 @@ const Professionals = () => {
                       Client: {req.client_ref?.name} (
                       {req.client_ref?.phone_number})
                     </p>
+                    {req.preferred_consultant_ref && (
+                      <p className="text-brand-blue-light text-sm mb-1">
+                        Requested:{" "}
+                        <span className="font-medium text-brand-blue">
+                          {req.preferred_consultant_ref.name}
+                        </span>
+                      </p>
+                    )}
                     <p className="text-brand-blue-light text-sm mb-4">
-                      Preferred: {req.preferred_time || "No preference given"}
+                      Preferred time:{" "}
+                      {req.preferred_time || "No preference given"}
                     </p>
                     <div className="flex gap-3">
                       <button
@@ -354,6 +364,14 @@ const Professionals = () => {
         title={`Schedule — ${selectedRequest?.client_ref?.name || ""}`}
       >
         <form onSubmit={handleSchedule} className="space-y-4">
+          {selectedRequest?.preferred_consultant_ref && (
+            <p className="text-xs text-brand-blue-light bg-brand-blue-pale rounded-lg p-3">
+              Client requested:{" "}
+              <span className="font-semibold text-brand-blue">
+                {selectedRequest.preferred_consultant_ref.name}
+              </span>
+            </p>
+          )}
           <select
             value={scheduleConsultant}
             onChange={(e) => setScheduleConsultant(e.target.value)}

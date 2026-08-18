@@ -16,6 +16,9 @@ import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
+import NotFound from "./pages/public/NotFound";
+import PrivacyPolicy from "./pages/public/PrivacyPolicy";
+import TermsOfService from "./pages/public/TermsOfService";
 
 import AdminLayout from "./components/admin/AdminLayout";
 import Enrollments from "./pages/admin/Enrollments";
@@ -61,6 +64,30 @@ function AppRoutes() {
           element={
             <PublicLayout>
               <Home />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="*"
+          element={
+            <PublicLayout>
+              <NotFound />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/privacy-policy"
+          element={
+            <PublicLayout>
+              <PrivacyPolicy />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/terms"
+          element={
+            <PublicLayout>
+              <TermsOfService />
             </PublicLayout>
           }
         />

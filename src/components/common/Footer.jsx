@@ -62,6 +62,21 @@ const Footer = () => {
 
       <div className="border-t border-white/10 text-center py-4 text-xs text-brand-blue-pale/60">
         © {new Date().getFullYear()} Fitness Zone. All rights reserved.
+        <div className="flex justify-center gap-4 mt-2 text-xs text-brand-blue-pale/50">
+          <a
+            href="/privacy-policy"
+            className="hover:text-brand-orange transition-colors"
+          >
+            Privacy Policy
+          </a>
+          <span>·</span>
+          <a
+            href="/terms"
+            className="hover:text-brand-orange transition-colors"
+          >
+            Terms of Service
+          </a>
+        </div>
       </div>
     </footer>
   );

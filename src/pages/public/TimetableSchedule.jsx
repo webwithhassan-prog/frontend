@@ -4,11 +4,17 @@ import { Clock } from "lucide-react";
 import axios from "axios";
 import Card from "../../components/common/Card";
 
-const dayOrder = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const countries = [
+  { label: "Pakistan", flag: "🇵🇰", timeZone: "Asia/Karachi" },
+  { label: "India", flag: "🇮🇳", timeZone: "Asia/Kolkata" },
+  { label: "Saudi Arabia", flag: "🇸🇦", timeZone: "Asia/Riyadh" },
+  { label: "UAE", flag: "🇦🇪", timeZone: "Asia/Dubai" },
+];
 
 const TimetableSchedule = () => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -31,10 +37,11 @@ const TimetableSchedule = () => {
   );
 
   const grouped = sorted.reduce((acc, c) => {
-    const day = new Date(c.datetime).toLocaleDateString(undefined, {
+    const day = new Date(c.datetime).toLocaleDateString("en-US", {
       weekday: "long",
       month: "short",
       day: "numeric",
+      timeZone: selectedCountry.timeZone,
     });
     if (!acc[day]) acc[day] = [];
     acc[day].push(c);
@@ -51,9 +58,27 @@ const TimetableSchedule = () => {
       >
         TIMETABLE
       </motion.h1>
-      <p className="text-brand-blue/70 text-center mb-14">
+      <p className="text-brand-blue/70 text-center mb-8">
         Upcoming live sessions — join from your Profile once booked.
       </p>
+
+      <div className="flex justify-center mb-14">
+        <select
+          value={selectedCountry.label}
+          onChange={(e) =>
+            setSelectedCountry(
+              countries.find((c) => c.label === e.target.value),
+            )
+          }
+          className="border border-brand-blue-pale rounded-full px-5 py-2.5 text-sm text-brand-blue font-medium focus:outline-none focus:ring-2 focus:ring-brand-orange"
+        >
+          {countries.map((c) => (
+            <option key={c.label} value={c.label}>
+              {c.flag} Show times for {c.label}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {loading ? (
         <p className="text-center text-brand-blue/70">Loading schedule...</p>
@@ -87,9 +112,10 @@ const TimetableSchedule = () => {
                   </div>
                   <div className="flex items-center gap-2 text-brand-blue/70 text-sm">
                     <Clock size={16} />
-                    {new Date(c.datetime).toLocaleTimeString(undefined, {
+                    {new Date(c.datetime).toLocaleTimeString("en-US", {
                       hour: "2-digit",
                       minute: "2-digit",
+                      timeZone: selectedCountry.timeZone,
                     })}
                   </div>
                 </Card>

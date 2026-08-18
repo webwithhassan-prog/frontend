@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toPng } from "html-to-image";
-import { Download } from "lucide-react";
+import { Download, ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
@@ -23,13 +24,15 @@ const emptyDietForm = {
 
 const Profile = () => {
   const [client, setClient] = useState(null);
-  const [bookings, setBookings] = useState([]);
+  const [allUpcomingClasses, setAllUpcomingClasses] = useState([]);
+  const [showFullWeek, setShowFullWeek] = useState(false);
   const [ebooks, setEbooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [passwordMessage, setPasswordMessage] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const navigate = useNavigate();
 
   const [dietForm, setDietForm] = useState(emptyDietForm);
   const [imageGenerated, setImageGenerated] = useState(false);
@@ -38,13 +41,23 @@ const Profile = () => {
   const fetchData = async () => {
     try {
       const clientId = localStorage.getItem("client_id");
-      const [clientRes, bookingsRes, ebooksRes] = await Promise.all([
+      const [clientRes, classesRes, ebooksRes] = await Promise.all([
         api.get(`/clients/${clientId}`),
-        api.get(`/bookings/${clientId}`),
+        api.get("/classes/public"),
         api.get("/ebooks/public"),
       ]);
       setClient(clientRes.data);
-      setBookings(bookingsRes.data.filter((b) => b.status === "booked"));
+
+      const now = new Date();
+      const sevenDaysOut = new Date(now);
+      sevenDaysOut.setDate(now.getDate() + 7);
+      const upcoming = classesRes.data
+        .filter((c) => {
+          const d = new Date(c.datetime);
+          return d >= now && d <= sevenDaysOut;
+        })
+        .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+      setAllUpcomingClasses(upcoming);
 
       const purchasedIds = (clientRes.data.purchased_ebooks || []).map((id) =>
         id.toString(),
@@ -60,11 +73,6 @@ const Profile = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
-  const handleCancel = async (id) => {
-    await api.put(`/bookings/${id}/cancel`);
-    fetchData();
-  };
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -105,6 +113,41 @@ const Profile = () => {
     setDietForm(emptyDietForm);
     setImageGenerated(false);
   };
+
+  const handleJoin = (classId) => {
+    const clientId = localStorage.getItem("client_id");
+    window.location.href = `${import.meta.env.VITE_API_URL}/join/class/${classId}?client_id=${clientId}`;
+  };
+
+  const todayClasses = allUpcomingClasses.filter((c) => {
+    const d = new Date(c.datetime);
+    const now = new Date();
+    return (
+      d.getFullYear() === now.getFullYear() &&
+      d.getMonth() === now.getMonth() &&
+      d.getDate() === now.getDate()
+    );
+  });
+
+  const classesToShow = showFullWeek ? allUpcomingClasses : todayClasses;
+
+  const renderClassCard = (c) => (
+    <Card key={c._id}>
+      <h3 className="font-display text-brand-blue text-sm mb-1">{c.type}</h3>
+      <p className="text-brand-blue/70 text-xs mb-1">
+        with {c.trainer_ref?.name || "Fitness Zone Trainer"}
+      </p>
+      <p className="text-brand-blue/70 text-xs mb-4">
+        {showFullWeek
+          ? new Date(c.datetime).toLocaleString()
+          : new Date(c.datetime).toLocaleTimeString(undefined, {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+      </p>
+      <Button onClick={() => handleJoin(c._id)}>Join Class</Button>
+    </Card>
+  );
 
   return (
     <div>
@@ -151,47 +194,45 @@ const Profile = () => {
           </div>
 
           {/* Upcoming classes */}
-          <h2 className="font-display text-lg text-brand-blue mb-4">
-            UPCOMING CLASSES
-          </h2>
-          {bookings.length === 0 ? (
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display text-lg text-brand-blue">
+              {showFullWeek
+                ? "UPCOMING CLASSES — NEXT 7 DAYS"
+                : "TODAY'S CLASSES"}
+            </h2>
+            {client?.status === "active" && client?.has_workout && (
+              <button
+                onClick={() => setShowFullWeek(!showFullWeek)}
+                className="flex items-center gap-1 text-sm font-semibold text-brand-orange"
+              >
+                {showFullWeek ? "Show Today Only" : "Show Upcoming Week"}
+                <ChevronDown
+                  size={16}
+                  className={`transition-transform ${showFullWeek ? "rotate-180" : ""}`}
+                />
+              </button>
+            )}
+          </div>
+
+          {client?.status !== "active" || !client?.has_workout ? (
+            <Card className="mb-12 border-brand-orange border-2 text-center max-w-lg">
+              <p className="text-brand-blue font-semibold mb-4">
+                Your Workout package isn't active — activate it to see and join
+                live classes.
+              </p>
+              <Button onClick={() => navigate("/plans?type=workout")}>
+                View Workout Packages
+              </Button>
+            </Card>
+          ) : classesToShow.length === 0 ? (
             <p className="text-brand-blue/70 mb-12">
-              No upcoming bookings yet.
+              {showFullWeek
+                ? "No classes scheduled in the next 7 days."
+                : "No classes scheduled for today."}
             </p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-              {bookings.map((booking) => {
-                const session = booking.class_ref || booking.consultation_ref;
-                return (
-                  <Card key={booking._id}>
-                    <h3 className="font-display text-brand-blue text-sm mb-1">
-                      {booking.class_ref
-                        ? booking.class_ref.type
-                        : "Consultation"}
-                    </h3>
-                    <p className="text-brand-blue/70 text-xs mb-4">
-                      {session
-                        ? new Date(session.datetime).toLocaleString()
-                        : "—"}
-                    </p>
-                    <div className="flex gap-3">
-                      <Button
-                        onClick={() =>
-                          (window.location.href = `${import.meta.env.VITE_API_URL}/join/booking/${booking._id}`)
-                        }
-                      >
-                        Join Class
-                      </Button>
-                      <button
-                        onClick={() => handleCancel(booking._id)}
-                        className="text-xs font-semibold px-3 py-1.5 rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </Card>
-                );
-              })}
+              {classesToShow.map(renderClassCard)}
             </div>
           )}
 
