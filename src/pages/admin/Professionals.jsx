@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Check, X, DollarSign, Calendar } from "lucide-react";
+import { Check, X, DollarSign, Calendar, User } from "lucide-react";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
@@ -16,6 +16,14 @@ const requestStatusColors = {
   pending: "bg-yellow-100 text-yellow-700",
   scheduled: "bg-green-100 text-green-700",
   declined: "bg-red-100 text-red-700",
+};
+
+const specialtyLabels = {
+  dietician: "Dietician",
+  gynecologist: "Gynecologist",
+  psychiatrist: "Psychiatrist",
+  personal_trainer: "Personal Trainer",
+  other: "Other",
 };
 
 const Professionals = () => {
@@ -108,7 +116,6 @@ const Professionals = () => {
 
   const openScheduleModal = (request) => {
     setSelectedRequest(request);
-    // Pre-fill with the client's preferred consultant, if they picked one
     setScheduleConsultant(request.preferred_consultant_ref?._id || "");
     setScheduleDatetime("");
     setIsScheduleModalOpen(true);
@@ -207,28 +214,63 @@ const Professionals = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
             {applications.map((app) => (
               <Card key={app._id}>
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-brand-blue font-bold">{app.name}</h3>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColors[app.status]}`}
-                  >
-                    {app.status}
-                  </span>
+                <div className="flex items-start gap-4 mb-3">
+                  <div className="w-14 h-14 rounded-full bg-brand-blue-pale overflow-hidden flex items-center justify-center flex-shrink-0">
+                    {app.photo_url ? (
+                      <img
+                        src={app.photo_url}
+                        alt={app.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User size={20} className="text-brand-blue-light" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-brand-blue font-bold">{app.name}</h3>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColors[app.status]}`}
+                      >
+                        {app.status}
+                      </span>
+                    </div>
+                    <p className="text-brand-blue-light text-sm">
+                      {specialtyLabels[app.specialty] || app.specialty}
+                      {app.years_experience
+                        ? ` · ${app.years_experience} yrs experience`
+                        : ""}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-brand-blue-light text-sm capitalize mb-1">
-                  {app.specialty}
+
+                {app.session_duration && (
+                  <p className="text-brand-blue-light text-xs mb-1">
+                    Session: {app.session_duration} · Available:{" "}
+                    {app.available_days || "—"}
+                  </p>
+                )}
+
+                {app.bio && (
+                  <p className="text-brand-blue-light text-sm mb-3 leading-relaxed">
+                    {app.bio}
+                  </p>
+                )}
+
+                <p className="text-brand-blue-light text-xs mb-1">
+                  Contact: {app.contact}
                 </p>
-                <p className="text-brand-blue-light text-sm mb-1">
-                  {app.contact}
-                </p>
-                <a
-                  href={app.cv_link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-brand-orange text-sm underline mb-4 inline-block"
-                >
-                  View CV
-                </a>
+
+                {app.cv_link && (
+                  <a
+                    href={app.cv_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-brand-orange text-sm underline mb-3 inline-block"
+                  >
+                    View CV
+                  </a>
+                )}
 
                 {app.offer_terms && (
                   <p className="text-xs text-brand-blue-light bg-brand-blue-pale rounded-lg p-3 mb-4">
@@ -237,7 +279,7 @@ const Professionals = () => {
                 )}
 
                 {app.status === "pending" && (
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 mt-3">
                     <button
                       onClick={() => openOfferModal(app)}
                       className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-green-100 text-green-700 hover:bg-green-200 transition-colors"

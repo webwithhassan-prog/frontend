@@ -127,7 +127,15 @@ const Consultation = () => {
                   >
                     <button onClick={() => handleSelect(c)} className="w-full">
                       <div className="inline-flex bg-brand-blue-pale rounded-full p-3 mb-3">
-                        <Stethoscope className="text-brand-blue" size={20} />
+                        {c.photo_url ? (
+                          <img
+                            src={c.photo_url}
+                            alt={c.name}
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                        ) : (
+                          <Stethoscope className="text-brand-blue" size={20} />
+                        )}
                       </div>
                       <h3 className="font-display text-brand-blue text-base mb-1">
                         {c.name}

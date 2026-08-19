@@ -32,21 +32,30 @@ const TimetableSchedule = () => {
     fetchClasses();
   }, []);
 
-  const sorted = [...classes].sort(
-    (a, b) => new Date(a.datetime) - new Date(b.datetime),
-  );
+  // Build the next 7 calendar days explicitly, so every day of the week shows
+  // up in order — even if it currently has no classes — instead of silently
+  // skipping days with no data.
+  const today = new Date();
+  const next7Days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    return d;
+  });
 
-  const grouped = sorted.reduce((acc, c) => {
-    const day = new Date(c.datetime).toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "short",
-      day: "numeric",
-      timeZone: selectedCountry.timeZone,
-    });
-    if (!acc[day]) acc[day] = [];
-    acc[day].push(c);
-    return acc;
-  }, {});
+  const classesByDay = next7Days.map((dayDate) => {
+    const dayClasses = classes
+      .filter((c) => {
+        const classDate = new Date(c.datetime);
+        return (
+          classDate.getFullYear() === dayDate.getFullYear() &&
+          classDate.getMonth() === dayDate.getMonth() &&
+          classDate.getDate() === dayDate.getDate()
+        );
+      })
+      .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+
+    return { dayDate, dayClasses };
+  });
 
   return (
     <section className="max-w-4xl mx-auto px-6 py-20">
@@ -59,7 +68,8 @@ const TimetableSchedule = () => {
         TIMETABLE
       </motion.h1>
       <p className="text-brand-blue/70 text-center mb-8">
-        Upcoming live sessions — join from your Profile once booked.
+        This week's live sessions — join from your Profile once you have an
+        active package.
       </p>
 
       <div className="flex justify-center mb-14">
@@ -82,47 +92,62 @@ const TimetableSchedule = () => {
 
       {loading ? (
         <p className="text-center text-brand-blue/70">Loading schedule...</p>
-      ) : sorted.length === 0 ? (
-        <p className="text-center text-brand-blue/70">
-          No upcoming classes scheduled yet.
-        </p>
       ) : (
-        Object.entries(grouped).map(([day, dayClasses], i) => (
-          <motion.div
-            key={day}
-            className="mb-10"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.4, delay: i * 0.05 }}
-          >
-            <h2 className="font-display text-sm text-brand-orange tracking-wide mb-4">
-              {day.toUpperCase()}
-            </h2>
-            <div className="space-y-3">
-              {dayClasses.map((c) => (
-                <Card key={c._id} className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-display text-brand-blue text-base">
-                      {c.type}
-                    </h3>
-                    <p className="text-brand-blue/60 text-sm mt-1">
-                      with {c.trainer_ref?.name || "Fitness Zone Trainer"}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 text-brand-blue/70 text-sm">
-                    <Clock size={16} />
-                    {new Date(c.datetime).toLocaleTimeString("en-US", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      timeZone: selectedCountry.timeZone,
-                    })}
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </motion.div>
-        ))
+        classesByDay.map(({ dayDate, dayClasses }, i) => {
+          const dayLabel = dayDate.toLocaleDateString("en-US", {
+            weekday: "long",
+            month: "short",
+            day: "numeric",
+            timeZone: selectedCountry.timeZone,
+          });
+
+          return (
+            <motion.div
+              key={dayDate.toDateString()}
+              className="mb-10"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.4, delay: i * 0.05 }}
+            >
+              <h2 className="font-display text-sm text-brand-orange tracking-wide mb-4">
+                {dayLabel.toUpperCase()}
+              </h2>
+
+              {dayClasses.length === 0 ? (
+                <p className="text-brand-blue/50 text-sm">
+                  No classes scheduled.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {dayClasses.map((c) => (
+                    <Card
+                      key={c._id}
+                      className="flex items-center justify-between"
+                    >
+                      <div>
+                        <h3 className="font-display text-brand-blue text-base">
+                          {c.type}
+                        </h3>
+                        <p className="text-brand-blue/60 text-sm mt-1">
+                          with {c.trainer_ref?.name || "Fitness Zone Trainer"}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 text-brand-blue/70 text-sm">
+                        <Clock size={16} />
+                        {new Date(c.datetime).toLocaleTimeString("en-US", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          timeZone: selectedCountry.timeZone,
+                        })}
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          );
+        })
       )}
     </section>
   );
