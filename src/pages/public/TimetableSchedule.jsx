@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Clock } from "lucide-react";
 import axios from "axios";
 import Card from "../../components/common/Card";
 
@@ -32,9 +31,6 @@ const TimetableSchedule = () => {
     fetchClasses();
   }, []);
 
-  // Build the next 7 calendar days explicitly, so every day of the week shows
-  // up in order — even if it currently has no classes — instead of silently
-  // skipping days with no data.
   const today = new Date();
   const next7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(today);
@@ -42,23 +38,35 @@ const TimetableSchedule = () => {
     return d;
   });
 
-  const classesByDay = next7Days.map((dayDate) => {
-    const dayClasses = classes
-      .filter((c) => {
-        const classDate = new Date(c.datetime);
-        return (
-          classDate.getFullYear() === dayDate.getFullYear() &&
-          classDate.getMonth() === dayDate.getMonth() &&
-          classDate.getDate() === dayDate.getDate()
-        );
-      })
-      .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
-
-    return { dayDate, dayClasses };
+  // Weekly Plan: one representative class per real upcoming date, showing day + type
+  const weeklyPlan = next7Days.map((dayDate) => {
+    const match = classes.find((c) => {
+      const classDate = new Date(c.datetime);
+      return (
+        classDate.getFullYear() === dayDate.getFullYear() &&
+        classDate.getMonth() === dayDate.getMonth() &&
+        classDate.getDate() === dayDate.getDate()
+      );
+    });
+    return match ? { dayDate, type: match.type } : { dayDate, type: null };
   });
 
+  // Daily Time Slots: unique trainer + time-of-day combos (same pattern repeats every day)
+  const slotMap = new Map();
+  classes.forEach((c) => {
+    const d = new Date(c.datetime);
+    const trainerName = c.trainer_ref?.name || "—";
+    const key = `${trainerName}-${d.getHours()}-${d.getMinutes()}`;
+    if (!slotMap.has(key)) {
+      slotMap.set(key, { trainerName, datetime: c.datetime });
+    }
+  });
+  const dailyTimeSlots = [...slotMap.values()].sort(
+    (a, b) => new Date(a.datetime) - new Date(b.datetime),
+  );
+
   return (
-    <section className="max-w-4xl mx-auto px-6 py-20">
+    <section className="max-w-3xl mx-auto px-6 py-20">
       <motion.h1
         className="font-display text-3xl md:text-4xl text-brand-blue text-center mb-4"
         initial={{ opacity: 0, y: 20 }}
@@ -68,11 +76,11 @@ const TimetableSchedule = () => {
         TIMETABLE
       </motion.h1>
       <p className="text-brand-blue/70 text-center mb-8">
-        This week's live sessions — join from your Profile once you have an
-        active package.
+        This week's plan and daily time slots — join from your Profile once
+        active.
       </p>
 
-      <div className="flex justify-center mb-14">
+      <div className="flex justify-center mb-12">
         <select
           value={selectedCountry.label}
           onChange={(e) =>
@@ -93,61 +101,83 @@ const TimetableSchedule = () => {
       {loading ? (
         <p className="text-center text-brand-blue/70">Loading schedule...</p>
       ) : (
-        classesByDay.map(({ dayDate, dayClasses }, i) => {
-          const dayLabel = dayDate.toLocaleDateString("en-US", {
-            weekday: "long",
-            month: "short",
-            day: "numeric",
-            timeZone: selectedCountry.timeZone,
-          });
+        <>
+          <h2 className="font-display text-sm text-brand-orange tracking-wide mb-4">
+            THIS WEEK'S PLAN
+          </h2>
+          <Card className="overflow-x-auto mb-12">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-brand-blue border-b border-brand-blue-pale">
+                  <th className="py-3 px-2">Day</th>
+                  <th className="py-3 px-2">Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                {weeklyPlan.map(({ dayDate, type }) => (
+                  <tr
+                    key={dayDate.toDateString()}
+                    className="border-b border-brand-blue-pale/60"
+                  >
+                    <td className="py-3 px-2 font-medium text-brand-blue">
+                      {dayDate.toLocaleDateString("en-US", {
+                        weekday: "long",
+                        month: "short",
+                        day: "numeric",
+                        timeZone: selectedCountry.timeZone,
+                      })}
+                    </td>
+                    <td className="py-3 px-2 text-brand-blue/70">
+                      {type || (
+                        <span className="italic text-brand-blue/40">
+                          No classes
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
 
-          return (
-            <motion.div
-              key={dayDate.toDateString()}
-              className="mb-10"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.4, delay: i * 0.05 }}
-            >
-              <h2 className="font-display text-sm text-brand-orange tracking-wide mb-4">
-                {dayLabel.toUpperCase()}
-              </h2>
-
-              {dayClasses.length === 0 ? (
-                <p className="text-brand-blue/50 text-sm">
-                  No classes scheduled.
-                </p>
-              ) : (
-                <div className="space-y-3">
-                  {dayClasses.map((c) => (
-                    <Card
-                      key={c._id}
-                      className="flex items-center justify-between"
-                    >
-                      <div>
-                        <h3 className="font-display text-brand-blue text-base">
-                          {c.type}
-                        </h3>
-                        <p className="text-brand-blue/60 text-sm mt-1">
-                          with {c.trainer_ref?.name || "Fitness Zone Trainer"}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 text-brand-blue/70 text-sm">
-                        <Clock size={16} />
-                        {new Date(c.datetime).toLocaleTimeString("en-US", {
+          <h2 className="font-display text-sm text-brand-orange tracking-wide mb-4">
+            DAILY TIME SLOTS
+          </h2>
+          <Card className="overflow-x-auto">
+            {dailyTimeSlots.length === 0 ? (
+              <p className="text-brand-blue/50 text-sm py-2">
+                No time slots scheduled yet.
+              </p>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-brand-blue border-b border-brand-blue-pale">
+                    <th className="py-3 px-2">Trainer</th>
+                    <th className="py-3 px-2">
+                      Time ({selectedCountry.label})
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dailyTimeSlots.map((slot, i) => (
+                    <tr key={i} className="border-b border-brand-blue-pale/60">
+                      <td className="py-3 px-2 font-medium text-brand-blue">
+                        {slot.trainerName}
+                      </td>
+                      <td className="py-3 px-2 text-brand-blue/70">
+                        {new Date(slot.datetime).toLocaleTimeString("en-US", {
                           hour: "2-digit",
                           minute: "2-digit",
                           timeZone: selectedCountry.timeZone,
                         })}
-                      </div>
-                    </Card>
+                      </td>
+                    </tr>
                   ))}
-                </div>
-              )}
-            </motion.div>
-          );
-        })
+                </tbody>
+              </table>
+            )}
+          </Card>
+        </>
       )}
     </section>
   );

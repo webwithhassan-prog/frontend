@@ -42,8 +42,7 @@ const featuresByType = {
 const Plans = () => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDuration, setSelectedDuration] = useState(30);
-  const [checkingOut, setCheckingOut] = useState(false);
+  const [checkingOutDuration, setCheckingOutDuration] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { role } = useAuth();
@@ -65,27 +64,21 @@ const Plans = () => {
     fetchPlans();
   }, []);
 
-  const dietplan = plans.find(
-    (p) =>
-      p.product_type === "dietplan" && p.duration_days === selectedDuration,
-  );
-  const workout = plans.find(
-    (p) => p.product_type === "workout" && p.duration_days === selectedDuration,
-  );
+  const getSelectionForDuration = (duration) => {
+    const dietplan = plans.find(
+      (p) => p.product_type === "dietplan" && p.duration_days === duration,
+    );
+    const workout = plans.find(
+      (p) => p.product_type === "workout" && p.duration_days === duration,
+    );
 
-  const getSelection = () => {
     if (selectedType === "dietplan") return dietplan ? [dietplan] : [];
     if (selectedType === "workout") return workout ? [workout] : [];
     if (selectedType === "combo") return [dietplan, workout].filter(Boolean);
     return [];
   };
 
-  const selection = getSelection();
-  const total = selection.reduce((sum, p) => sum + p.price, 0);
-
   const startCheckout = async (planIds) => {
-    setCheckingOut(true);
-    setError("");
     try {
       const clientId = localStorage.getItem("client_id");
       const res = await api.post("/payments/stripe/checkout", {
@@ -98,13 +91,13 @@ const Plans = () => {
       setError(
         err.response?.data?.message || "Checkout failed. Please try again.",
       );
-      setCheckingOut(false);
+      setCheckingOutDuration(null);
     }
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = (duration) => {
     setError("");
-    console.log("role from context:", role);
+    const selection = getSelectionForDuration(duration);
 
     if (selection.length === 0) {
       setError("This package/duration combination isn\u2019t available yet.");
@@ -112,6 +105,7 @@ const Plans = () => {
     }
 
     const planIds = selection.map((p) => p._id);
+    setCheckingOutDuration(duration);
 
     if (role !== "client") {
       localStorage.setItem("pending_plan_ids", JSON.stringify(planIds));
@@ -124,7 +118,7 @@ const Plans = () => {
   };
 
   return (
-    <section className="max-w-3xl mx-auto px-6 py-20">
+    <section className="max-w-5xl mx-auto px-6 py-20">
       <motion.h1
         className="font-display text-3xl md:text-4xl text-brand-blue text-center mb-4"
         initial={{ opacity: 0, y: 20 }}
@@ -133,71 +127,89 @@ const Plans = () => {
       >
         {packageLabels[selectedType]?.toUpperCase() || "PACKAGES"}
       </motion.h1>
-      <p className="text-brand-blue/70 text-center mb-12">
-        Pick a duration to see pricing and get started.
+      <p className="text-brand-blue/70 text-center mb-4">
+        Choose the duration that works for you.
       </p>
+
+      <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-14">
+        {(featuresByType[selectedType] || []).map((f) => (
+          <li
+            key={f}
+            className="flex items-center gap-2 text-sm text-brand-blue/70"
+          >
+            <Check size={16} className="text-brand-orange" />
+            {f}
+          </li>
+        ))}
+      </ul>
+
+      {error && (
+        <p className="text-red-500 text-center text-sm mb-8">{error}</p>
+      )}
 
       {loading ? (
         <p className="text-center text-brand-blue/70">Loading packages...</p>
       ) : (
-        <Card className="max-w-xl mx-auto">
-          <div className="space-y-5">
-            <div>
-              <label className="text-sm text-brand-blue/60 mb-1 block">
-                Duration
-              </label>
-              <select
-                value={selectedDuration}
-                onChange={(e) => setSelectedDuration(Number(e.target.value))}
-                className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-              >
-                {durations.map((d) => (
-                  <option key={d} value={d}>
-                    {d} Days
-                  </option>
-                ))}
-              </select>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {durations.map((duration, i) => {
+            const selection = getSelectionForDuration(duration);
+            const total = selection.reduce((sum, p) => sum + p.price, 0);
+            const dietplan = selection.find(
+              (p) => p.product_type === "dietplan",
+            );
+            const isMiddle = i === 1;
 
-            <ul className="space-y-2 pt-2">
-              {(featuresByType[selectedType] || []).map((f) => (
-                <li
-                  key={f}
-                  className="flex items-center gap-2 text-sm text-brand-blue/70"
+            return (
+              <motion.div
+                key={duration}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.4, delay: i * 0.1 }}
+              >
+                <Card
+                  className={`h-full flex flex-col ${isMiddle ? "border-brand-orange border-2" : ""}`}
                 >
-                  <Check size={16} className="text-brand-orange" />
-                  {f}
-                </li>
-              ))}
-            </ul>
+                  {isMiddle && (
+                    <span className="inline-block bg-brand-orange text-white text-xs font-bold px-3 py-1 rounded-full mb-3 self-start">
+                      MOST POPULAR
+                    </span>
+                  )}
+                  <h3 className="font-display text-brand-blue text-lg mb-1">
+                    {duration} Days
+                  </h3>
+                  <p className="font-display text-3xl text-brand-blue mb-4">
+                    {selection.length > 0
+                      ? `Rs ${total.toLocaleString()}`
+                      : "—"}
+                  </p>
 
-            {selectedType === "dietplan" && dietplan?.diet_plans_included && (
-              <p className="text-sm text-brand-blue/70">
-                Includes {dietplan.diet_plans_included} diet plans over{" "}
-                {selectedDuration} days.
-              </p>
-            )}
+                  {selectedType === "dietplan" &&
+                    dietplan?.diet_plans_included && (
+                      <p className="text-sm text-brand-blue/70 mb-4">
+                        Includes {dietplan.diet_plans_included} diet plans
+                      </p>
+                    )}
 
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+                  <div className="flex-1" />
 
-            <div className="border-t border-brand-blue-pale pt-5">
-              <p className="text-brand-blue/60 text-sm mb-1">Total</p>
-              <p className="font-display text-3xl text-brand-blue mb-5">
-                {selection.length > 0 ? `Rs ${total.toLocaleString()}` : "—"}
-              </p>
-              <Button
-                onClick={handleCheckout}
-                disabled={checkingOut}
-                className="w-full"
-              >
-                {checkingOut ? "Redirecting..." : "Checkout"}
-              </Button>
-            </div>
-          </div>
-        </Card>
+                  <Button
+                    onClick={() => handleCheckout(duration)}
+                    disabled={checkingOutDuration === duration}
+                    className="w-full"
+                  >
+                    {checkingOutDuration === duration
+                      ? "Redirecting..."
+                      : "Checkout"}
+                  </Button>
+                </Card>
+              </motion.div>
+            );
+          })}
+        </div>
       )}
 
-      <p className="text-center text-brand-blue/60 text-sm mt-8">
+      <p className="text-center text-brand-blue/60 text-sm mt-12">
         Looking for a 1-on-1 consultation with a dietician, gynecologist, or
         psychiatrist?{" "}
         <a

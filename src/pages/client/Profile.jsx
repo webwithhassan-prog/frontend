@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toPng } from "html-to-image";
-import { Download, ChevronDown } from "lucide-react";
+import { Download, ChevronDown, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
@@ -22,6 +22,17 @@ const emptyDietForm = {
   dietary_notes: "",
 };
 
+const emptyProgressForm = {
+  starting_weight: "",
+  current_weight: "",
+  inch_loss: "",
+  cloth_fit_note: "",
+  sleep_hours: "",
+  sleep_quality: "",
+  water_intake: "",
+  energy_feedback: "",
+};
+
 const Profile = () => {
   const [client, setClient] = useState(null);
   const [allUpcomingClasses, setAllUpcomingClasses] = useState([]);
@@ -39,6 +50,12 @@ const Profile = () => {
   const [dietForm, setDietForm] = useState(emptyDietForm);
   const [imageGenerated, setImageGenerated] = useState(false);
   const cardRef = useRef(null);
+
+  const [progressForm, setProgressForm] = useState(emptyProgressForm);
+  const [progressPhoto, setProgressPhoto] = useState(null);
+  const [progressPhotoPreview, setProgressPhotoPreview] = useState(null);
+  const [progressImageGenerated, setProgressImageGenerated] = useState(false);
+  const progressCardRef = useRef(null);
 
   const fetchData = async () => {
     try {
@@ -128,6 +145,49 @@ const Profile = () => {
     setImageGenerated(false);
   };
 
+  const handleProgressChange = (e) => {
+    setProgressForm({ ...progressForm, [e.target.name]: e.target.value });
+  };
+
+  const handleProgressPhotoSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setProgressPhoto(file);
+    setProgressPhotoPreview(URL.createObjectURL(file));
+  };
+
+  const handleProgressSubmit = (e) => {
+    e.preventDefault();
+    setProgressImageGenerated(true);
+  };
+
+  const handleSaveProgressImage = async () => {
+    if (!progressCardRef.current) return;
+    const dataUrl = await toPng(progressCardRef.current, { pixelRatio: 2 });
+    const link = document.createElement("a");
+    link.download = "weekly-progress.png";
+    link.href = dataUrl;
+    link.click();
+
+    try {
+      const clientId = localStorage.getItem("client_id");
+      await api.put(`/clients/${clientId}/progress-checkin`);
+      setClient((prev) => ({
+        ...prev,
+        last_progress_checkin: new Date().toISOString(),
+      }));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleProgressReset = () => {
+    setProgressForm(emptyProgressForm);
+    setProgressPhoto(null);
+    setProgressPhotoPreview(null);
+    setProgressImageGenerated(false);
+  };
+
   const handleJoin = (classId) => {
     const clientId = localStorage.getItem("client_id");
     window.location.href = `${import.meta.env.VITE_API_URL}/join/class/${classId}?client_id=${clientId}`;
@@ -169,6 +229,14 @@ const Profile = () => {
     return acc;
   }, {});
 
+  const daysSinceCheckin = client?.last_progress_checkin
+    ? Math.floor(
+        (new Date() - new Date(client.last_progress_checkin)) /
+          (1000 * 60 * 60 * 24),
+      )
+    : null;
+  const checkinDue = daysSinceCheckin === null || daysSinceCheckin >= 7;
+
   return (
     <div>
       <motion.h1
@@ -183,6 +251,22 @@ const Profile = () => {
         <p className="text-brand-blue/70">Loading...</p>
       ) : (
         <>
+          {/* Weekly check-in reminder */}
+          {checkinDue && (client?.has_dietplan || client?.has_workout) && (
+            <motion.div
+              className="mb-8 flex items-center gap-3 bg-brand-orange/10 border border-brand-orange rounded-xl px-4 py-3"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Bell size={18} className="text-brand-orange flex-shrink-0" />
+              <p className="text-brand-blue text-sm">
+                {daysSinceCheckin === null
+                  ? "You haven't done a weekly check-in yet — fill it out below."
+                  : `It's been ${daysSinceCheckin} days since your last check-in — time for a new one.`}
+              </p>
+            </motion.div>
+          )}
+
           {/* Status */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <Card>
@@ -358,7 +442,7 @@ const Profile = () => {
             </div>
           )}
 
-          {/* Dietician follow-up */}
+          {/* Dietician follow-up
           <h2 className="font-display text-lg text-brand-blue mb-2">
             DIETICIAN FOLLOW-UP
           </h2>
@@ -510,6 +594,237 @@ const Profile = () => {
 
                 <p className="text-brand-blue/70 text-sm mt-6">
                   Send this image to us on WhatsApp to get your updated plan.
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence> */}
+
+          {/* Weekly Progress form */}
+          <h2 className="font-display text-lg text-brand-blue mb-2 mt-12">
+            WEEKLY PROGRESS CHECK-IN
+          </h2>
+          <p className="text-brand-blue/70 text-sm mb-6">
+            Fill this in weekly to track your progress — nothing here is saved
+            on our servers except the date of your last check-in (so we can
+            remind you). Save the image and send it to us on WhatsApp.
+          </p>
+
+          <AnimatePresence mode="wait">
+            {!progressImageGenerated ? (
+              <motion.div
+                key="progress-form"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="max-w-xl">
+                  <form onSubmit={handleProgressSubmit} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <input
+                        type="number"
+                        name="starting_weight"
+                        placeholder="Starting Weight (kg)"
+                        value={progressForm.starting_weight}
+                        onChange={handleProgressChange}
+                        required
+                        className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                      />
+                      <input
+                        type="number"
+                        name="current_weight"
+                        placeholder="Today's Weight (kg)"
+                        value={progressForm.current_weight}
+                        onChange={handleProgressChange}
+                        required
+                        className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      name="inch_loss"
+                      placeholder="Total Inch Loss This Week (if any)"
+                      value={progressForm.inch_loss}
+                      onChange={handleProgressChange}
+                      className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                    />
+
+                    <div>
+                      <label className="text-sm text-brand-blue/60 mb-2 block">
+                        Progress Photo (optional) or note how your clothes fit
+                      </label>
+                      <div className="flex items-center gap-4 mb-2">
+                        <label className="cursor-pointer text-sm font-semibold text-brand-orange">
+                          {progressPhoto ? "Change Photo" : "Upload Photo"}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleProgressPhotoSelect}
+                            className="hidden"
+                          />
+                        </label>
+                        {progressPhotoPreview && (
+                          <img
+                            src={progressPhotoPreview}
+                            alt="Preview"
+                            className="w-12 h-12 rounded-lg object-cover"
+                          />
+                        )}
+                      </div>
+                      <input
+                        type="text"
+                        name="cloth_fit_note"
+                        placeholder="How do your clothes fit this week?"
+                        value={progressForm.cloth_fit_note}
+                        onChange={handleProgressChange}
+                        className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <input
+                        type="text"
+                        name="sleep_hours"
+                        placeholder="Hours of Sleep"
+                        value={progressForm.sleep_hours}
+                        onChange={handleProgressChange}
+                        required
+                        className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                      />
+                      <input
+                        type="text"
+                        name="sleep_quality"
+                        placeholder="Sleep Quality"
+                        value={progressForm.sleep_quality}
+                        onChange={handleProgressChange}
+                        required
+                        className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                      />
+                    </div>
+
+                    <input
+                      type="text"
+                      name="water_intake"
+                      placeholder="Water Intake (liters/day)"
+                      value={progressForm.water_intake}
+                      onChange={handleProgressChange}
+                      required
+                      className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                    />
+
+                    <textarea
+                      name="energy_feedback"
+                      placeholder="Energy levels, feedback, or questions"
+                      value={progressForm.energy_feedback}
+                      onChange={handleProgressChange}
+                      rows={3}
+                      className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                    />
+
+                    <Button type="submit" className="w-full">
+                      Generate Image
+                    </Button>
+                  </form>
+                </Card>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="progress-image"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                <div
+                  ref={progressCardRef}
+                  className="max-w-xl bg-white border-2 border-brand-blue rounded-2xl p-8"
+                >
+                  <h2 className="font-display text-brand-blue text-lg mb-4">
+                    WEEKLY PROGRESS
+                  </h2>
+                  <div className="space-y-2 text-sm">
+                    <p>
+                      <span className="text-brand-blue/60">
+                        Starting Weight:
+                      </span>{" "}
+                      <span className="text-brand-blue font-medium">
+                        {progressForm.starting_weight} kg
+                      </span>
+                    </p>
+                    <p>
+                      <span className="text-brand-blue/60">
+                        Today's Weight:
+                      </span>{" "}
+                      <span className="text-brand-blue font-medium">
+                        {progressForm.current_weight} kg
+                      </span>
+                    </p>
+                    {progressForm.inch_loss && (
+                      <p>
+                        <span className="text-brand-blue/60">Inch Loss:</span>{" "}
+                        <span className="text-brand-blue font-medium">
+                          {progressForm.inch_loss}
+                        </span>
+                      </p>
+                    )}
+                    {progressForm.cloth_fit_note && (
+                      <p>
+                        <span className="text-brand-blue/60">Clothes Fit:</span>{" "}
+                        <span className="text-brand-blue font-medium">
+                          {progressForm.cloth_fit_note}
+                        </span>
+                      </p>
+                    )}
+                    <p>
+                      <span className="text-brand-blue/60">Sleep:</span>{" "}
+                      <span className="text-brand-blue font-medium">
+                        {progressForm.sleep_hours} hrs —{" "}
+                        {progressForm.sleep_quality}
+                      </span>
+                    </p>
+                    <p>
+                      <span className="text-brand-blue/60">Water Intake:</span>{" "}
+                      <span className="text-brand-blue font-medium">
+                        {progressForm.water_intake} L/day
+                      </span>
+                    </p>
+                    {progressForm.energy_feedback && (
+                      <p>
+                        <span className="text-brand-blue/60">
+                          Energy & Feedback:
+                        </span>{" "}
+                        <span className="text-brand-blue font-medium">
+                          {progressForm.energy_feedback}
+                        </span>
+                      </p>
+                    )}
+                  </div>
+
+                  {progressPhotoPreview && (
+                    <img
+                      src={progressPhotoPreview}
+                      alt="Progress"
+                      className="w-full rounded-xl mt-4 max-h-64 object-cover"
+                    />
+                  )}
+
+                  <div className="mt-6 text-xs text-brand-orange font-semibold">
+                    FITNESS ZONE • Weekly Progress
+                  </div>
+                </div>
+
+                <div className="flex gap-4 mt-6">
+                  <Button onClick={handleSaveProgressImage}>Save Image</Button>
+                  <button
+                    onClick={handleProgressReset}
+                    className="text-sm font-semibold text-brand-blue/60 hover:text-brand-blue"
+                  >
+                    Start Over
+                  </button>
+                </div>
+
+                <p className="text-brand-blue/70 text-sm mt-6">
+                  Send this image to us on WhatsApp — your next reminder will
+                  show up in 7 days.
                 </p>
               </motion.div>
             )}
