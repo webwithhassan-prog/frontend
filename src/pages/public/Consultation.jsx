@@ -8,6 +8,14 @@ import { useAuth } from "../../context/AuthContext";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 
+const specialtyLabels = {
+  dietician: "Dietician",
+  gynecologist: "Gynecologist",
+  psychiatrist: "Psychiatrist",
+  personal_trainer: "Personal Trainer",
+  other: "Other",
+};
+
 const Consultation = () => {
   const [consultants, setConsultants] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -94,8 +102,9 @@ const Consultation = () => {
           1-ON-1 CONSULTATION
         </h1>
         <p className="text-brand-blue/70 max-w-xl mx-auto">
-          Choose who you'd like to speak with — a dietician, gynecologist, or
-          psychiatrist — and request a time that works for you.
+          Choose who you'd like to speak with — a dietician, gynecologist,
+          psychiatrist, or personal trainer — and request a time that works for
+          you.
         </p>
       </motion.div>
 
@@ -140,8 +149,8 @@ const Consultation = () => {
                       <h3 className="font-display text-brand-blue text-base mb-1">
                         {c.name}
                       </h3>
-                      <p className="text-brand-blue/60 text-xs capitalize mb-3">
-                        {c.specialty}
+                      <p className="text-brand-blue/60 text-xs mb-3">
+                        {specialtyLabels[c.specialty] || c.specialty}
                       </p>
                       {isSelected && (
                         <span className="inline-flex items-center gap-1 text-xs font-semibold text-brand-orange">
@@ -167,8 +176,11 @@ const Consultation = () => {
                   <span className="font-semibold">
                     {selectedConsultant.name}
                   </span>{" "}
-                  <span className="text-brand-blue/60 capitalize">
-                    ({selectedConsultant.specialty})
+                  <span className="text-brand-blue/60">
+                    (
+                    {specialtyLabels[selectedConsultant.specialty] ||
+                      selectedConsultant.specialty}
+                    )
                   </span>
                 </p>
                 <form onSubmit={handleSubmit} className="space-y-4">

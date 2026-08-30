@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toPng } from "html-to-image";
-import { Download, ChevronDown, Bell } from "lucide-react";
+import { Download, ChevronDown, Bell, Footprints, Droplet } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
@@ -45,6 +45,9 @@ const Profile = () => {
   const [newPassword, setNewPassword] = useState("");
   const [passwordMessage, setPasswordMessage] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [dailySteps, setDailySteps] = useState("");
+  const [dailyWater, setDailyWater] = useState("");
+  const [dailyLogMessage, setDailyLogMessage] = useState("");
   const navigate = useNavigate();
 
   const [dietForm, setDietForm] = useState(emptyDietForm);
@@ -66,7 +69,9 @@ const Profile = () => {
         api.get("/ebooks/public"),
       ]);
       setClient(clientRes.data);
-
+      const todayLogRes = await api.get("/daily-logs/today");
+      setDailySteps(todayLogRes.data.steps || "");
+      setDailyWater(todayLogRes.data.water_liters || "");
       const now = new Date();
       const sevenDaysOut = new Date(now);
       sevenDaysOut.setDate(now.getDate() + 7);
@@ -104,7 +109,19 @@ const Profile = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
+  const handleSaveDailyLog = async (e) => {
+    e.preventDefault();
+    setDailyLogMessage("");
+    try {
+      await api.put("/daily-logs/today", {
+        steps: Number(dailySteps) || 0,
+        water_liters: Number(dailyWater) || 0,
+      });
+      setDailyLogMessage("Saved! Keep it up.");
+    } catch (err) {
+      setDailyLogMessage("Something went wrong.");
+    }
+  };
   const handleChangePassword = async (e) => {
     e.preventDefault();
     setPasswordMessage("");
@@ -323,6 +340,42 @@ const Profile = () => {
               )}
             </div>
           )}
+          <h2 className="font-display text-lg text-brand-blue mb-4">
+            TODAY'S LOG
+          </h2>
+          <Card className="max-w-md mb-12">
+            <form onSubmit={handleSaveDailyLog} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="flex items-center gap-1 text-sm text-brand-blue/60 mb-1">
+                    <Footprints size={14} /> Steps
+                  </label>
+                  <input
+                    type="number"
+                    value={dailySteps}
+                    onChange={(e) => setDailySteps(e.target.value)}
+                    className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                  />
+                </div>
+                <div>
+                  <label className="flex items-center gap-1 text-sm text-brand-blue/60 mb-1">
+                    <Droplet size={14} /> Water (liters)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={dailyWater}
+                    onChange={(e) => setDailyWater(e.target.value)}
+                    className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                  />
+                </div>
+              </div>
+              {dailyLogMessage && (
+                <p className="text-brand-blue text-sm">{dailyLogMessage}</p>
+              )}
+              <Button type="submit">Save Today's Log</Button>
+            </form>
+          </Card>
 
           {/* Upcoming classes */}
           <div className="flex items-center justify-between mb-4">

@@ -111,7 +111,7 @@ const Professionals = () => {
   };
 
   const commission = paymentAmount
-    ? (Number(paymentAmount) * 0.1).toFixed(2)
+    ? (Number(paymentAmount) * 0.15).toFixed(2)
     : "0.00";
 
   const openScheduleModal = (request) => {
@@ -388,7 +388,7 @@ const Professionals = () => {
           </select>
 
           <p className="text-sm text-brand-blue-light">
-            Platform commission (10%):{" "}
+            Platform commission (15%):{" "}
             <span className="font-semibold text-brand-blue">
               Rs {commission}
             </span>

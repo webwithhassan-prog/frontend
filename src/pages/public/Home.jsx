@@ -14,6 +14,7 @@ import {
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 import TestimonialsSlider from "../../components/common/TestimonialsSlider";
+import AchievementMarquee from "../../components/common/AchievementMarquee";
 
 const pillars = [
   {
@@ -85,6 +86,7 @@ const steps = [
 const Home = () => {
   return (
     <div className="overflow-hidden">
+      <AchievementMarquee />
       {/* Hero */}
       <section className="relative bg-white">
         <div className="max-w-6xl mx-auto px-6 pt-20 pb-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
