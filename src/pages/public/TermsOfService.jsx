@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const tabs = [
   { id: "premium", label: "Premium 1-on-1 Services" },
-  { id: "standard", label: "Standard Platform Services" },
+  { id: "standard", label: "Platform Services" },
   { id: "professional", label: "Professional Partnership" },
 ];
 

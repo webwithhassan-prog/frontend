@@ -14,7 +14,9 @@ import {
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 import TestimonialsSlider from "../../components/common/TestimonialsSlider";
+import InstagramReelsSlider from "../../components/common/InstagramReelsSlider";
 import AchievementMarquee from "../../components/common/AchievementMarquee";
+import heroBanner from "../../assets/cleanBanner.jpeg";
 
 const pillars = [
   {
@@ -88,176 +90,92 @@ const Home = () => {
     <div className="overflow-hidden">
       <AchievementMarquee />
       {/* Hero */}
-      <section className="relative bg-white">
-        <div className="max-w-6xl mx-auto px-6 pt-20 pb-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div>
-            <motion.p
-              className="font-display text-brand-orange text-xs tracking-[0.2em] mb-4"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              FITNESS ZONE — FOR WOMEN
-            </motion.p>
+      <section className="relative bg-white overflow-hidden">
+        <motion.div
+          className="relative w-full h-[620px] sm:h-[560px] md:h-[560px] lg:h-[640px]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
+        >
+          <img
+            src={heroBanner}
+            alt="Fitness Zone — built for women, not adapted to them"
+            className="absolute inset-0 w-full h-full object-cover object-[68%_center]"
+          />
 
-            <motion.h1
-              className="font-display text-4xl md:text-5xl text-brand-blue leading-[1.1] mb-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-            >
-              BUILT FOR WOMEN.
-              <br />
-              NOT ADAPTED TO THEM.
-            </motion.h1>
+          {/* Scrim behind the text only — reaches further on narrow screens where the
+              text column takes up more of the width, and tucks in tighter on desktop
+              so the model stays clear. */}
+          <div
+            className="absolute inset-0 md:hidden"
+            style={{
+              background:
+                "linear-gradient(to right, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.75) 55%, rgba(255,255,255,0) 88%)",
+            }}
+          />
+          <div
+            className="absolute inset-0 hidden md:block"
+            style={{
+              background:
+                "linear-gradient(to right, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.55) 28%, rgba(255,255,255,0) 52%)",
+            }}
+          />
 
-            <motion.p
-              className="text-brand-blue/70 max-w-md mb-8 leading-relaxed"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              Dietplans, live workouts, and one-on-one consultations — one
-              platform, no WhatsApp groups, no missed links.
-            </motion.p>
+          <div className="absolute inset-0 flex items-center">
+            <div className="max-w-6xl mx-auto px-6 w-full">
+              <div className="max-w-[230px] sm:max-w-sm md:max-w-lg">
+                <motion.p
+                  className="font-display text-brand-orange text-xs tracking-[0.2em] mb-4"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  A GLOBAL PLATFORM
+                </motion.p>
 
-            <motion.div
-              className="flex flex-wrap gap-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <Button onClick={() => (window.location.href = "/plans")}>
-                Explore Packages
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => (window.location.href = "/timetable")}
-              >
-                <span className="flex items-center gap-2">
-                  How it works <ArrowRight size={16} />
-                </span>
-              </Button>
-            </motion.div>
+                <motion.h1
+                  className="font-display text-3xl sm:text-4xl md:text-5xl text-brand-blue leading-[1.1] mb-6"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                >
+                  FITNESSZONE OFFICIAL LTD.
+                  <br />
+                  ONE STOP WELLNESS HUB
+                </motion.h1>
 
-            <motion.div
-              className="flex items-center gap-6 mt-8"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <div>
-                <p className="font-display text-brand-blue text-lg">
-                  50,000+
-                </p>
-                <p className="text-brand-blue/50 text-xs">Clients Served</p>
+                <motion.p
+                  className="text-brand-blue/70 mb-8 leading-relaxed"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                >
+                  Dietplans, live workouts, and one-on-one consultations — one
+                  platform, no missed links.
+                </motion.p>
+
+                <motion.div
+                  className="flex flex-wrap gap-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                >
+                  <Button onClick={() => (window.location.href = "/plans")}>
+                    Explore Packages
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => (window.location.href = "/timetable")}
+                  >
+                    <span className="flex items-center gap-2">
+                      How it works <ArrowRight size={16} />
+                    </span>
+                  </Button>
+                </motion.div>
               </div>
-              <div className="w-px h-8 bg-brand-blue-pale" />
-              <div>
-                <p className="font-display text-brand-blue text-lg">
-                  10,000+
-                </p>
-                <p className="text-brand-blue/50 text-xs">Success Stories</p>
-              </div>
-              <div className="w-px h-8 bg-brand-blue-pale" />
-              <div className="flex items-center gap-1">
-                <Star size={16} fill="#FFC93C" color="#FFC93C" />
-                <span className="font-display text-brand-blue text-lg">
-                  3+ yrs
-                </span>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Signature ascent-line graphic */}
-          <div className="relative">
-            <svg
-              viewBox="0 0 780 400"
-              className="w-full h-auto"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <motion.path
-                d="M40,340 Q140,260 240,260 Q340,260 340,170 Q440,80 640,90 Q700,95 738,52"
-                stroke="#2B5FE2"
-                strokeWidth="4"
-                strokeLinecap="round"
-                initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ duration: 1.8, ease: "easeInOut" }}
-              />
-
-              <motion.circle
-                cx="240"
-                cy="260"
-                r="9"
-                fill="#F76B1C"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.7, duration: 0.4, type: "spring" }}
-              />
-              <motion.circle
-                cx="440"
-                cy="120"
-                r="9"
-                fill="#F76B1C"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 1.1, duration: 0.4, type: "spring" }}
-              />
-              <motion.circle
-                cx="640"
-                cy="90"
-                r="9"
-                fill="#F76B1C"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 1.5, duration: 0.4, type: "spring" }}
-              />
-
-              <motion.g
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 1.8, duration: 0.5, type: "spring" }}
-              >
-                <circle cx="738" cy="52" r="22" fill="#FFC93C" opacity="0.15" />
-                <foreignObject x="722" y="36" width="32" height="32">
-                  <Star size={32} fill="#FFC93C" color="#FFC93C" />
-                </foreignObject>
-              </motion.g>
-            </svg>
-
-            <div className="absolute inset-0 pointer-events-none">
-              <motion.span
-                className="absolute font-display text-[10px] text-brand-blue tracking-wide"
-                style={{ left: "24%", top: "68%" }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.0 }}
-              >
-                DIETPLAN
-              </motion.span>
-              <motion.span
-                className="absolute font-display text-[10px] text-brand-blue tracking-wide"
-                style={{ left: "52%", top: "25%" }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.4 }}
-              >
-                LIVE SESSIONS
-              </motion.span>
-              <motion.span
-                className="absolute font-display text-[10px] text-brand-blue tracking-wide"
-                style={{ left: "76%", top: "15%" }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.8 }}
-              >
-                PREMIUM
-              </motion.span>
             </div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Stats bar */}
@@ -283,7 +201,24 @@ const Home = () => {
           ))}
         </div>
       </section>
+      {/* Transformations */}
+      <section className="py-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.h2
+            className="font-display text-2xl md:text-3xl text-brand-blue text-center mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            REAL TRANSFORMATIONS
+          </motion.h2>
+          <p className="text-brand-blue/70 text-center max-w-xl mx-auto mb-14">
+            Straight from Instagram — real members, real results.
+          </p>
 
+          <InstagramReelsSlider />
+        </div>
+      </section>
       {/* Pillars */}
       <section className="max-w-6xl mx-auto px-6 py-20">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -312,17 +247,17 @@ const Home = () => {
       </section>
 
       {/* Demo Videos */}
-      <section className="bg-brand-blue-pale py-20">
+      <section className="bg-[#4082C0] py-20">
         <div className="max-w-6xl mx-auto px-6">
           <motion.h2
-            className="font-display text-2xl md:text-3xl text-brand-blue text-center mb-4"
+            className="font-display text-2xl md:text-3xl text-white text-center mb-4"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
             SEE A SESSION IN ACTION
           </motion.h2>
-          <p className="text-brand-blue/70 text-center max-w-xl mx-auto mb-14">
+          <p className="text-white/80 text-center max-w-xl mx-auto mb-14">
             A few real moments from our live workouts.
           </p>
 
@@ -456,17 +391,17 @@ const Home = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="bg-brand-blue-pale py-20">
+      <section className="bg-[#4082C0] py-20">
         <div className="max-w-6xl mx-auto px-6">
           <motion.h2
-            className="font-display text-2xl md:text-3xl text-brand-blue text-center mb-4"
+            className="font-display text-2xl md:text-3xl text-white text-center mb-4"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
           >
             SUCCESS STORIES
           </motion.h2>
-          <p className="text-brand-blue/70 text-center max-w-xl mx-auto mb-14">
+          <p className="text-white/80 text-center max-w-xl mx-auto mb-14">
             Real check-ins, real progress, from real members.
           </p>
 
