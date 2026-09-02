@@ -89,7 +89,7 @@ const Home = () => {
       <AchievementMarquee />
       {/* Hero */}
       <section className="relative bg-white">
-        <div className="max-w-6xl mx-auto px-6 pt-20 pb-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="max-w-6xl mx-auto px-6 pt-20 pb-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
             <motion.p
               className="font-display text-brand-orange text-xs tracking-[0.2em] mb-4"
@@ -138,6 +138,34 @@ const Home = () => {
                   How it works <ArrowRight size={16} />
                 </span>
               </Button>
+            </motion.div>
+
+            <motion.div
+              className="flex items-center gap-6 mt-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <div>
+                <p className="font-display text-brand-blue text-lg">
+                  50,000+
+                </p>
+                <p className="text-brand-blue/50 text-xs">Clients Served</p>
+              </div>
+              <div className="w-px h-8 bg-brand-blue-pale" />
+              <div>
+                <p className="font-display text-brand-blue text-lg">
+                  10,000+
+                </p>
+                <p className="text-brand-blue/50 text-xs">Success Stories</p>
+              </div>
+              <div className="w-px h-8 bg-brand-blue-pale" />
+              <div className="flex items-center gap-1">
+                <Star size={16} fill="#FFC93C" color="#FFC93C" />
+                <span className="font-display text-brand-blue text-lg">
+                  3+ yrs
+                </span>
+              </div>
             </motion.div>
           </div>
 

@@ -12,6 +12,8 @@ import {
   BarChart3,
   Video,
   BookOpen,
+  Megaphone,
+  TrendingUp,
   LogOut,
 } from "lucide-react";
 
@@ -26,6 +28,8 @@ const navItems = [
   { label: "Sales", to: "/admin/sales", icon: BarChart3 },
   { label: "Content", to: "/admin/content", icon: Video },
   { label: "E-Books", to: "/admin/ebooks", icon: BookOpen },
+  { label: "Offers", to: "/admin/offers", icon: Megaphone },
+  { label: "Analytics", to: "/admin/analytics", icon: TrendingUp },
 ];
 
 const AdminLayout = () => {

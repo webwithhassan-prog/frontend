@@ -6,6 +6,7 @@ import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
+import { trackEvent } from "../../utils/analytics";
 
 const durations = [30, 90, 180];
 
@@ -107,6 +108,11 @@ const Plans = () => {
     const planIds = selection.map((p) => p._id);
     setCheckingOutDuration(duration);
 
+    trackEvent("checkout_started", "/plans", {
+      type: selectedType,
+      duration,
+    });
+
     if (role !== "client") {
       localStorage.setItem("pending_plan_ids", JSON.stringify(planIds));
       localStorage.setItem("pending_include_premium", "false");
@@ -127,21 +133,9 @@ const Plans = () => {
       >
         {packageLabels[selectedType]?.toUpperCase() || "PACKAGES"}
       </motion.h1>
-      <p className="text-brand-blue/70 text-center mb-4">
+      <p className="text-brand-blue/70 text-center mb-14">
         Choose the duration that works for you.
       </p>
-
-      <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-14">
-        {(featuresByType[selectedType] || []).map((f) => (
-          <li
-            key={f}
-            className="flex items-center gap-2 text-sm text-brand-blue/70"
-          >
-            <Check size={16} className="text-brand-orange" />
-            {f}
-          </li>
-        ))}
-      </ul>
 
       {error && (
         <p className="text-red-500 text-center text-sm mb-8">{error}</p>
@@ -153,11 +147,24 @@ const Plans = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {durations.map((duration, i) => {
             const selection = getSelectionForDuration(duration);
-            const total = selection.reduce((sum, p) => sum + p.price, 0);
+            const total = selection.reduce(
+              (sum, p) => sum + (p.discounted_price ?? p.price),
+              0,
+            );
+            const originalTotal = selection.reduce(
+              (sum, p) => sum + p.price,
+              0,
+            );
+            const hasDiscount = selection.length > 0 && total < originalTotal;
+            const discountPercent = hasDiscount
+              ? Math.round((1 - total / originalTotal) * 100)
+              : 0;
             const dietplan = selection.find(
               (p) => p.product_type === "dietplan",
             );
             const isMiddle = i === 1;
+            const perDay =
+              selection.length > 0 ? Math.round(total / duration) : null;
 
             return (
               <motion.div
@@ -166,9 +173,14 @@ const Plans = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.4, delay: i * 0.1 }}
+                className={isMiddle ? "md:-mt-4" : ""}
               >
                 <Card
-                  className={`h-full flex flex-col ${isMiddle ? "border-brand-orange border-2" : ""}`}
+                  className={`h-full flex flex-col ${
+                    isMiddle
+                      ? "border-brand-orange border-2 shadow-xl"
+                      : ""
+                  }`}
                 >
                   {isMiddle && (
                     <span className="inline-block bg-brand-orange text-white text-xs font-bold px-3 py-1 rounded-full mb-3 self-start">
@@ -178,24 +190,55 @@ const Plans = () => {
                   <h3 className="font-display text-brand-blue text-lg mb-1">
                     {duration} Days
                   </h3>
-                  <p className="font-display text-3xl text-brand-blue mb-4">
-                    {selection.length > 0
-                      ? `Rs ${total.toLocaleString()}`
-                      : "—"}
-                  </p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-display text-3xl text-brand-blue">
+                      {selection.length > 0
+                        ? `Rs ${total.toLocaleString()}`
+                        : "—"}
+                    </p>
+                    {hasDiscount && (
+                      <span className="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-full">
+                        {discountPercent}% OFF
+                      </span>
+                    )}
+                  </div>
+                  {hasDiscount && (
+                    <p className="text-sm text-brand-blue/40 line-through">
+                      Rs {originalTotal.toLocaleString()}
+                    </p>
+                  )}
+                  {perDay && (
+                    <p className="text-xs text-brand-blue/50 mb-4">
+                      ≈ Rs {perDay.toLocaleString()} / day
+                    </p>
+                  )}
 
                   {selectedType === "dietplan" &&
                     dietplan?.diet_plans_included && (
-                      <p className="text-sm text-brand-blue/70 mb-4">
+                      <p className="text-sm text-brand-blue/70 mb-2">
                         Includes {dietplan.diet_plans_included} diet plans
                       </p>
                     )}
 
-                  <div className="flex-1" />
+                  <ul className="space-y-2.5 my-4 flex-1">
+                    {(featuresByType[selectedType] || []).map((f) => (
+                      <li
+                        key={f}
+                        className="flex items-start gap-2 text-sm text-brand-blue/70"
+                      >
+                        <Check
+                          size={16}
+                          className="text-brand-orange mt-0.5 shrink-0"
+                        />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
 
                   <Button
                     onClick={() => handleCheckout(duration)}
                     disabled={checkingOutDuration === duration}
+                    variant={isMiddle ? "primary" : "secondary"}
                     className="w-full"
                   >
                     {checkingOutDuration === duration

@@ -9,6 +9,7 @@ import {
   LogOut,
 } from "lucide-react";
 import Button from "./Button";
+import InstagramIcon from "./InstagramIcon";
 import logo from "../../assets/logo.jpeg";
 import { useAuth } from "../../context/AuthContext";
 
@@ -28,6 +29,7 @@ const navLinks = [
 
 // TODO: add your WhatsApp number here, e.g. "https://wa.me/923001234567"
 const whatsappLink = "https://wa.me/";
+const instagramLink = "https://www.instagram.com/fitness_zone5566";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -52,7 +54,7 @@ const Navbar = () => {
           </a>
 
           {/* Desktop links */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => (
               <a
                 key={link.href}
@@ -104,7 +106,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop actions */}
-          <div className="hidden md:flex items-center gap-4 pl-4 ml-2 border-l border-brand-blue-pale">
+          <div className="hidden lg:flex items-center gap-4 pl-4 ml-2 border-l border-brand-blue-pale">
             <a
               href={whatsappLink}
               target="_blank"
@@ -113,6 +115,15 @@ const Navbar = () => {
               title="Chat on WhatsApp"
             >
               <MessageCircle size={19} />
+            </a>
+            <a
+              href={instagramLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand-blue/70 hover:text-brand-orange transition-colors"
+              title="Follow us on Instagram"
+            >
+              <InstagramIcon size={19} />
             </a>
 
             {isClient ? (
@@ -149,7 +160,7 @@ const Navbar = () => {
 
           {/* Mobile toggle */}
           <button
-            className="md:hidden text-brand-blue"
+            className="lg:hidden text-brand-blue"
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <X size={26} /> : <Menu size={26} />}
@@ -161,7 +172,7 @@ const Navbar = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="md:hidden max-w-6xl mx-auto mt-3 bg-white rounded-3xl shadow-lg border border-brand-blue-pale/60 overflow-hidden"
+            className="lg:hidden max-w-6xl mx-auto mt-3 bg-white rounded-3xl shadow-lg border border-brand-blue-pale/60 overflow-hidden"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -218,6 +229,15 @@ const Navbar = () => {
               >
                 <MessageCircle size={18} />
                 WhatsApp
+              </a>
+              <a
+                href={instagramLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-brand-blue font-medium py-2 px-2 rounded-lg hover:bg-brand-blue-pale transition-colors"
+              >
+                <InstagramIcon size={18} />
+                Instagram
               </a>
 
               {isClient ? (

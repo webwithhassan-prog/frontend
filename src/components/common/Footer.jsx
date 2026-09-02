@@ -26,20 +26,24 @@ const Footer = () => {
             QUICK LINKS
           </h4>
           <ul className="space-y-2 text-sm">
-            {["Home", "Packages", "Trainers", "Careers", "Contact"].map(
-              (link) => (
-                <li key={link}>
-                  <motion.a
-                    href="#"
-                    className="text-brand-blue-pale/70"
-                    whileHover={{ x: 4, color: "#F76B1C" }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {link}
-                  </motion.a>
-                </li>
-              ),
-            )}
+            {[
+              { label: "Home", href: "/" },
+              { label: "Packages", href: "/plans" },
+              { label: "Trainers", href: "/trainers" },
+              { label: "Careers", href: "/careers" },
+              { label: "Contact", href: "/contact" },
+            ].map((link) => (
+              <li key={link.label}>
+                <motion.a
+                  href={link.href}
+                  className="text-brand-blue-pale/70"
+                  whileHover={{ x: 4, color: "#F76B1C" }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {link.label}
+                </motion.a>
+              </li>
+            ))}
           </ul>
         </div>
 
@@ -47,16 +51,28 @@ const Footer = () => {
           <h4 className="font-display text-sm mb-4 tracking-wide">
             GET IN TOUCH
           </h4>
-          <motion.a
-            href="https://wa.me/yourNumber"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block bg-brand-orange px-5 py-2 rounded-full font-semibold text-sm"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Chat on WhatsApp
-          </motion.a>
+          <div className="flex flex-col items-start gap-3">
+            <motion.a
+              href="https://wa.me/yourNumber"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-brand-orange px-5 py-2 rounded-full font-semibold text-sm"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Chat on WhatsApp
+            </motion.a>
+            <motion.a
+              href="https://www.instagram.com/fitness_zone5566"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block border border-white/30 px-5 py-2 rounded-full font-semibold text-sm text-white/90"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Follow on Instagram
+            </motion.a>
+          </div>
         </div>
       </div>
 

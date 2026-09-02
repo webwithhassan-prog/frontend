@@ -4,11 +4,18 @@ const Button = ({
   children,
   onClick,
   variant = "primary",
+  size = "md",
   type = "button",
   disabled = false,
+  className = "",
 }) => {
   const base =
-    "font-semibold px-6 py-3 rounded-full transition-colors duration-200 relative overflow-hidden";
+    "font-semibold rounded-full transition-colors duration-200 relative overflow-hidden";
+
+  const sizes = {
+    md: "px-6 py-3",
+    sm: "px-4 py-2 text-xs",
+  };
 
   const variants = {
     primary: "bg-brand-orange text-white shadow-lg hover:bg-brand-orange-dark",
@@ -21,7 +28,7 @@ const Button = ({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`${base} ${variants[variant]} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+      className={`${base} ${sizes[size]} ${variants[variant]} ${disabled ? "opacity-50 cursor-not-allowed" : ""} ${className}`}
       whileHover={
         disabled
           ? {}

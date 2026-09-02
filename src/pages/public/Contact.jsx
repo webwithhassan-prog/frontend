@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { MessageCircle, Mail, MapPin } from "lucide-react";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
+import InstagramIcon from "../../components/common/InstagramIcon";
 
 const Contact = () => {
   return (
@@ -19,7 +20,7 @@ const Contact = () => {
         message away.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         <Card className="text-center">
           <MessageCircle className="mx-auto text-brand-orange mb-3" size={32} />
           <h3 className="font-display text-brand-blue text-sm mb-2">
@@ -32,6 +33,26 @@ const Contact = () => {
             onClick={() => window.open("https://wa.me/yourNumber", "_blank")}
           >
             Chat Now
+          </Button>
+        </Card>
+
+        <Card className="text-center">
+          <InstagramIcon className="mx-auto text-brand-orange mb-3" size={32} />
+          <h3 className="font-display text-brand-blue text-sm mb-2">
+            INSTAGRAM
+          </h3>
+          <p className="text-brand-blue/70 text-sm mb-4">
+            See our latest sessions
+          </p>
+          <Button
+            onClick={() =>
+              window.open(
+                "https://www.instagram.com/fitness_zone5566",
+                "_blank",
+              )
+            }
+          >
+            Follow Us
           </Button>
         </Card>
 

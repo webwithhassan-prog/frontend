@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -16,7 +16,15 @@ const Signup = () => {
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, role, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && role) {
+      navigate(role === "admin" ? "/admin/dashboard" : "/client", {
+        replace: true,
+      });
+    }
+  }, [loading, role, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -106,6 +114,8 @@ const Signup = () => {
       setError(err.response?.data?.message || "Signup failed");
     }
   };
+
+  if (loading || role) return null;
 
   return (
     <section className="max-w-md mx-auto px-6 py-24">

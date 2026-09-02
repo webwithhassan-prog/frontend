@@ -10,10 +10,22 @@ const countries = [
   { label: "UAE", flag: "🇦🇪", timeZone: "Asia/Dubai" },
 ];
 
+const detectCountry = () => {
+  try {
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return countries.find((c) => c.timeZone === timeZone) || null;
+  } catch {
+    return null;
+  }
+};
+
 const TimetableSchedule = () => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
+  const [selectedCountry, setSelectedCountry] = useState(
+    () => detectCountry() || countries[0],
+  );
+  const [autoDetected] = useState(() => !!detectCountry());
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -48,9 +60,13 @@ const TimetableSchedule = () => {
         classDate.getDate() === dayDate.getDate()
       );
     });
-    return match ? { dayDate, type: match.type } : { dayDate, type: null };
+    return {
+      dayDate,
+      type: match?.type || null,
+      cancelled: match?.status === "cancelled",
+      cancelReason: match?.cancel_reason,
+    };
   });
-
   // Daily Time Slots: unique trainer + time-of-day combos (same pattern repeats every day)
   const slotMap = new Map();
   classes.forEach((c) => {
@@ -80,7 +96,7 @@ const TimetableSchedule = () => {
         active.
       </p>
 
-      <div className="flex justify-center mb-12">
+      <div className="flex flex-col items-center gap-2 mb-12">
         <select
           value={selectedCountry.label}
           onChange={(e) =>
@@ -96,6 +112,11 @@ const TimetableSchedule = () => {
             </option>
           ))}
         </select>
+        <p className="text-xs text-brand-blue/50">
+          {autoDetected
+            ? "Detected automatically from your location — change it above if that's wrong."
+            : "Couldn't detect your location — pick your country above."}
+        </p>
       </div>
 
       {loading ? (
@@ -114,28 +135,36 @@ const TimetableSchedule = () => {
                 </tr>
               </thead>
               <tbody>
-                {weeklyPlan.map(({ dayDate, type }) => (
-                  <tr
-                    key={dayDate.toDateString()}
-                    className="border-b border-brand-blue-pale/60"
-                  >
-                    <td className="py-3 px-2 font-medium text-brand-blue">
-                      {dayDate.toLocaleDateString("en-US", {
-                        weekday: "long",
-                        month: "short",
-                        day: "numeric",
-                        timeZone: selectedCountry.timeZone,
-                      })}
-                    </td>
-                    <td className="py-3 px-2 text-brand-blue/70">
-                      {type || (
-                        <span className="italic text-brand-blue/40">
-                          No classes
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {weeklyPlan.map(
+                  ({ dayDate, type, cancelled, cancelReason }) => (
+                    <tr
+                      key={dayDate.toDateString()}
+                      className="border-b border-brand-blue-pale/60"
+                    >
+                      <td className="py-3 px-2 font-medium text-brand-blue">
+                        {dayDate.toLocaleDateString("en-US", {
+                          weekday: "long",
+                          month: "short",
+                          day: "numeric",
+                          timeZone: selectedCountry.timeZone,
+                        })}
+                      </td>
+                      <td className="py-3 px-2 text-brand-blue/70">
+                        {cancelled ? (
+                          <span className="text-red-500">
+                            Cancelled{cancelReason ? ` — ${cancelReason}` : ""}
+                          </span>
+                        ) : (
+                          type || (
+                            <span className="italic text-brand-blue/40">
+                              No classes
+                            </span>
+                          )
+                        )}
+                      </td>
+                    </tr>
+                  ),
+                )}
               </tbody>
             </table>
           </Card>
@@ -168,6 +197,7 @@ const TimetableSchedule = () => {
                         {new Date(slot.datetime).toLocaleTimeString("en-US", {
                           hour: "2-digit",
                           minute: "2-digit",
+                          hour12: true,
                           timeZone: selectedCountry.timeZone,
                         })}
                       </td>

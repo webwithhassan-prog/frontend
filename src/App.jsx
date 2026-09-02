@@ -2,9 +2,13 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
+import OfferPopup from "./components/common/OfferPopup";
+import usePageTracking from "./hooks/usePageTracking";
+import usePageMeta from "./hooks/usePageMeta";
 
 import Home from "./pages/public/Home";
 import Plans from "./pages/public/Plans";
+import Trainers from "./pages/public/Trainers";
 import Consultation from "./pages/public/Consultation";
 import TimetableSchedule from "./pages/public/TimetableSchedule";
 import EBooks from "./pages/public/EBooks";
@@ -30,9 +34,12 @@ import Professionals from "./pages/admin/Professionals";
 import Sales from "./pages/admin/Sales";
 import Content from "./pages/admin/Content";
 import AdminEBooks from "./pages/admin/EBooks";
+import AdminOffers from "./pages/admin/Offers";
+import Analytics from "./pages/admin/Analytics";
 
 import ClientLayout from "./components/client/ClientLayout";
 import Profile from "./pages/client/Profile";
+import BookConsultation from "./pages/client/BookConsultation";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const { role, loading } = useAuth();
@@ -45,11 +52,14 @@ const ProtectedRoute = ({ children, allowedRole }) => {
 };
 
 function PublicLayout({ children }) {
+  usePageTracking();
+  usePageMeta();
   return (
     <>
       <Navbar />
       {children}
       <Footer />
+      <OfferPopup />
     </>
   );
 }
@@ -96,6 +106,14 @@ function AppRoutes() {
           element={
             <PublicLayout>
               <Plans />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/trainers"
+          element={
+            <PublicLayout>
+              <Trainers />
             </PublicLayout>
           }
         />
@@ -200,6 +218,7 @@ function AppRoutes() {
           <Route index element={<Profile />} />
           <Route path="dashboard" element={<Navigate to="/client" replace />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="book-consultation" element={<BookConsultation />} />
         </Route>
 
         {/* Admin panel — nested routes inside AdminLayout */}
@@ -221,6 +240,8 @@ function AppRoutes() {
           <Route path="sales" element={<Sales />} />
           <Route path="content" element={<Content />} />
           <Route path="ebooks" element={<AdminEBooks />} />
+          <Route path="offers" element={<AdminOffers />} />
+          <Route path="analytics" element={<Analytics />} />
         </Route>
       </Routes>
     </BrowserRouter>
