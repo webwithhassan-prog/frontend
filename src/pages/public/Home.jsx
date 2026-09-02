@@ -247,7 +247,7 @@ const Home = () => {
       </section>
 
       {/* Demo Videos */}
-      <section className="bg-[#4082C0] py-20">
+      <section className="bg-brand-blue py-20">
         <div className="max-w-6xl mx-auto px-6">
           <motion.h2
             className="font-display text-2xl md:text-3xl text-white text-center mb-4"
@@ -298,7 +298,7 @@ const Home = () => {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
           >
-            HOW YOUR RISE WORKS
+            How it works?
           </motion.h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
@@ -391,7 +391,7 @@ const Home = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="bg-[#4082C0] py-20">
+      <section className="bg-brand-blue py-20">
         <div className="max-w-6xl mx-auto px-6">
           <motion.h2
             className="font-display text-2xl md:text-3xl text-white text-center mb-4"
@@ -428,7 +428,7 @@ const Home = () => {
             className="mx-auto mb-4"
           />
           <h2 className="font-display text-2xl md:text-3xl text-white mb-4">
-            READY TO RISE?
+            Ready to Transform
           </h2>
           <p className="text-white/70 mb-8">
             Pick your package — Dietplan, Live Sessions, or both — and start

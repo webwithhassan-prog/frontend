@@ -26,7 +26,7 @@ const Contact = () => {
         transition={{ duration: 0.5 }}
       >
         <div className="rounded-2xl overflow-hidden shadow-md border border-brand-blue-pale">
-          <div className="bg-[#4082C0] px-8 py-5 flex items-center gap-3">
+          <div className="bg-brand-blue px-8 py-5 flex items-center gap-3">
             <Building2 className="text-white" size={20} />
             <h3 className="font-display text-white text-sm tracking-[0.15em]">
               COMPANY INFORMATION
@@ -117,7 +117,7 @@ const Contact = () => {
                   : ""
               }`}
             >
-              <div className="bg-[#4082C0] px-5 py-3 flex items-center gap-2">
+              <div className="bg-brand-blue px-5 py-3 flex items-center gap-2">
                 <item.icon className="text-white shrink-0" size={16} />
                 <h3 className="font-display text-white text-xs tracking-wide">
                   {item.label}

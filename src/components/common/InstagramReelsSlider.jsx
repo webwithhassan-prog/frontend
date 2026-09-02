@@ -1,78 +1,65 @@
-import { useState, useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import InstagramEmbed from "./InstagramEmbed";
+import { motion } from "framer-motion";
+import { Play, Image as ImageIcon } from "lucide-react";
+import InstagramIcon from "./InstagramIcon";
 
-const reelLinks = [
-  "https://www.instagram.com/reel/DEAvyM7skJR/",
-  "https://www.instagram.com/reel/DCoqBeTIkHV/",
-  "https://www.instagram.com/reel/DAqnzxTs8HC/",
-  "https://www.instagram.com/p/C-513yJokem/",
-  "https://www.instagram.com/p/C7WI0MLIghc/",
-  "https://www.instagram.com/p/DCRRR3asLxi/",
-  "https://www.instagram.com/p/DYMbJchjIXs/",
-  "https://www.instagram.com/p/DYErUNPDorH/",
-  "https://www.instagram.com/p/DO5u-ohDK44/",
-  "https://www.instagram.com/reel/DQef5qRDLCs/",
-  "https://www.instagram.com/reel/DNTDjRoMbPN/",
-  "https://www.instagram.com/p/DIndC4xoehe/",
-  "https://www.instagram.com/reel/DGSQtF9SXFO/",
-  "https://www.instagram.com/p/C9ooToaoVo3/",
+const posts = [
+  { url: "https://www.instagram.com/reel/DEAvyM7skJR/", type: "reel" },
+  { url: "https://www.instagram.com/reel/DCoqBeTIkHV/", type: "reel" },
+  { url: "https://www.instagram.com/reel/DAqnzxTs8HC/", type: "reel" },
+  { url: "https://www.instagram.com/p/C-513yJokem/", type: "post" },
+  { url: "https://www.instagram.com/p/C7WI0MLIghc/", type: "post" },
+  { url: "https://www.instagram.com/p/DCRRR3asLxi/", type: "post" },
+  { url: "https://www.instagram.com/p/DYMbJchjIXs/", type: "post" },
+  { url: "https://www.instagram.com/p/DYErUNPDorH/", type: "post" },
+  { url: "https://www.instagram.com/p/DO5u-ohDK44/", type: "post" },
+  { url: "https://www.instagram.com/reel/DQef5qRDLCs/", type: "reel" },
+  { url: "https://www.instagram.com/reel/DNTDjRoMbPN/", type: "reel" },
+  { url: "https://www.instagram.com/p/DIndC4xoehe/", type: "post" },
+  { url: "https://www.instagram.com/reel/DGSQtF9SXFO/", type: "reel" },
+  { url: "https://www.instagram.com/p/C9ooToaoVo3/", type: "post" },
 ];
 
 const InstagramReelsSlider = () => {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    if (reelLinks.length <= 1) return;
-    const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % reelLinks.length);
-    }, 8000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const goPrev = () =>
-    setIndex((prev) => (prev - 1 + reelLinks.length) % reelLinks.length);
-  const goNext = () => setIndex((prev) => (prev + 1) % reelLinks.length);
-
   return (
-    <div className="relative max-w-md mx-auto">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={reelLinks[index]}
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -40 }}
-          transition={{ duration: 0.4 }}
-        >
-          <InstagramEmbed url={reelLinks[index]} />
-        </motion.div>
-      </AnimatePresence>
-
-      <button
-        onClick={goPrev}
-        className="absolute top-1/2 -left-4 -translate-y-1/2 bg-white shadow-md rounded-full p-2 text-brand-blue hover:text-brand-orange transition-colors"
-      >
-        <ChevronLeft size={20} />
-      </button>
-      <button
-        onClick={goNext}
-        className="absolute top-1/2 -right-4 -translate-y-1/2 bg-white shadow-md rounded-full p-2 text-brand-blue hover:text-brand-orange transition-colors"
-      >
-        <ChevronRight size={20} />
-      </button>
-
-      <div className="flex flex-wrap justify-center gap-2 mt-6">
-        {reelLinks.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setIndex(i)}
-            aria-label={`Show post ${i + 1}`}
-            className={`h-2 rounded-full transition-all ${
-              i === index ? "w-6 bg-brand-orange" : "w-2 bg-brand-blue-pale"
-            }`}
-          />
+    <div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        {posts.map((post, i) => (
+          <motion.a
+            key={post.url}
+            href={post.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative aspect-square rounded-2xl overflow-hidden shadow-md bg-gradient-to-br from-[#4082C0] to-brand-blue flex flex-col items-center justify-center gap-2 text-white"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.4, delay: (i % 8) * 0.05 }}
+            whileHover={{ scale: 1.03 }}
+          >
+            <div className="bg-white/15 rounded-full p-3 group-hover:bg-white/25 transition-colors">
+              {post.type === "reel" ? (
+                <Play size={22} fill="white" />
+              ) : (
+                <ImageIcon size={22} />
+              )}
+            </div>
+            <span className="text-xs font-semibold uppercase tracking-wide">
+              {post.type === "reel" ? "Reel" : "Post"}
+            </span>
+          </motion.a>
         ))}
+      </div>
+
+      <div className="text-center mt-10">
+        <a
+          href="https://www.instagram.com/fitness_zone5566"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 bg-brand-orange hover:bg-brand-orange-dark transition-colors text-white font-semibold px-6 py-3 rounded-full"
+        >
+          <InstagramIcon size={18} />
+          Follow @fitness_zone5566 on Instagram
+        </a>
       </div>
     </div>
   );
