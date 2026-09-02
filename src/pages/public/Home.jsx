@@ -14,7 +14,7 @@ import {
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 import TestimonialsSlider from "../../components/common/TestimonialsSlider";
-import InstagramReelsSlider from "../../components/common/InstagramReelsSlider";
+// import InstagramReelsSlider from "../../components/common/InstagramReelsSlider";
 import AchievementMarquee from "../../components/common/AchievementMarquee";
 import heroBanner from "../../assets/cleanBanner.jpeg";
 
@@ -202,6 +202,7 @@ const Home = () => {
         </div>
       </section>
       {/* Transformations */}
+      {/*
       <section className="py-20">
         <div className="max-w-6xl mx-auto px-6">
           <motion.h2
@@ -219,6 +220,7 @@ const Home = () => {
           <InstagramReelsSlider />
         </div>
       </section>
+      */}
       {/* Pillars */}
       <section className="max-w-6xl mx-auto px-6 py-20">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
