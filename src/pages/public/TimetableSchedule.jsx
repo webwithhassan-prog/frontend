@@ -89,7 +89,7 @@ const TimetableSchedule = () => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
       >
-        TIMETABLE
+        TIME SLOTS
       </motion.h1>
       <p className="text-brand-blue/70 text-center mb-8">
         This week's plan and daily time slots — join from your Profile once

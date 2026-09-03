@@ -62,7 +62,7 @@ const EBooks = () => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
       >
-        E-BOOKS
+        E-BOOKS & COURSES
       </motion.h1>
       <p className="text-brand-blue/70 text-center mb-14">
         Guides and resources you can keep — available to purchase individually.

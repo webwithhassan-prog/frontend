@@ -26,14 +26,14 @@ const pageMeta = {
       "Book a private consultation with a dietician, gynecologist, or psychiatrist — no package required.",
   },
   "/timetable": {
-    title: `Weekly Timetable | ${siteName}`,
+    title: `Time Slots | ${siteName}`,
     description:
-      "This week's workout plan and daily class times, shown in your local timezone.",
+      "This week's workout plan and daily time slots, shown in your local timezone.",
   },
   "/ebooks": {
-    title: `E-Books | ${siteName}`,
+    title: `E-Books & Courses | ${siteName}`,
     description:
-      "Guides and resources you can keep — workout and nutrition e-books available to purchase individually.",
+      "Guides, resources, and courses you can keep — workout and nutrition e-books available to purchase individually.",
   },
   "/success-stories": {
     title: `Success Stories | ${siteName}`,

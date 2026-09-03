@@ -24,18 +24,18 @@ const packageOptions = [
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "1-on-1", href: "/consultation" },
-  { label: "Timetable", href: "/timetable" },
+  { label: "Time Slots", href: "/timetable" },
   { label: "Jobs", href: "/careers" },
-  { label: "E-Books", href: "/ebooks" },
+  { label: "E-Books & Courses", href: "/ebooks" },
 ];
 
 const searchablePages = [
   { label: "Home", href: "/" },
   { label: "Packages & Pricing", href: "/plans" },
   { label: "1-on-1 Consultation", href: "/consultation" },
-  { label: "Timetable", href: "/timetable" },
+  { label: "Time Slots", href: "/timetable" },
   { label: "Careers", href: "/careers" },
-  { label: "E-Books", href: "/ebooks" },
+  { label: "E-Books & Courses", href: "/ebooks" },
   { label: "Trainers", href: "/trainers" },
   { label: "Success Stories", href: "/success-stories" },
   { label: "Contact", href: "/contact" },
@@ -104,12 +104,12 @@ const Navbar = () => {
           </div>
 
           {/* Desktop links */}
-          <div className="hidden lg:flex items-center gap-2">
+          <div className="hidden lg:flex items-center gap-1 xl:gap-2">
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
-                className="text-brand-blue/80 font-medium text-sm px-3 py-2 hover:text-brand-orange transition-colors"
+                className="text-brand-blue/80 font-medium text-sm px-2 xl:px-3 py-2 whitespace-nowrap hover:text-brand-orange transition-colors"
               >
                 {link.label}
               </a>
