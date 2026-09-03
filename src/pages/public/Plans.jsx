@@ -220,20 +220,63 @@ const Plans = () => {
                       </p>
                     )}
 
-                  <ul className="space-y-2.5 my-4 flex-1">
-                    {(featuresByType[selectedType] || []).map((f) => (
-                      <li
-                        key={f}
-                        className="flex items-start gap-2 text-sm text-brand-blue/70"
-                      >
-                        <Check
-                          size={16}
-                          className="text-brand-orange mt-0.5 shrink-0"
-                        />
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  {selectedType === "combo" ? (
+                    <div className="grid grid-cols-2 gap-4 my-4 flex-1">
+                      <div className="pr-4 border-r border-brand-blue-pale">
+                        <p className="text-[11px] font-bold text-brand-blue uppercase tracking-wide mb-2.5">
+                          Dietplan
+                        </p>
+                        <ul className="space-y-2">
+                          {featuresByType.dietplan.map((f) => (
+                            <li
+                              key={f}
+                              className="flex items-start gap-1.5 text-xs text-brand-blue/70"
+                            >
+                              <Check
+                                size={14}
+                                className="text-brand-orange mt-0.5 shrink-0"
+                              />
+                              <span>{f}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="pl-1">
+                        <p className="text-[11px] font-bold text-brand-blue uppercase tracking-wide mb-2.5">
+                          Live Sessions
+                        </p>
+                        <ul className="space-y-2">
+                          {featuresByType.workout.map((f) => (
+                            <li
+                              key={f}
+                              className="flex items-start gap-1.5 text-xs text-brand-blue/70"
+                            >
+                              <Check
+                                size={14}
+                                className="text-brand-orange mt-0.5 shrink-0"
+                              />
+                              <span>{f}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  ) : (
+                    <ul className="space-y-2.5 my-4 flex-1">
+                      {(featuresByType[selectedType] || []).map((f) => (
+                        <li
+                          key={f}
+                          className="flex items-start gap-2 text-sm text-brand-blue/70"
+                        >
+                          <Check
+                            size={16}
+                            className="text-brand-orange mt-0.5 shrink-0"
+                          />
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
 
                   <Button
                     onClick={() => handleCheckout(duration)}

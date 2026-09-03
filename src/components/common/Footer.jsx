@@ -19,6 +19,13 @@ const Footer = () => {
           <p className="text-brand-blue-pale/70 text-sm">
             Dietplans, live workouts, and consultations — built for women.
           </p>
+          <p className="text-brand-blue-pale/50 text-xs mt-4 leading-relaxed">
+            Director / Founder: M Abu Bakar Siddique
+            <br />
+            Office 20790, 182–184 High Street North,
+            <br />
+            London, United Kingdom, E6 2JA
+          </p>
         </div>
 
         <div>

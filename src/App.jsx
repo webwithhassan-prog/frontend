@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
 import OfferPopup from "./components/common/OfferPopup";
+import FloatingActions from "./components/common/FloatingActions";
 import usePageTracking from "./hooks/usePageTracking";
 import usePageMeta from "./hooks/usePageMeta";
 
@@ -60,6 +61,7 @@ function PublicLayout({ children }) {
       {children}
       <Footer />
       <OfferPopup />
+      <FloatingActions />
     </>
   );
 }
