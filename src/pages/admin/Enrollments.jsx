@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { Search, X } from "lucide-react";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
@@ -14,6 +15,17 @@ const Enrollments = () => {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [extendDays, setExtendDays] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredClients = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return clients;
+    return clients.filter((c) => {
+      const name = (c.name || "").toLowerCase();
+      const phone = (c.phone_number || "").toLowerCase();
+      return name.includes(q) || phone.includes(q);
+    });
+  }, [clients, searchQuery]);
 
   const fetchClients = async () => {
     try {
@@ -73,20 +85,57 @@ const Enrollments = () => {
 
   return (
     <div>
-      <motion.h1
-        className="text-2xl font-bold text-brand-blue mb-8"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        Enrollments
-      </motion.h1>
+      <div className="flex items-center justify-between gap-4 mb-8 flex-wrap">
+        <motion.h1
+          className="text-2xl font-bold text-brand-blue"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          Enrollments
+        </motion.h1>
+
+        <div className="relative w-full sm:w-72">
+          <Search
+            size={16}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-blue-light"
+          />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by name or phone..."
+            className="w-full border border-brand-blue-pale rounded-full pl-10 pr-9 py-2.5 text-sm text-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-orange"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-blue-light hover:text-brand-blue"
+              title="Clear search"
+            >
+              <X size={15} />
+            </button>
+          )}
+        </div>
+      </div>
 
       {loading ? (
         <p className="text-brand-blue-light">Loading...</p>
+      ) : filteredClients.length === 0 ? (
+        <p className="text-brand-blue-light text-sm">
+          {searchQuery
+            ? `No clients found matching "${searchQuery}".`
+            : "No clients enrolled yet."}
+        </p>
       ) : (
-        <Card className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
+        <>
+          {searchQuery && (
+            <p className="text-brand-blue-light text-xs mb-3">
+              {filteredClients.length} of {clients.length} clients match
+            </p>
+          )}
+          <Card className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
               <tr className="text-left text-brand-blue border-b border-brand-blue-pale">
                 <th className="py-3 px-2">Name</th>
                 <th className="py-3 px-2">Phone</th>
@@ -99,7 +148,7 @@ const Enrollments = () => {
               </tr>
             </thead>
             <tbody>
-              {clients.map((client) => (
+              {filteredClients.map((client) => (
                 <motion.tr
                   key={client._id}
                   className="border-b border-brand-blue-pale/60"
@@ -233,7 +282,8 @@ const Enrollments = () => {
               ))}
             </tbody>
           </table>
-        </Card>
+          </Card>
+        </>
       )}
     </div>
   );
