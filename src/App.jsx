@@ -17,6 +17,8 @@ import SuccessStories from "./pages/public/SuccessStories";
 import Careers from "./pages/public/Careers";
 import Contact from "./pages/public/Contact";
 import ZoomAccess from "./pages/public/ZoomAccess";
+import PaymentSuccess from "./pages/public/PaymentSuccess";
+import PaymentCancelled from "./pages/public/PaymentCancelled";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -173,6 +175,22 @@ function AppRoutes() {
           element={
             <PublicLayout>
               <ZoomAccess />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/payment-success"
+          element={
+            <PublicLayout>
+              <PaymentSuccess />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/payment-cancelled"
+          element={
+            <PublicLayout>
+              <PaymentCancelled />
             </PublicLayout>
           }
         />
