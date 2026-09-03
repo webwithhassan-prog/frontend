@@ -36,6 +36,7 @@ import Sales from "./pages/admin/Sales";
 import Content from "./pages/admin/Content";
 import AdminEBooks from "./pages/admin/EBooks";
 import AdminOffers from "./pages/admin/Offers";
+import AdminCoupons from "./pages/admin/Coupons";
 import Analytics from "./pages/admin/Analytics";
 
 import ClientLayout from "./components/client/ClientLayout";
@@ -243,6 +244,7 @@ function AppRoutes() {
           <Route path="content" element={<Content />} />
           <Route path="ebooks" element={<AdminEBooks />} />
           <Route path="offers" element={<AdminOffers />} />
+          <Route path="coupons" element={<AdminCoupons />} />
           <Route path="analytics" element={<Analytics />} />
         </Route>
       </Routes>

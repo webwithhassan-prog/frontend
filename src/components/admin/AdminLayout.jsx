@@ -13,6 +13,7 @@ import {
   Video,
   BookOpen,
   Megaphone,
+  Tag,
   TrendingUp,
   LogOut,
 } from "lucide-react";
@@ -29,6 +30,7 @@ const navItems = [
   { label: "Content", to: "/admin/content", icon: Video },
   { label: "E-Books", to: "/admin/ebooks", icon: BookOpen },
   { label: "Offers", to: "/admin/offers", icon: Megaphone },
+  { label: "Coupons", to: "/admin/coupons", icon: Tag },
   { label: "Analytics", to: "/admin/analytics", icon: TrendingUp },
 ];
 

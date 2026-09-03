@@ -44,11 +44,13 @@ const Login = () => {
       const pendingPlanIdsRaw = localStorage.getItem("pending_plan_ids");
       const pendingIncludePremium =
         localStorage.getItem("pending_include_premium") === "true";
+      const pendingCouponCode = localStorage.getItem("pending_coupon_code");
 
       if (pendingPlanIdsRaw) {
         const pendingPlanIds = JSON.parse(pendingPlanIdsRaw);
         localStorage.removeItem("pending_plan_ids");
         localStorage.removeItem("pending_include_premium");
+        localStorage.removeItem("pending_coupon_code");
 
         if (pendingPlanIds.length > 0) {
           try {
@@ -56,6 +58,7 @@ const Login = () => {
               client_id: res.data.client_id,
               plan_ids: pendingPlanIds,
               include_premium: pendingIncludePremium,
+              coupon_code: pendingCouponCode || undefined,
             });
             window.location.href = checkoutRes.data.url;
             return;

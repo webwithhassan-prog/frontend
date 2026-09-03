@@ -10,6 +10,11 @@ import {
   Users,
   TrendingUp,
   Headset,
+  Salad,
+  Dumbbell,
+  Route,
+  CalendarCheck,
+  Video,
 } from "lucide-react";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
@@ -20,16 +25,19 @@ import heroBanner from "../../assets/cleanBanner.jpeg";
 
 const pillars = [
   {
+    icon: Salad,
     label: "Dietplan",
     title: "Customized Dietplans",
     desc: "Home-based menus built around your body, your food, your life — tracked daily, adjusted weekly.",
   },
   {
+    icon: Dumbbell,
     label: "Live Sessions",
     title: "Live Workout Sessions",
     desc: "50–55 minutes, six days a week, a different workout every day — led by female trainers, recorded for you.",
   },
   {
+    icon: Stethoscope,
     label: "Premium",
     title: "One-on-One Consultations",
     desc: "Direct access to a dietician, gynecologist, or psychiatrist — the questions you don\u2019t ask in group chat.",
@@ -69,16 +77,19 @@ const demoVideos = [
 
 const steps = [
   {
+    icon: Route,
     n: "01",
     title: "Choose your path",
     desc: "Pick a Dietplan, Live Sessions, or both. Add Premium if you want a professional in your corner.",
   },
   {
+    icon: CalendarCheck,
     n: "02",
     title: "Get matched & scheduled",
     desc: "We assign your trainer or consultant and set your timetable around your week, not the other way round.",
   },
   {
+    icon: Video,
     n: "03",
     title: "Show up live",
     desc: "Join from your dashboard — no links to hunt for, no groups to scroll through.",
@@ -234,10 +245,15 @@ const Home = () => {
               transition={{ duration: 0.5, delay: i * 0.1 }}
             >
               <Card className="h-full">
-                <span className="font-display text-brand-orange text-[10px] tracking-[0.15em]">
-                  {pillar.label.toUpperCase()}
-                </span>
-                <h3 className="font-display text-brand-blue text-lg mt-2 mb-3">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="inline-flex shrink-0 bg-brand-blue-pale rounded-full p-2">
+                    <pillar.icon className="text-brand-blue" size={18} />
+                  </div>
+                  <span className="font-display text-brand-orange text-[10px] tracking-[0.15em]">
+                    {pillar.label.toUpperCase()}
+                  </span>
+                </div>
+                <h3 className="font-display text-brand-blue text-lg mb-3">
                   {pillar.title}
                 </h3>
                 <p className="text-brand-blue/70 text-sm leading-relaxed">
@@ -313,6 +329,9 @@ const Home = () => {
                 viewport={{ once: true, amount: 0.4 }}
                 transition={{ duration: 0.5, delay: i * 0.15 }}
               >
+                <div className="inline-flex bg-brand-orange/10 rounded-full p-3 mb-4">
+                  <step.icon className="text-brand-orange" size={22} />
+                </div>
                 <p className="font-display text-brand-orange text-3xl mb-3">
                   {step.n}
                 </p>

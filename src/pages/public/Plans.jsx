@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { Check, Tag, X } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
@@ -49,6 +49,11 @@ const Plans = () => {
   const { role } = useAuth();
   const [searchParams] = useSearchParams();
 
+  const [couponInput, setCouponInput] = useState("");
+  const [couponChecking, setCouponChecking] = useState(false);
+  const [couponError, setCouponError] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null); // { code, discount_percent, applies_to }
+
   const selectedType = searchParams.get("type") || "dietplan";
 
   useEffect(() => {
@@ -86,6 +91,7 @@ const Plans = () => {
         client_id: clientId,
         plan_ids: planIds,
         include_premium: false,
+        coupon_code: appliedCoupon?.code,
       });
       window.location.href = res.data.url;
     } catch (err) {
@@ -95,6 +101,56 @@ const Plans = () => {
       setCheckingOutDuration(null);
     }
   };
+
+  const handleApplyCoupon = async () => {
+    const code = couponInput.trim();
+    if (!code) return;
+    setCouponChecking(true);
+    setCouponError("");
+    try {
+      const typePlans = plans.filter((p) =>
+        selectedType === "combo"
+          ? p.product_type === "dietplan" || p.product_type === "workout"
+          : p.product_type === selectedType,
+      );
+      const res = await api.post("/coupons/validate", {
+        code,
+        plan_ids: typePlans.map((p) => p._id),
+      });
+      setAppliedCoupon({
+        code: code.toUpperCase(),
+        discount_percent: res.data.discount_percent,
+        applies_to: res.data.applies_to,
+      });
+    } catch (err) {
+      setAppliedCoupon(null);
+      setCouponError(
+        err.response?.data?.message || "Invalid coupon code",
+      );
+    } finally {
+      setCouponChecking(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput("");
+    setCouponError("");
+  };
+
+  const getBestDiscountPercent = (plan) => {
+    const offerPercent = plan.discount_percent || 0;
+    const couponPercent =
+      appliedCoupon &&
+      (appliedCoupon.applies_to === "all" ||
+        appliedCoupon.applies_to === plan.product_type)
+        ? appliedCoupon.discount_percent
+        : 0;
+    return Math.max(offerPercent, couponPercent);
+  };
+
+  const getPlanPrice = (plan) =>
+    Math.round(plan.price * (1 - getBestDiscountPercent(plan) / 100));
 
   const handleCheckout = (duration) => {
     setError("");
@@ -116,6 +172,9 @@ const Plans = () => {
     if (role !== "client") {
       localStorage.setItem("pending_plan_ids", JSON.stringify(planIds));
       localStorage.setItem("pending_include_premium", "false");
+      if (appliedCoupon?.code) {
+        localStorage.setItem("pending_coupon_code", appliedCoupon.code);
+      }
       navigate("/signup");
       return;
     }
@@ -133,9 +192,52 @@ const Plans = () => {
       >
         {packageLabels[selectedType]?.toUpperCase() || "PACKAGES"}
       </motion.h1>
-      <p className="text-brand-blue/70 text-center mb-14">
+      <p className="text-brand-blue/70 text-center mb-8">
         Choose the duration that works for you.
       </p>
+
+      <div className="max-w-sm mx-auto mb-14">
+        {appliedCoupon ? (
+          <div className="flex items-center justify-between gap-3 bg-brand-blue-pale/50 border border-brand-blue-pale rounded-full px-4 py-2.5">
+            <span className="flex items-center gap-2 text-sm text-brand-blue font-medium">
+              <Tag size={15} className="text-brand-orange" />
+              {appliedCoupon.code} — {appliedCoupon.discount_percent}% off
+              applied
+            </span>
+            <button
+              onClick={handleRemoveCoupon}
+              className="text-brand-blue/50 hover:text-red-500 transition-colors"
+              title="Remove coupon"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={couponInput}
+              onChange={(e) => setCouponInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()}
+              placeholder="Have a coupon code?"
+              className="flex-1 border border-brand-blue-pale rounded-full px-4 py-2.5 text-sm text-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-orange"
+            />
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleApplyCoupon}
+              disabled={couponChecking || !couponInput.trim()}
+            >
+              {couponChecking ? "Checking..." : "Apply"}
+            </Button>
+          </div>
+        )}
+        {couponError && (
+          <p className="text-red-500 text-xs text-center mt-2">
+            {couponError}
+          </p>
+        )}
+      </div>
 
       {error && (
         <p className="text-red-500 text-center text-sm mb-8">{error}</p>
@@ -148,7 +250,7 @@ const Plans = () => {
           {durations.map((duration, i) => {
             const selection = getSelectionForDuration(duration);
             const total = selection.reduce(
-              (sum, p) => sum + (p.discounted_price ?? p.price),
+              (sum, p) => sum + getPlanPrice(p),
               0,
             );
             const originalTotal = selection.reduce(

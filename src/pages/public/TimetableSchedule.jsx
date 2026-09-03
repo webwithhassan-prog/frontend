@@ -19,6 +19,16 @@ const detectCountry = () => {
   }
 };
 
+// Fixed weekly workout plan — same every week, always shown Monday through Saturday
+const weeklyWorkoutPlan = [
+  { day: "Monday", type: "Yoga and Stretching" },
+  { day: "Tuesday", type: "Upper Body Strength Training" },
+  { day: "Wednesday", type: "Lower Body Strength Training" },
+  { day: "Thursday", type: "Aerobics & Tabata" },
+  { day: "Friday", type: "Abs & Belly" },
+  { day: "Saturday", type: "Full Body Workout" },
+];
+
 const TimetableSchedule = () => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -43,30 +53,6 @@ const TimetableSchedule = () => {
     fetchClasses();
   }, []);
 
-  const today = new Date();
-  const next7Days = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    return d;
-  });
-
-  // Weekly Plan: one representative class per real upcoming date, showing day + type
-  const weeklyPlan = next7Days.map((dayDate) => {
-    const match = classes.find((c) => {
-      const classDate = new Date(c.datetime);
-      return (
-        classDate.getFullYear() === dayDate.getFullYear() &&
-        classDate.getMonth() === dayDate.getMonth() &&
-        classDate.getDate() === dayDate.getDate()
-      );
-    });
-    return {
-      dayDate,
-      type: match?.type || null,
-      cancelled: match?.status === "cancelled",
-      cancelReason: match?.cancel_reason,
-    };
-  });
   // Daily Time Slots: unique trainer + time-of-day combos (same pattern repeats every day)
   const slotMap = new Map();
   classes.forEach((c) => {
@@ -92,7 +78,7 @@ const TimetableSchedule = () => {
         TIME SLOTS
       </motion.h1>
       <p className="text-brand-blue/70 text-center mb-8">
-        This week's plan and daily time slots — join from your Profile once
+        Weekly plan and daily time slots — join from your Profile once
         active.
       </p>
 
@@ -124,50 +110,24 @@ const TimetableSchedule = () => {
       ) : (
         <>
           <h2 className="font-display text-sm text-brand-orange tracking-wide mb-4">
-            THIS WEEK'S PLAN
+            WEEKLY PLAN
           </h2>
-          <Card className="overflow-x-auto mb-12">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-brand-blue border-b border-brand-blue-pale">
-                  <th className="py-3 px-2">Day</th>
-                  <th className="py-3 px-2">Type</th>
-                </tr>
-              </thead>
-              <tbody>
-                {weeklyPlan.map(
-                  ({ dayDate, type, cancelled, cancelReason }) => (
-                    <tr
-                      key={dayDate.toDateString()}
-                      className="border-b border-brand-blue-pale/60"
-                    >
-                      <td className="py-3 px-2 font-medium text-brand-blue">
-                        {dayDate.toLocaleDateString("en-US", {
-                          weekday: "long",
-                          month: "short",
-                          day: "numeric",
-                          timeZone: selectedCountry.timeZone,
-                        })}
-                      </td>
-                      <td className="py-3 px-2 text-brand-blue/70">
-                        {cancelled ? (
-                          <span className="text-red-500">
-                            Cancelled{cancelReason ? ` — ${cancelReason}` : ""}
-                          </span>
-                        ) : (
-                          type || (
-                            <span className="italic text-brand-blue/40">
-                              No classes
-                            </span>
-                          )
-                        )}
-                      </td>
-                    </tr>
-                  ),
-                )}
-              </tbody>
-            </table>
+          <Card className="mb-3">
+            <ul className="divide-y divide-brand-blue-pale/60">
+              {weeklyWorkoutPlan.map(({ day, type }) => (
+                <li
+                  key={day}
+                  className="py-3 text-sm text-brand-blue text-center sm:text-left"
+                >
+                  <span className="font-display">{day}:</span>{" "}
+                  <span className="text-brand-blue/70">{type}</span>
+                </li>
+              ))}
+            </ul>
           </Card>
+          <p className="text-brand-blue/60 text-xs text-center mb-12">
+            Cardio &amp; Facial Yoga included every day.
+          </p>
 
           <h2 className="font-display text-sm text-brand-orange tracking-wide mb-4">
             DAILY TIME SLOTS
