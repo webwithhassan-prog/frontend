@@ -150,8 +150,9 @@ const Home = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
                 >
-                  Dietplans, live workouts, and one-on-one consultations — one
-                  platform, no missed links.
+                  Empowering your health journey with certified female fitness
+                  coaches, expert dietitians, and specialized wellness
+                  professionals. Total care designed around you.
                 </motion.p>
 
                 <motion.div
