@@ -14,6 +14,8 @@ const emptyForm = {
   years_experience: "",
   session_duration: "",
   fee: "",
+  bio: "",
+  max_clients_per_session: "",
 };
 const specialties = [
   "dietician",
@@ -72,6 +74,8 @@ const Consultants = () => {
       years_experience: consultant.years_experience ?? "",
       session_duration: consultant.session_duration || "",
       fee: consultant.fee ?? "",
+      bio: consultant.bio || "",
+      max_clients_per_session: consultant.max_clients_per_session ?? "",
     });
     setPhotoFile(null);
     setEditingId(consultant._id);
@@ -119,6 +123,10 @@ const Consultants = () => {
           : undefined,
         session_duration: formData.session_duration || undefined,
         fee: formData.fee ? Number(formData.fee) : undefined,
+        bio: formData.bio || undefined,
+        max_clients_per_session: formData.max_clients_per_session
+          ? Number(formData.max_clients_per_session)
+          : undefined,
       };
 
       if (editingId) {
@@ -276,13 +284,32 @@ const Consultants = () => {
               className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
             />
           </div>
-          <input
-            type="number"
-            name="fee"
-            placeholder="Fee (Rs per session)"
-            min="0"
-            value={formData.fee}
+          <div className="grid grid-cols-2 gap-3">
+            <input
+              type="number"
+              name="fee"
+              placeholder="Fee (Rs per session)"
+              min="0"
+              value={formData.fee}
+              onChange={handleChange}
+              className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+            />
+            <input
+              type="number"
+              name="max_clients_per_session"
+              placeholder="Max clients/session (optional)"
+              min="1"
+              value={formData.max_clients_per_session}
+              onChange={handleChange}
+              className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+            />
+          </div>
+          <textarea
+            name="bio"
+            placeholder="Expertise / bio — shown to clients when they browse consultants"
+            value={formData.bio}
             onChange={handleChange}
+            rows={4}
             className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
           />
 

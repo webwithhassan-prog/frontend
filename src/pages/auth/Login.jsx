@@ -90,28 +90,24 @@ const Login = () => {
         }
       }
 
-      // Resume a pending 1-on-1 consultation request, if any
-      const pendingSpecialty = localStorage.getItem(
-        "pending_consultation_specialty",
+      // Resume a pending 1-on-1 consultation booking, if any
+      const pendingConsultantId = localStorage.getItem(
+        "pending_consultation_consultant_id",
       );
-      if (pendingSpecialty) {
-        const pendingTime =
-          localStorage.getItem("pending_consultation_time") || "";
-        const pendingConsultantId =
-          localStorage.getItem("pending_consultation_consultant_id") || null;
-        localStorage.removeItem("pending_consultation_specialty");
-        localStorage.removeItem("pending_consultation_time");
+      if (pendingConsultantId) {
         localStorage.removeItem("pending_consultation_consultant_id");
-
         try {
-          await api.post("/consultation-requests", {
-            client_id: res.data.client_id,
-            specialty: pendingSpecialty,
-            consultant_id: pendingConsultantId,
-            preferred_time: pendingTime,
-          });
-        } catch (requestErr) {
-          // If it fails, just continue to profile — client can resubmit from there
+          const consultationCheckoutRes = await api.post(
+            "/payments/stripe/consultation-checkout",
+            {
+              client_id: res.data.client_id,
+              consultant_id: pendingConsultantId,
+            },
+          );
+          window.location.href = consultationCheckoutRes.data.url;
+          return;
+        } catch (checkoutErr) {
+          // If checkout fails, fall through to profile
         }
       }
 

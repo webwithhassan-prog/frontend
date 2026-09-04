@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import {
   Star,
   ArrowRight,
@@ -21,6 +23,7 @@ import {
   Briefcase,
   Clock,
   Wallet,
+  UserRound,
 } from "lucide-react";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
@@ -28,6 +31,7 @@ import TestimonialsSlider from "../../components/common/TestimonialsSlider";
 // import InstagramReelsSlider from "../../components/common/InstagramReelsSlider";
 import AchievementMarquee from "../../components/common/AchievementMarquee";
 import api from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 import heroBanner from "../../assets/cleanBanner.jpeg";
 
 const pillars = [
@@ -98,6 +102,9 @@ const Home = () => {
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
   const [consultants, setConsultants] = useState([]);
   const [loadingConsultants, setLoadingConsultants] = useState(false);
+  const [bookingId, setBookingId] = useState(null);
+  const navigate = useNavigate();
+  const { role } = useAuth();
 
   const handleSelectSpecialty = async (specialty) => {
     setSelectedSpecialty(specialty);
@@ -113,6 +120,32 @@ const Home = () => {
       setConsultants([]);
     } finally {
       setLoadingConsultants(false);
+    }
+  };
+
+  const handleBook = async (consultant) => {
+    if (role !== "client") {
+      localStorage.setItem(
+        "pending_consultation_consultant_id",
+        consultant._id,
+      );
+      navigate("/signup");
+      return;
+    }
+
+    setBookingId(consultant._id);
+    try {
+      const clientId = localStorage.getItem("client_id");
+      const res = await api.post("/payments/stripe/consultation-checkout", {
+        client_id: clientId,
+        consultant_id: consultant._id,
+      });
+      window.location.href = res.data.url;
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Could not start checkout",
+      );
+      setBookingId(null);
     }
   };
 
@@ -458,7 +491,7 @@ const Home = () => {
                     {consultants.map((c) => (
                       <Card
                         key={c._id}
-                        className="flex flex-col sm:flex-row sm:items-center gap-4"
+                        className="flex flex-col sm:flex-row sm:items-start gap-4"
                       >
                         <div className="w-14 h-14 rounded-full bg-brand-blue-pale overflow-hidden flex items-center justify-center shrink-0">
                           {c.photo_url ? (
@@ -478,7 +511,7 @@ const Home = () => {
                           <h3 className="font-display text-brand-blue text-sm mb-1">
                             {c.name}
                           </h3>
-                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-brand-blue/60">
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-brand-blue/60 mb-2">
                             {c.years_experience && (
                               <span className="flex items-center gap-1">
                                 <Briefcase size={12} /> {c.years_experience}{" "}
@@ -496,15 +529,28 @@ const Home = () => {
                                 {c.fee.toLocaleString()}
                               </span>
                             )}
+                            {c.max_clients_per_session && (
+                              <span className="flex items-center gap-1">
+                                <UserRound size={12} /> Max{" "}
+                                {c.max_clients_per_session} client
+                                {c.max_clients_per_session > 1 ? "s" : ""}
+                                /session
+                              </span>
+                            )}
                           </div>
+                          {c.bio && (
+                            <p className="text-brand-blue/70 text-xs leading-relaxed">
+                              {c.bio}
+                            </p>
+                          )}
                         </div>
                         <Button
                           size="sm"
-                          onClick={() =>
-                            (window.location.href = "/consultation")
-                          }
+                          onClick={() => handleBook(c)}
+                          disabled={bookingId === c._id}
+                          className="shrink-0"
                         >
-                          Book
+                          {bookingId === c._id ? "Redirecting..." : "Book"}
                         </Button>
                       </Card>
                     ))}
