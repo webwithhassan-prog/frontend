@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
@@ -20,9 +20,10 @@ const Signup = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { login, role, loading } = useAuth();
+  const redirectingRef = useRef(false);
 
   useEffect(() => {
-    if (!loading && role) {
+    if (!loading && role && !redirectingRef.current) {
       navigate(role === "admin" ? "/admin/dashboard" : "/client", {
         replace: true,
       });
@@ -41,6 +42,11 @@ const Signup = () => {
         `${import.meta.env.VITE_API_URL}/auth/register`,
         formData,
       );
+      // Block the role-change effect above from racing this handler's own
+      // navigation — otherwise it fires the instant login() updates auth
+      // state, flashing the dashboard before an async checkout redirect
+      // gets a chance to run.
+      redirectingRef.current = true;
       login(res.data.token, res.data.role, res.data.client_id);
 
       // Resume a pending package checkout, if any
