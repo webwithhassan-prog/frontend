@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Check, Tag, X } from "lucide-react";
+import toast from "react-hot-toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
@@ -15,6 +16,12 @@ const packageLabels = {
   workout: "Live Workout Sessions",
   combo: "Both Combined",
 };
+
+const packageTabs = [
+  { type: "dietplan", label: "Dietplan" },
+  { type: "workout", label: "Live Sessions" },
+  { type: "combo", label: "Both Combined" },
+];
 
 const featuresByType = {
   dietplan: [
@@ -47,7 +54,7 @@ const Plans = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { role } = useAuth();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [couponInput, setCouponInput] = useState("");
   const [couponChecking, setCouponChecking] = useState(false);
@@ -95,9 +102,10 @@ const Plans = () => {
       });
       window.location.href = res.data.url;
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Checkout failed. Please try again.",
-      );
+      const msg =
+        err.response?.data?.message || "Checkout failed. Please try again.";
+      setError(msg);
+      toast.error(msg);
       setCheckingOutDuration(null);
     }
   };
@@ -122,11 +130,12 @@ const Plans = () => {
         discount_percent: res.data.discount_percent,
         applies_to: res.data.applies_to,
       });
+      toast.success(`${code.toUpperCase()} applied — ${res.data.discount_percent}% off`);
     } catch (err) {
       setAppliedCoupon(null);
-      setCouponError(
-        err.response?.data?.message || "Invalid coupon code",
-      );
+      const msg = err.response?.data?.message || "Invalid coupon code";
+      setCouponError(msg);
+      toast.error(msg);
     } finally {
       setCouponChecking(false);
     }
@@ -192,9 +201,25 @@ const Plans = () => {
       >
         {packageLabels[selectedType]?.toUpperCase() || "PACKAGES"}
       </motion.h1>
-      <p className="text-brand-blue/70 text-center mb-8">
+      <p className="text-brand-blue/70 text-center mb-6">
         Choose the duration that works for you.
       </p>
+
+      <div className="flex justify-center gap-2 mb-8 flex-wrap">
+        {packageTabs.map((tab) => (
+          <button
+            key={tab.type}
+            onClick={() => setSearchParams({ type: tab.type })}
+            className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-colors ${
+              selectedType === tab.type
+                ? "bg-brand-blue text-white"
+                : "bg-brand-blue-pale text-brand-blue hover:bg-brand-blue-pale/70"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
       <div className="max-w-sm mx-auto mb-14">
         {appliedCoupon ? (

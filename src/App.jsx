@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
@@ -273,6 +274,25 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: "#12224A",
+            color: "#fff",
+            fontSize: "14px",
+            borderRadius: "9999px",
+            padding: "10px 20px",
+          },
+          success: {
+            iconTheme: { primary: "#F76B1C", secondary: "#fff" },
+          },
+          error: {
+            iconTheme: { primary: "#ef4444", secondary: "#fff" },
+          },
+        }}
+      />
       <AppRoutes />
     </AuthProvider>
   );

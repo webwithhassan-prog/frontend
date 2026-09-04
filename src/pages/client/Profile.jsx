@@ -8,6 +8,7 @@ import {
   Droplet,
   Lock,
   Check,
+  UtensilsCrossed,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
@@ -275,6 +276,16 @@ const Profile = () => {
       setDailyLogMessage("Saved! Keep it up.");
     } catch (err) {
       setDailyLogMessage("Something went wrong.");
+    }
+  };
+
+  const handleDismissDietplanNotification = async () => {
+    try {
+      const clientId = localStorage.getItem("client_id");
+      await api.put(`/clients/${clientId}/dismiss-dietplan-notification`);
+      setClient((prev) => ({ ...prev, dietplan_notification_pending: false }));
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -735,6 +746,39 @@ const Profile = () => {
               </span>
             </div>
           </motion.div>
+
+          {/* Dietplan renewal notification */}
+          {client?.dietplan_notification_pending && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8"
+            >
+              <Card className="border-brand-orange border-2 bg-brand-orange/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="inline-flex shrink-0 bg-brand-orange/10 rounded-full p-2.5">
+                    <UtensilsCrossed size={20} className="text-brand-orange" />
+                  </div>
+                  <div>
+                    <p className="font-display text-brand-blue text-sm mb-1">
+                      TIME FOR YOUR NEW DIETPLAN
+                    </p>
+                    <p className="text-brand-blue/70 text-sm">
+                      It's been 15 days — your next diet plan is ready. Our
+                      team will reach out to you on WhatsApp shortly.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={handleDismissDietplanNotification}
+                  className="sm:shrink-0"
+                >
+                  Got it
+                </Button>
+              </Card>
+            </motion.div>
+          )}
 
           {/* Premium Services grid */}
           <h2 className="font-display text-sm text-brand-blue/60 tracking-wide mb-4">

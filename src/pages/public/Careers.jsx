@@ -9,6 +9,7 @@ const specialties = [
   { value: "dietician", label: "Dietician" },
   { value: "gynecologist", label: "Gynecologist" },
   { value: "psychiatrist", label: "Psychiatrist" },
+  { value: "physiotherapist", label: "Physiotherapist" },
   { value: "personal_trainer", label: "Personal Trainer" },
   { value: "other", label: "Other" },
 ];

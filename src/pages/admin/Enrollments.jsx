@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
-import { Search, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, X, Ban, ShieldCheck, Trash2, MoreVertical } from "lucide-react";
+import toast from "react-hot-toast";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
@@ -16,6 +17,7 @@ const Enrollments = () => {
   const [loading, setLoading] = useState(true);
   const [extendDays, setExtendDays] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [openMenuId, setOpenMenuId] = useState(null);
 
   const filteredClients = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -43,41 +45,108 @@ const Enrollments = () => {
   }, []);
 
   const handleFreeze = async (id) => {
-    await api.put(`/clients/${id}/freeze`);
-    fetchClients();
+    try {
+      await api.put(`/clients/${id}/freeze`);
+      toast.success("Client frozen");
+      fetchClients();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to freeze client");
+    }
   };
 
   const handleResume = async (id) => {
-    await api.put(`/clients/${id}/resume`);
-    fetchClients();
+    try {
+      await api.put(`/clients/${id}/resume`);
+      toast.success("Client resumed");
+      fetchClients();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to resume client");
+    }
   };
 
   const handleExtend = async (id) => {
     const days = Number(extendDays[id] || 0);
     if (!days) return;
-    await api.put(`/clients/${id}/extend`, { days });
-    setExtendDays({ ...extendDays, [id]: "" });
-    fetchClients();
+    try {
+      await api.put(`/clients/${id}/extend`, { days });
+      toast.success(`Extended by ${days} day(s)`);
+      setExtendDays({ ...extendDays, [id]: "" });
+      fetchClients();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to extend access");
+    }
+  };
+
+  const handleBan = async (client) => {
+    setOpenMenuId(null);
+    const reason = window.prompt(
+      `Ban ${client.name}? They'll be logged out and blocked from logging back in.\n\nReason (optional):`,
+    );
+    if (reason === null) return; // cancelled
+    try {
+      await api.put(`/clients/${client._id}/ban`, {
+        reason: reason || undefined,
+      });
+      toast.success(`${client.name} banned`);
+      fetchClients();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to ban client");
+    }
+  };
+
+  const handleUnban = async (id) => {
+    setOpenMenuId(null);
+    try {
+      await api.put(`/clients/${id}/unban`);
+      toast.success("Client unbanned");
+      fetchClients();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to unban client");
+    }
+  };
+
+  const handleDelete = async (client) => {
+    setOpenMenuId(null);
+    const confirmed = window.confirm(
+      `Permanently delete ${client.name}? This removes their account and login for good — this can't be undone.`,
+    );
+    if (!confirmed) return;
+    try {
+      await api.delete(`/clients/${client._id}`);
+      toast.success(`${client.name} deleted`);
+      fetchClients();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete client");
+    }
   };
 
   const handleTogglePackage = async (client, field) => {
-    await api.put(`/clients/${client._id}/packages`, {
-      has_dietplan:
-        field === "has_dietplan" ? !client.has_dietplan : client.has_dietplan,
-      has_workout:
-        field === "has_workout" ? !client.has_workout : client.has_workout,
-      has_premium:
-        field === "has_premium" ? !client.has_premium : client.has_premium,
-    });
-    fetchClients();
+    try {
+      await api.put(`/clients/${client._id}/packages`, {
+        has_dietplan:
+          field === "has_dietplan"
+            ? !client.has_dietplan
+            : client.has_dietplan,
+        has_workout:
+          field === "has_workout" ? !client.has_workout : client.has_workout,
+        has_premium:
+          field === "has_premium"
+            ? !client.has_premium
+            : client.has_premium,
+      });
+      fetchClients();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update package");
+    }
   };
 
   const handleDeliverDietPlan = async (id) => {
     try {
       await api.put(`/clients/${id}/deliver-dietplan`);
+      toast.success("Diet plan delivered");
       fetchClients();
     } catch (err) {
-      alert(
+      toast.error(
         err.response?.data?.message || "Failed to mark diet plan delivered",
       );
     }
@@ -162,11 +231,21 @@ const Enrollments = () => {
                     {client.phone_number}
                   </td>
                   <td className="py-3 px-2">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColors[client.status]}`}
-                    >
-                      {client.status}
-                    </span>
+                    <div className="flex flex-col items-start gap-1">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColors[client.status]}`}
+                      >
+                        {client.status}
+                      </span>
+                      {client.banned && (
+                        <span
+                          className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-800 text-white"
+                          title={client.ban_reason || ""}
+                        >
+                          BANNED
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="py-3 px-2 text-brand-blue-light">
                     {client.days_remaining}
@@ -244,18 +323,18 @@ const Enrollments = () => {
                     )}
                   </td>
                   <td className="py-3 px-2">
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-2 flex-nowrap">
                       {client.status === "active" ? (
                         <button
                           onClick={() => handleFreeze(client._id)}
-                          className="text-xs font-semibold px-3 py-1.5 rounded-full bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors"
+                          className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-colors"
                         >
                           Freeze
                         </button>
                       ) : (
                         <button
                           onClick={() => handleResume(client._id)}
-                          className="text-xs font-semibold px-3 py-1.5 rounded-full bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+                          className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
                         >
                           Resume
                         </button>
@@ -271,11 +350,65 @@ const Enrollments = () => {
                             [client._id]: e.target.value,
                           })
                         }
-                        className="w-16 border border-brand-blue-pale rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                        className="w-14 shrink-0 border border-brand-blue-pale rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-orange"
                       />
-                      <Button onClick={() => handleExtend(client._id)}>
+                      <Button size="sm" onClick={() => handleExtend(client._id)}>
                         Extend
                       </Button>
+
+                      <div className="relative shrink-0 ml-auto">
+                        <button
+                          onClick={() =>
+                            setOpenMenuId(
+                              openMenuId === client._id ? null : client._id,
+                            )
+                          }
+                          title="More actions"
+                          className="w-7 h-7 flex items-center justify-center rounded-full text-brand-blue-light hover:bg-brand-blue-pale transition-colors"
+                        >
+                          <MoreVertical size={16} />
+                        </button>
+
+                        <AnimatePresence>
+                          {openMenuId === client._id && (
+                            <>
+                              <div
+                                className="fixed inset-0 z-10"
+                                onClick={() => setOpenMenuId(null)}
+                              />
+                              <motion.div
+                                initial={{ opacity: 0, y: -6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -6 }}
+                                transition={{ duration: 0.15 }}
+                                className="absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-lg border border-brand-blue-pale py-1.5 z-20"
+                              >
+                                {client.banned ? (
+                                  <button
+                                    onClick={() => handleUnban(client._id)}
+                                    className="flex items-center gap-2 w-full text-left px-4 py-2 text-xs font-medium text-brand-blue hover:bg-brand-blue-pale transition-colors"
+                                  >
+                                    <ShieldCheck size={14} /> Unban
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => handleBan(client)}
+                                    className="flex items-center gap-2 w-full text-left px-4 py-2 text-xs font-medium text-brand-blue hover:bg-brand-blue-pale transition-colors"
+                                  >
+                                    <Ban size={14} /> Ban
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => handleDelete(client)}
+                                  className="flex items-center gap-2 w-full text-left px-4 py-2 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
+                                >
+                                  <Trash2 size={14} /> Delete
+                                </button>
+                              </motion.div>
+                            </>
+                          )}
+                        </AnimatePresence>
+                      </div>
                     </div>
                   </td>
                 </motion.tr>

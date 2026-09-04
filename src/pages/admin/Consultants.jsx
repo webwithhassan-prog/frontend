@@ -7,8 +7,28 @@ import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import Modal from "../../components/admin/Modal";
 
-const emptyForm = { name: "", specialty: "", photo_url: "" };
-const specialties = ["dietician", "gynecologist", "psychiatrist"];
+const emptyForm = {
+  name: "",
+  specialty: "",
+  photo_url: "",
+  years_experience: "",
+  session_duration: "",
+  fee: "",
+};
+const specialties = [
+  "dietician",
+  "gynecologist",
+  "psychiatrist",
+  "physiotherapist",
+  "personal_trainer",
+];
+const specialtyLabels = {
+  dietician: "Dietician",
+  gynecologist: "Gynecologist",
+  psychiatrist: "Psychiatrist",
+  physiotherapist: "Physiotherapist",
+  personal_trainer: "Fitness Trainer",
+};
 
 const CLOUDINARY_CLOUD_NAME = "zyfxigcj";
 const CLOUDINARY_UPLOAD_PRESET = "FitnessZone";
@@ -49,6 +69,9 @@ const Consultants = () => {
       name: consultant.name,
       specialty: consultant.specialty,
       photo_url: consultant.photo_url || "",
+      years_experience: consultant.years_experience ?? "",
+      session_duration: consultant.session_duration || "",
+      fee: consultant.fee ?? "",
     });
     setPhotoFile(null);
     setEditingId(consultant._id);
@@ -91,6 +114,11 @@ const Consultants = () => {
         name: formData.name,
         specialty: formData.specialty,
         photo_url,
+        years_experience: formData.years_experience
+          ? Number(formData.years_experience)
+          : undefined,
+        session_duration: formData.session_duration || undefined,
+        fee: formData.fee ? Number(formData.fee) : undefined,
       };
 
       if (editingId) {
@@ -145,8 +173,17 @@ const Consultants = () => {
               <h3 className="text-brand-blue font-bold text-lg">
                 {consultant.name}
               </h3>
-              <p className="text-brand-blue-light text-sm mt-1 mb-4 capitalize">
-                {consultant.specialty}
+              <p className="text-brand-blue-light text-sm mt-1 mb-1">
+                {specialtyLabels[consultant.specialty] || consultant.specialty}
+              </p>
+              <p className="text-brand-blue-light text-xs mb-4">
+                {consultant.years_experience
+                  ? `${consultant.years_experience} yrs experience`
+                  : "Experience not set"}
+                {consultant.session_duration
+                  ? ` · ${consultant.session_duration}`
+                  : ""}
+                {consultant.fee ? ` · Rs ${consultant.fee.toLocaleString()}` : ""}
               </p>
               <div className="flex gap-3">
                 <button
@@ -214,11 +251,41 @@ const Consultants = () => {
           >
             <option value="">Select Specialty</option>
             {specialties.map((s) => (
-              <option key={s} value={s} className="capitalize">
-                {s}
+              <option key={s} value={s}>
+                {specialtyLabels[s]}
               </option>
             ))}
           </select>
+
+          <div className="grid grid-cols-2 gap-3">
+            <input
+              type="number"
+              name="years_experience"
+              placeholder="Years experience"
+              min="0"
+              value={formData.years_experience}
+              onChange={handleChange}
+              className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+            />
+            <input
+              type="text"
+              name="session_duration"
+              placeholder="Session time (e.g. 30 min)"
+              value={formData.session_duration}
+              onChange={handleChange}
+              className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+            />
+          </div>
+          <input
+            type="number"
+            name="fee"
+            placeholder="Fee (Rs per session)"
+            min="0"
+            value={formData.fee}
+            onChange={handleChange}
+            className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+          />
+
           <Button type="submit" className="w-full" disabled={uploading}>
             {uploading
               ? "Saving..."

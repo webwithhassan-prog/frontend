@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Star,
   ArrowRight,
@@ -15,12 +16,18 @@ import {
   Route,
   CalendarCheck,
   Video,
+  ChevronDown,
+  Activity,
+  Briefcase,
+  Clock,
+  Wallet,
 } from "lucide-react";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 import TestimonialsSlider from "../../components/common/TestimonialsSlider";
 // import InstagramReelsSlider from "../../components/common/InstagramReelsSlider";
 import AchievementMarquee from "../../components/common/AchievementMarquee";
+import api from "../../services/api";
 import heroBanner from "../../assets/cleanBanner.jpeg";
 
 const pillars = [
@@ -34,7 +41,7 @@ const pillars = [
     icon: Dumbbell,
     label: "Live Sessions",
     title: "Live Workout Sessions",
-    desc: "50–55 minutes, six days a week, a different workout every day — led by female trainers, recorded for you.",
+    desc: "50–55 minutes, six days a week, a different workout every day — led by female trainers. (recordings are also available)",
   },
   {
     icon: Stethoscope,
@@ -51,22 +58,12 @@ const stats = [
   { icon: Headset, value: "24/7", label: "Support" },
 ];
 
-const specialists = [
-  {
-    icon: Apple,
-    title: "Dietician",
-    desc: "Personalized nutrition guidance beyond the standard plan — allergies, conditions, real-life eating habits.",
-  },
-  {
-    icon: Heart,
-    title: "Gynecologist",
-    desc: "Private, judgment-free conversations about women's health — from a real professional, on your schedule.",
-  },
-  {
-    icon: Brain,
-    title: "Psychiatrist",
-    desc: "Mental health support that fits around your week, without the wait time of a walk-in clinic.",
-  },
+const consultationSpecialties = [
+  { value: "dietician", label: "Dietician", icon: Apple },
+  { value: "gynecologist", label: "Gynecologist", icon: Heart },
+  { value: "psychiatrist", label: "Psychiatrist", icon: Brain },
+  { value: "physiotherapist", label: "Physiotherapist", icon: Activity },
+  { value: "personal_trainer", label: "Fitness Trainer", icon: Dumbbell },
 ];
 
 const demoVideos = [
@@ -97,6 +94,28 @@ const steps = [
 ];
 
 const Home = () => {
+  const [isSpecialtyOpen, setIsSpecialtyOpen] = useState(false);
+  const [selectedSpecialty, setSelectedSpecialty] = useState(null);
+  const [consultants, setConsultants] = useState([]);
+  const [loadingConsultants, setLoadingConsultants] = useState(false);
+
+  const handleSelectSpecialty = async (specialty) => {
+    setSelectedSpecialty(specialty);
+    setIsSpecialtyOpen(false);
+    setLoadingConsultants(true);
+    try {
+      const res = await api.get("/consultants/public");
+      setConsultants(
+        res.data.filter((c) => c.specialty === specialty.value),
+      );
+    } catch (err) {
+      console.error(err);
+      setConsultants([]);
+    } finally {
+      setLoadingConsultants(false);
+    }
+  };
+
   return (
     <div className="overflow-hidden">
       <AchievementMarquee />
@@ -177,7 +196,11 @@ const Home = () => {
                   </Button>
                   <Button
                     variant="secondary"
-                    onClick={() => (window.location.href = "/timetable")}
+                    onClick={() =>
+                      document
+                        .getElementById("how-it-works")
+                        ?.scrollIntoView({ behavior: "smooth" })
+                    }
                   >
                     <span className="flex items-center gap-2">
                       How it works <ArrowRight size={16} />
@@ -309,7 +332,7 @@ const Home = () => {
         </div>
       </section>
       {/* How it works — real sequence, numbers earn their place */}
-      <section className="py-20">
+      <section id="how-it-works" className="py-20">
         <div className="max-w-6xl mx-auto px-6">
           <motion.h2
             className="font-display text-2xl md:text-3xl text-brand-blue text-center mb-14"
@@ -365,50 +388,131 @@ const Home = () => {
             </h2>
             <p className="text-brand-blue/70 leading-relaxed">
               Group classes cover a lot — but some questions need a private
-              room. Book a 1-on-1 with a real professional, no package required,
-              and no algorithm deciding who you get matched with.
+              room. Book a 1-on-1 with a real professional.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {specialists.map((s, i) => (
-              <motion.div
-                key={s.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
+          <div className="max-w-lg mx-auto">
+            <div className="relative flex justify-center mb-8">
+              <button
+                onClick={() => setIsSpecialtyOpen(!isSpecialtyOpen)}
+                className="flex items-center gap-2 bg-brand-orange text-white font-semibold px-8 py-3.5 rounded-full shadow-lg hover:bg-brand-orange-dark transition-colors"
               >
-                <Card className="h-full text-center">
-                  <div className="inline-flex bg-brand-blue-pale rounded-full p-3 mb-4">
-                    <s.icon className="text-brand-blue" size={22} />
-                  </div>
-                  <h3 className="font-display text-brand-blue text-base mb-2">
-                    {s.title}
-                  </h3>
-                  <p className="text-brand-blue/70 text-sm leading-relaxed">
-                    {s.desc}
-                  </p>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
+                Book a Consultation
+                <ChevronDown
+                  size={18}
+                  className={`transition-transform ${isSpecialtyOpen ? "rotate-180" : ""}`}
+                />
+              </button>
 
-          <motion.div
-            className="flex flex-col md:flex-row items-center justify-center gap-4 text-center"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-          >
-            <p className="text-brand-blue/60 text-sm">
-              Tell us who you'd like to speak with and a time that works — we'll
-              confirm the rest.
-            </p>
-            <Button onClick={() => (window.location.href = "/consultation")}>
-              Book a Consultation
-            </Button>
-          </motion.div>
+              <AnimatePresence>
+                {isSpecialtyOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setIsSpecialtyOpen(false)}
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full mt-3 w-72 bg-white rounded-2xl shadow-lg border border-brand-blue-pale py-2 z-20"
+                    >
+                      {consultationSpecialties.map((s) => (
+                        <button
+                          key={s.value}
+                          onClick={() => handleSelectSpecialty(s)}
+                          className="flex items-center gap-3 w-full text-left px-5 py-3 text-sm text-brand-blue hover:bg-brand-blue-pale transition-colors"
+                        >
+                          <s.icon size={16} className="text-brand-orange" />
+                          {s.label}
+                        </button>
+                      ))}
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {selectedSpecialty && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                <p className="text-brand-blue/60 text-xs uppercase tracking-wide text-center mb-4">
+                  Available {selectedSpecialty.label}s
+                </p>
+                {loadingConsultants ? (
+                  <p className="text-brand-blue/60 text-sm text-center">
+                    Loading...
+                  </p>
+                ) : consultants.length === 0 ? (
+                  <p className="text-brand-blue/60 text-sm text-center">
+                    No {selectedSpecialty.label.toLowerCase()}s available
+                    right now — check back soon.
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {consultants.map((c) => (
+                      <Card
+                        key={c._id}
+                        className="flex flex-col sm:flex-row sm:items-center gap-4"
+                      >
+                        <div className="w-14 h-14 rounded-full bg-brand-blue-pale overflow-hidden flex items-center justify-center shrink-0">
+                          {c.photo_url ? (
+                            <img
+                              src={c.photo_url}
+                              alt={c.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <selectedSpecialty.icon
+                              className="text-brand-blue"
+                              size={22}
+                            />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-display text-brand-blue text-sm mb-1">
+                            {c.name}
+                          </h3>
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-brand-blue/60">
+                            {c.years_experience && (
+                              <span className="flex items-center gap-1">
+                                <Briefcase size={12} /> {c.years_experience}{" "}
+                                yrs experience
+                              </span>
+                            )}
+                            {c.session_duration && (
+                              <span className="flex items-center gap-1">
+                                <Clock size={12} /> {c.session_duration}
+                              </span>
+                            )}
+                            {c.fee && (
+                              <span className="flex items-center gap-1">
+                                <Wallet size={12} /> Rs{" "}
+                                {c.fee.toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() =>
+                            (window.location.href = "/consultation")
+                          }
+                        >
+                          Book
+                        </Button>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </div>
         </div>
       </section>
 

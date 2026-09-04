@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
+import toast from "react-hot-toast";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 
@@ -21,8 +22,11 @@ const ForgotPassword = () => {
         { email },
       );
       setMessage(res.data.message);
+      toast.success(res.data.message);
     } catch (err) {
-      setError(err.response?.data?.message || "Something went wrong");
+      const msg = err.response?.data?.message || "Something went wrong";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }

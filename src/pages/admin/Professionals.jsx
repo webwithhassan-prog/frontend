@@ -22,6 +22,7 @@ const specialtyLabels = {
   dietician: "Dietician",
   gynecologist: "Gynecologist",
   psychiatrist: "Psychiatrist",
+  physiotherapist: "Physiotherapist",
   personal_trainer: "Personal Trainer",
   other: "Other",
 };
@@ -36,6 +37,7 @@ const Professionals = () => {
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [offerTerms, setOfferTerms] = useState("");
+  const [offerFee, setOfferFee] = useState("");
 
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [selectedConsultation, setSelectedConsultation] = useState(null);
@@ -74,6 +76,7 @@ const Professionals = () => {
   const openOfferModal = (application) => {
     setSelectedApplication(application);
     setOfferTerms("");
+    setOfferFee("");
     setIsOfferModalOpen(true);
   };
 
@@ -81,6 +84,7 @@ const Professionals = () => {
     e.preventDefault();
     await api.put(`/applications/${selectedApplication._id}/approve`, {
       offer_terms: offerTerms,
+      fee: offerFee ? Number(offerFee) : undefined,
     });
     setIsOfferModalOpen(false);
     fetchData();
@@ -355,6 +359,14 @@ const Professionals = () => {
             onChange={(e) => setOfferTerms(e.target.value)}
             required
             rows={4}
+            className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+          />
+          <input
+            type="number"
+            placeholder="Consultation fee (Rs per session) — shown to clients"
+            min="0"
+            value={offerFee}
+            onChange={(e) => setOfferFee(e.target.value)}
             className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
           />
           <Button type="submit" className="w-full">

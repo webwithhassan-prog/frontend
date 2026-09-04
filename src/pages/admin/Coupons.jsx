@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Pencil, Trash2, Plus } from "lucide-react";
+import toast from "react-hot-toast";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
@@ -84,24 +85,38 @@ const Coupons = () => {
     try {
       if (editingId) {
         await api.put(`/coupons/${editingId}`, payload);
+        toast.success("Coupon updated");
       } else {
         await api.post("/coupons", payload);
+        toast.success("Coupon created");
       }
       setIsModalOpen(false);
       fetchData();
     } catch (err) {
-      setFormError(err.response?.data?.message || "Something went wrong.");
+      const msg = err.response?.data?.message || "Something went wrong.";
+      setFormError(msg);
+      toast.error(msg);
     }
   };
 
   const handleDelete = async (id) => {
-    await api.delete(`/coupons/${id}`);
-    fetchData();
+    try {
+      await api.delete(`/coupons/${id}`);
+      toast.success("Coupon deleted");
+      fetchData();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete coupon");
+    }
   };
 
   const toggleActive = async (coupon) => {
-    await api.put(`/coupons/${coupon._id}`, { active: !coupon.active });
-    fetchData();
+    try {
+      await api.put(`/coupons/${coupon._id}`, { active: !coupon.active });
+      toast.success(coupon.active ? "Coupon turned off" : "Coupon turned on");
+      fetchData();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update coupon");
+    }
   };
 
   return (

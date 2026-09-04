@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
+import toast from "react-hot-toast";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -116,7 +117,9 @@ const Signup = () => {
 
       navigate("/client");
     } catch (err) {
-      setError(err.response?.data?.message || "Signup failed");
+      const msg = err.response?.data?.message || "Signup failed";
+      setError(msg);
+      toast.error(msg);
     }
   };
 

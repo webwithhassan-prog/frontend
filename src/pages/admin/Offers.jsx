@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Pencil, Trash2, Plus } from "lucide-react";
+import toast from "react-hot-toast";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
@@ -75,23 +76,39 @@ const Offers = () => {
       ...formData,
       discount_percent: Number(formData.discount_percent) || 0,
     };
-    if (editingId) {
-      await api.put(`/offers/${editingId}`, payload);
-    } else {
-      await api.post("/offers", payload);
+    try {
+      if (editingId) {
+        await api.put(`/offers/${editingId}`, payload);
+        toast.success("Offer updated");
+      } else {
+        await api.post("/offers", payload);
+        toast.success("Offer created");
+      }
+      setIsModalOpen(false);
+      fetchData();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Something went wrong.");
     }
-    setIsModalOpen(false);
-    fetchData();
   };
 
   const handleDelete = async (id) => {
-    await api.delete(`/offers/${id}`);
-    fetchData();
+    try {
+      await api.delete(`/offers/${id}`);
+      toast.success("Offer deleted");
+      fetchData();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete offer");
+    }
   };
 
   const toggleActive = async (offer) => {
-    await api.put(`/offers/${offer._id}`, { active: !offer.active });
-    fetchData();
+    try {
+      await api.put(`/offers/${offer._id}`, { active: !offer.active });
+      toast.success(offer.active ? "Offer turned off" : "Offer turned on");
+      fetchData();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update offer");
+    }
   };
 
   return (

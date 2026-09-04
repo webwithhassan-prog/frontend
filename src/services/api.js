@@ -13,4 +13,19 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// A client's token can outlive an admin banning them mid-session — force
+// them out immediately if the backend reports the account as banned.
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response?.data?.banned) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("client_id");
+      window.location.href = "/login";
+    }
+    return Promise.reject(err);
+  },
+);
+
 export default api;
