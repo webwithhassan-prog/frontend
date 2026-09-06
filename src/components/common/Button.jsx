@@ -28,7 +28,7 @@ const Button = ({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`${base} ${sizes[size]} ${variants[variant]} ${disabled ? "opacity-50 cursor-not-allowed" : ""} ${className}`}
+      className={`${base} ${sizes[size]} ${variants[variant]} ${disabled ? "cursor-not-allowed" : ""} ${className}`}
       whileHover={
         disabled
           ? {}
@@ -36,7 +36,7 @@ const Button = ({
       }
       whileTap={disabled ? {} : { scale: 0.95 }}
       initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={{ opacity: disabled ? 0.5 : 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
       {children}

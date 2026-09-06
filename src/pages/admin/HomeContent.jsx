@@ -101,10 +101,10 @@ const VideoManager = ({ endpoint, title, description, aspect }) => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
         <h2 className="text-lg font-bold text-brand-blue">{title}</h2>
-        <Button onClick={openAddModal}>
-          <span className="flex items-center gap-2">
+        <Button onClick={openAddModal} className="self-start sm:self-auto">
+          <span className="flex items-center gap-2 whitespace-nowrap">
             <Plus size={16} /> Add Video
           </span>
         </Button>
@@ -265,10 +265,10 @@ const TestimonialsManager = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
         <h2 className="text-lg font-bold text-brand-blue">Testimonials</h2>
-        <Button onClick={openAddModal}>
-          <span className="flex items-center gap-2">
+        <Button onClick={openAddModal} className="self-start sm:self-auto">
+          <span className="flex items-center gap-2 whitespace-nowrap">
             <Plus size={16} /> Add Testimonial
           </span>
         </Button>

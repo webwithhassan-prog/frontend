@@ -24,6 +24,7 @@ const specialties = [
   "psychiatrist",
   "physiotherapist",
   "personal_trainer",
+  "other",
 ];
 const specialtyLabels = {
   dietician: "Dietician",
@@ -31,6 +32,7 @@ const specialtyLabels = {
   psychiatrist: "Psychiatrist",
   physiotherapist: "Physiotherapist",
   personal_trainer: "Fitness Trainer",
+  other: "Other",
 };
 
 const CLOUDINARY_CLOUD_NAME = "zyfxigcj";
