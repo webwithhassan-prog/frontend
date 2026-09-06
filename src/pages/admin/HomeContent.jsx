@@ -405,7 +405,8 @@ const HomeContent = () => {
         story testimonials shown on the public Home page.
       </p>
 
-      <div className="flex gap-2 border-b border-brand-blue-pale mb-8 overflow-x-auto">
+      <div className="relative mb-8">
+        <div className="flex gap-2 border-b border-brand-blue-pale overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -430,6 +431,8 @@ const HomeContent = () => {
             )}
           </button>
         ))}
+        </div>
+        <div className="pointer-events-none absolute right-0 top-0 bottom-1 w-8 bg-gradient-to-l from-brand-blue-pale to-transparent" />
       </div>
 
       {activeTab === "transformations" && (
