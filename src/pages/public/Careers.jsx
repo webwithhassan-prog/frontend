@@ -106,9 +106,13 @@ const Careers = () => {
             animate={{ opacity: 1, scale: 1 }}
           >
             <Check size={40} className="mx-auto text-brand-orange mb-4" />
-            <p className="text-brand-blue font-semibold">
-              Thanks for applying! We'll review your application and get back to
-              you.
+            <p className="text-brand-blue font-semibold mb-1">
+              Application Received
+            </p>
+            <p className="text-brand-blue/70 text-sm max-w-sm mx-auto">
+              Thank you for your interest in joining Fitness Zone. Our team
+              will review your credentials and experience, and will contact
+              you using the details provided if your profile is shortlisted.
             </p>
           </motion.div>
         ) : (
