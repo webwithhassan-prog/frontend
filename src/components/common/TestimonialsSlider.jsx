@@ -1,16 +1,26 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
-const images = Object.values(
-  import.meta.glob("../../assets/testimonials/*.{jpg,jpeg,png,JPG,JPEG,PNG}", {
-    eager: true,
-    import: "default",
-  }),
-);
+import api from "../../services/api";
 
 const TestimonialsSlider = () => {
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const res = await api.get("/testimonials/public");
+        setImages(res.data.map((t) => t.image_url));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTestimonials();
+  }, []);
 
   useEffect(() => {
     if (images.length <= 1) return;
@@ -18,12 +28,14 @@ const TestimonialsSlider = () => {
       setIndex((prev) => (prev + 1) % images.length);
     }, 4000);
     return () => clearInterval(timer);
-  }, []);
+  }, [images.length]);
+
+  if (loading) return null;
 
   if (images.length === 0) {
     return (
-      <p className="text-center text-brand-blue/50 text-sm">
-        Add testimonial images to src/assets/testimonials/ to show them here.
+      <p className="text-center text-white/60 text-sm">
+        No success stories added yet — check back soon.
       </p>
     );
   }

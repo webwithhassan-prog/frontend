@@ -215,10 +215,14 @@ const Consultation = () => {
                     <Button
                       size="sm"
                       onClick={() => handleBook(c)}
-                      disabled={bookingId === c._id}
+                      disabled={bookingId === c._id || !c.fee}
                       className="shrink-0"
                     >
-                      {bookingId === c._id ? "Redirecting..." : "Book"}
+                      {bookingId === c._id
+                        ? "Redirecting..."
+                        : !c.fee
+                          ? "Fee not set"
+                          : "Book"}
                     </Button>
                   </Card>
                 ))}

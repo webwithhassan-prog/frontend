@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -70,11 +70,14 @@ const consultationSpecialties = [
   { value: "personal_trainer", label: "Fitness Trainer", icon: Dumbbell },
 ];
 
-const demoVideos = [
-  { id: "vtxAyruLOX4", title: "Session Demo" },
-  { id: "1bze7Y6_UaM", title: "Session Demo" },
-  { id: "qpBVpOgzB1w", title: "Session Demo" },
-];
+const getYoutubeEmbedSrc = (link) => {
+  if (!link) return "";
+  const match = link.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/,
+  );
+  const videoId = match ? match[1] : link;
+  return `https://www.youtube.com/embed/${videoId}`;
+};
 
 const steps = [
   {
@@ -103,8 +106,21 @@ const Home = () => {
   const [consultants, setConsultants] = useState([]);
   const [loadingConsultants, setLoadingConsultants] = useState(false);
   const [bookingId, setBookingId] = useState(null);
+  const [demoVideos, setDemoVideos] = useState([]);
   const navigate = useNavigate();
   const { role } = useAuth();
+
+  useEffect(() => {
+    const fetchDemoVideos = async () => {
+      try {
+        const res = await api.get("/demo-videos/public");
+        setDemoVideos(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchDemoVideos();
+  }, []);
 
   const handleSelectSpecialty = async (specialty) => {
     setSelectedSpecialty(specialty);
@@ -322,6 +338,7 @@ const Home = () => {
       </section>
 
       {/* Demo Videos */}
+      {demoVideos.length > 0 && (
       <section className="bg-brand-blue py-20">
         <div className="max-w-6xl mx-auto px-6">
           <motion.h2
@@ -339,7 +356,7 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {demoVideos.map((video, i) => (
               <motion.div
-                key={video.id}
+                key={video._id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
@@ -348,7 +365,7 @@ const Home = () => {
                 <Card>
                   <div className="aspect-video mb-3 rounded-lg overflow-hidden bg-white">
                     <iframe
-                      src={`https://www.youtube.com/embed/${video.id}`}
+                      src={getYoutubeEmbedSrc(video.youtube_link)}
                       title={video.title}
                       className="w-full h-full"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -364,6 +381,7 @@ const Home = () => {
           </div>
         </div>
       </section>
+      )}
       {/* How it works — real sequence, numbers earn their place */}
       <section id="how-it-works" className="py-20">
         <div className="max-w-6xl mx-auto px-6">
@@ -547,10 +565,14 @@ const Home = () => {
                         <Button
                           size="sm"
                           onClick={() => handleBook(c)}
-                          disabled={bookingId === c._id}
+                          disabled={bookingId === c._id || !c.fee}
                           className="shrink-0"
                         >
-                          {bookingId === c._id ? "Redirecting..." : "Book"}
+                          {bookingId === c._id
+                            ? "Redirecting..."
+                            : !c.fee
+                              ? "Fee not set"
+                              : "Book"}
                         </Button>
                       </Card>
                     ))}

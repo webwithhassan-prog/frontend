@@ -72,7 +72,10 @@ const Login = () => {
             window.location.href = checkoutRes.data.url;
             return;
           } catch (checkoutErr) {
-            // If checkout fails, fall through
+            toast.error(
+              checkoutErr.response?.data?.message ||
+                "We couldn't start checkout for your package. Please try again from the Packages page.",
+            );
           }
         }
       }
@@ -92,7 +95,10 @@ const Login = () => {
           window.location.href = ebookCheckoutRes.data.url;
           return;
         } catch (checkoutErr) {
-          // If checkout fails, fall through
+          toast.error(
+            checkoutErr.response?.data?.message ||
+              "We couldn't start checkout for your e-book. Please try again from the E-Books page.",
+          );
         }
       }
 
@@ -113,7 +119,10 @@ const Login = () => {
           window.location.href = consultationCheckoutRes.data.url;
           return;
         } catch (checkoutErr) {
-          // If checkout fails, fall through to profile
+          toast.error(
+            checkoutErr.response?.data?.message ||
+              "We couldn't start checkout for your consultation. Please try booking again.",
+          );
         }
       }
 

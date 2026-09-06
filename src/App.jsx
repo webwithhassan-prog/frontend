@@ -37,6 +37,8 @@ import Timetable from "./pages/admin/Timetable";
 import Professionals from "./pages/admin/Professionals";
 import Sales from "./pages/admin/Sales";
 import Content from "./pages/admin/Content";
+import Testimonials from "./pages/admin/Testimonials";
+import DemoVideos from "./pages/admin/DemoVideos";
 import AdminEBooks from "./pages/admin/EBooks";
 import AdminOffers from "./pages/admin/Offers";
 import AdminCoupons from "./pages/admin/Coupons";
@@ -261,6 +263,8 @@ function AppRoutes() {
           <Route path="professionals" element={<Professionals />} />
           <Route path="sales" element={<Sales />} />
           <Route path="content" element={<Content />} />
+          <Route path="testimonials" element={<Testimonials />} />
+          <Route path="demo-videos" element={<DemoVideos />} />
           <Route path="ebooks" element={<AdminEBooks />} />
           <Route path="offers" element={<AdminOffers />} />
           <Route path="coupons" element={<AdminCoupons />} />
