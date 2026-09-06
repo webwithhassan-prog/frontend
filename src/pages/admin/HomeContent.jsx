@@ -20,6 +20,15 @@ const getYoutubeEmbedSrc = (link) => {
   return `https://www.youtube.com/embed/${videoId}`;
 };
 
+const formatUploadedAt = (isoDate) => {
+  if (!isoDate) return null;
+  return new Date(isoDate).toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+};
+
 const tabs = [
   { key: "transformations", label: "Transformation Videos" },
   { key: "demo-videos", label: "Demo Sessions" },
@@ -28,7 +37,7 @@ const tabs = [
 
 const emptyVideoForm = { title: "", youtube_link: "" };
 
-const VideoManager = ({ endpoint, title, description, aspect }) => {
+const VideoManager = ({ endpoint, title, description, aspect, onCountChange }) => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,6 +50,7 @@ const VideoManager = ({ endpoint, title, description, aspect }) => {
     try {
       const res = await api.get(`/${endpoint}`);
       setVideos(res.data);
+      onCountChange?.(res.data.length);
     } catch (err) {
       console.error(err);
     } finally {
@@ -130,9 +140,14 @@ const VideoManager = ({ endpoint, title, description, aspect }) => {
                 />
               </div>
               {video.title && (
-                <h3 className="text-brand-blue font-bold text-sm mb-3">
+                <h3 className="text-brand-blue font-bold text-sm mb-1">
                   {video.title}
                 </h3>
+              )}
+              {video.createdAt && (
+                <p className="text-brand-blue-light text-xs mb-3">
+                  Uploaded at: {formatUploadedAt(video.createdAt)}
+                </p>
               )}
               <div className="flex gap-3">
                 <button
@@ -185,7 +200,7 @@ const VideoManager = ({ endpoint, title, description, aspect }) => {
   );
 };
 
-const TestimonialsManager = () => {
+const TestimonialsManager = ({ onCountChange }) => {
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -197,6 +212,7 @@ const TestimonialsManager = () => {
     try {
       const res = await api.get("/testimonials");
       setTestimonials(res.data);
+      onCountChange?.(res.data.length);
     } catch (err) {
       console.error(err);
     } finally {
@@ -294,6 +310,11 @@ const TestimonialsManager = () => {
                   className="w-full h-full object-cover"
                 />
               </div>
+              {t.createdAt && (
+                <p className="text-brand-blue-light text-[11px] text-center mb-1">
+                  Uploaded at: {formatUploadedAt(t.createdAt)}
+                </p>
+              )}
               <button
                 onClick={() => handleDelete(t._id)}
                 className="w-full flex items-center justify-center gap-2 text-xs text-red-400 hover:text-red-600 py-1"
@@ -345,6 +366,30 @@ const TestimonialsManager = () => {
 
 const HomeContent = () => {
   const [activeTab, setActiveTab] = useState("transformations");
+  const [counts, setCounts] = useState({
+    transformations: null,
+    "demo-videos": null,
+    testimonials: null,
+  });
+
+  const setCount = (key) => (count) =>
+    setCounts((prev) => ({ ...prev, [key]: count }));
+
+  useEffect(() => {
+    const endpoints = {
+      transformations: "transformation-videos",
+      "demo-videos": "demo-videos",
+      testimonials: "testimonials",
+    };
+    Object.entries(endpoints).forEach(async ([key, endpoint]) => {
+      try {
+        const res = await api.get(`/${endpoint}`);
+        setCount(key)(res.data.length);
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  }, []);
 
   return (
     <div>
@@ -365,13 +410,24 @@ const HomeContent = () => {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`px-4 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
               activeTab === tab.key
                 ? "border-brand-orange text-brand-orange"
                 : "border-transparent text-brand-blue-light hover:text-brand-blue"
             }`}
           >
             {tab.label}
+            {counts[tab.key] != null && (
+              <span
+                className={`text-xs font-bold rounded-full px-2 py-0.5 ${
+                  activeTab === tab.key
+                    ? "bg-brand-orange/10 text-brand-orange"
+                    : "bg-brand-blue-pale text-brand-blue-light"
+                }`}
+              >
+                {counts[tab.key]}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -382,6 +438,7 @@ const HomeContent = () => {
           title="Transformation Videos"
           description='These show in the "Real Transformations" section on the Home page. Paste any YouTube link, including Shorts.'
           aspect="portrait"
+          onCountChange={setCount("transformations")}
         />
       )}
       {activeTab === "demo-videos" && (
@@ -390,9 +447,12 @@ const HomeContent = () => {
           title="Demo Session Videos"
           description='These show in the "See a Session in Action" section on the Home page.'
           aspect="landscape"
+          onCountChange={setCount("demo-videos")}
         />
       )}
-      {activeTab === "testimonials" && <TestimonialsManager />}
+      {activeTab === "testimonials" && (
+        <TestimonialsManager onCountChange={setCount("testimonials")} />
+      )}
     </div>
   );
 };
