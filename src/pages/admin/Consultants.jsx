@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
-import { Pencil, Trash2, Plus, Upload } from "lucide-react";
+import toast from "react-hot-toast";
+import { Pencil, Trash2, Plus, Upload, Ban, RotateCcw } from "lucide-react";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
@@ -146,6 +147,26 @@ const Consultants = () => {
     fetchConsultants();
   };
 
+  const handleBan = async (id) => {
+    try {
+      await api.put(`/consultants/${id}/ban`);
+      toast.success("Consultant banned");
+      fetchConsultants();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Could not ban consultant");
+    }
+  };
+
+  const handleUnban = async (id) => {
+    try {
+      await api.put(`/consultants/${id}/unban`);
+      toast.success("Consultant unbanned");
+      fetchConsultants();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Could not unban consultant");
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
@@ -168,14 +189,24 @@ const Consultants = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {consultants.map((consultant) => (
-            <Card key={consultant._id}>
-              <div className="w-14 h-14 rounded-full bg-brand-blue-pale overflow-hidden mb-3">
-                {consultant.photo_url && (
-                  <img
-                    src={consultant.photo_url}
-                    alt={consultant.name}
-                    className="w-full h-full object-cover"
-                  />
+            <Card
+              key={consultant._id}
+              className={consultant.banned ? "opacity-60" : ""}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="w-14 h-14 rounded-full bg-brand-blue-pale overflow-hidden">
+                  {consultant.photo_url && (
+                    <img
+                      src={consultant.photo_url}
+                      alt={consultant.name}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </div>
+                {consultant.banned && (
+                  <span className="text-xs font-semibold text-red-500 bg-red-50 px-2 py-1 rounded-full">
+                    Banned
+                  </span>
                 )}
               </div>
               <h3 className="text-brand-blue font-bold text-lg">
@@ -200,6 +231,23 @@ const Consultants = () => {
                 >
                   <Pencil size={18} />
                 </button>
+                {consultant.banned ? (
+                  <button
+                    onClick={() => handleUnban(consultant._id)}
+                    className="text-brand-blue-light hover:text-brand-blue"
+                    title="Unban"
+                  >
+                    <RotateCcw size={18} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleBan(consultant._id)}
+                    className="text-amber-500 hover:text-amber-600"
+                    title="Ban"
+                  >
+                    <Ban size={18} />
+                  </button>
+                )}
                 <button
                   onClick={() => handleDelete(consultant._id)}
                   className="text-red-400 hover:text-red-600"

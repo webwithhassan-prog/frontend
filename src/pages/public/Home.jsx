@@ -24,6 +24,7 @@ import {
   Clock,
   Wallet,
   UserRound,
+  MoreHorizontal,
 } from "lucide-react";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
@@ -67,6 +68,7 @@ const consultationSpecialties = [
   { value: "psychiatrist", label: "Psychiatrist", icon: Brain },
   { value: "physiotherapist", label: "Physiotherapist", icon: Activity },
   { value: "personal_trainer", label: "Fitness Trainer", icon: Dumbbell },
+  { value: "other", label: "Other", icon: MoreHorizontal },
 ];
 
 const getYoutubeEmbedSrc = (link) => {
@@ -481,7 +483,7 @@ const Home = () => {
             </p>
           </motion.div>
 
-          <div className="max-w-lg mx-auto">
+          <div className="max-w-4xl mx-auto">
             <div className="relative flex justify-center mb-8">
               <button
                 onClick={() => setIsSpecialtyOpen(!isSpecialtyOpen)}
@@ -543,13 +545,13 @@ const Home = () => {
                     right now — check back soon.
                   </p>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {consultants.map((c) => (
                       <Card
                         key={c._id}
-                        className="flex flex-col sm:flex-row sm:items-start gap-4"
+                        className="h-full flex flex-col text-center"
                       >
-                        <div className="w-14 h-14 rounded-full bg-brand-blue-pale overflow-hidden flex items-center justify-center shrink-0">
+                        <div className="w-20 h-20 rounded-full bg-brand-blue-pale overflow-hidden flex items-center justify-center mx-auto mb-4">
                           {c.photo_url ? (
                             <img
                               src={c.photo_url}
@@ -559,52 +561,48 @@ const Home = () => {
                           ) : (
                             <selectedSpecialty.icon
                               className="text-brand-blue"
-                              size={22}
+                              size={28}
                             />
                           )}
                         </div>
-                        <div className="flex-1">
-                          <h3 className="font-display text-brand-blue text-sm mb-1">
-                            {c.name}
-                          </h3>
-                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-brand-blue/60 mb-2">
-                            {c.years_experience && (
-                              <span className="flex items-center gap-1">
-                                <Briefcase size={12} /> {c.years_experience}{" "}
-                                yrs experience
-                              </span>
-                            )}
-                            {c.session_duration && (
-                              <span className="flex items-center gap-1">
-                                <Clock size={12} /> {c.session_duration}
-                              </span>
-                            )}
-                            {c.fee && (
-                              <span className="flex items-center gap-1">
-                                <Wallet size={12} /> Rs{" "}
-                                {c.fee.toLocaleString()}
-                              </span>
-                            )}
-                            {c.max_clients_per_session && (
-                              <span className="flex items-center gap-1">
-                                <UserRound size={12} /> Max{" "}
-                                {c.max_clients_per_session} client
-                                {c.max_clients_per_session > 1 ? "s" : ""}
-                                /session
-                              </span>
-                            )}
-                          </div>
-                          {c.bio && (
-                            <p className="text-brand-blue/70 text-xs leading-relaxed">
-                              {c.bio}
-                            </p>
+                        <h3 className="font-display text-brand-blue text-base mb-2">
+                          {c.name}
+                        </h3>
+                        <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-brand-blue/60 mb-3">
+                          {c.years_experience && (
+                            <span className="flex items-center gap-1">
+                              <Briefcase size={12} /> {c.years_experience} yrs
+                            </span>
+                          )}
+                          {c.session_duration && (
+                            <span className="flex items-center gap-1">
+                              <Clock size={12} /> {c.session_duration}
+                            </span>
+                          )}
+                          {c.fee && (
+                            <span className="flex items-center gap-1">
+                              <Wallet size={12} /> Rs {c.fee.toLocaleString()}
+                            </span>
+                          )}
+                          {c.max_clients_per_session && (
+                            <span className="flex items-center gap-1">
+                              <UserRound size={12} /> Max{" "}
+                              {c.max_clients_per_session} client
+                              {c.max_clients_per_session > 1 ? "s" : ""}
+                              /session
+                            </span>
                           )}
                         </div>
+                        {c.bio && (
+                          <p className="text-brand-blue/70 text-xs leading-relaxed mb-5 flex-1">
+                            {c.bio}
+                          </p>
+                        )}
                         <Button
                           size="sm"
                           onClick={() => handleBook(c)}
                           disabled={bookingId === c._id || !c.fee}
-                          className="shrink-0"
+                          className="w-full mt-auto"
                         >
                           {bookingId === c._id
                             ? "Redirecting..."
