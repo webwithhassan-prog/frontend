@@ -28,7 +28,6 @@ import {
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 import TestimonialsSlider from "../../components/common/TestimonialsSlider";
-// import InstagramReelsSlider from "../../components/common/InstagramReelsSlider";
 import AchievementMarquee from "../../components/common/AchievementMarquee";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
@@ -107,6 +106,7 @@ const Home = () => {
   const [loadingConsultants, setLoadingConsultants] = useState(false);
   const [bookingId, setBookingId] = useState(null);
   const [demoVideos, setDemoVideos] = useState([]);
+  const [transformationVideos, setTransformationVideos] = useState([]);
   const navigate = useNavigate();
   const { role } = useAuth();
 
@@ -120,6 +120,16 @@ const Home = () => {
       }
     };
     fetchDemoVideos();
+
+    const fetchTransformationVideos = async () => {
+      try {
+        const res = await api.get("/transformation-videos/public");
+        setTransformationVideos(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchTransformationVideos();
   }, []);
 
   const handleSelectSpecialty = async (specialty) => {
@@ -286,25 +296,53 @@ const Home = () => {
         </div>
       </section>
       {/* Transformations */}
-      {/*
-      <section className="py-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <motion.h2
-            className="font-display text-2xl md:text-3xl text-brand-blue text-center mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            REAL TRANSFORMATIONS
-          </motion.h2>
-          <p className="text-brand-blue/70 text-center max-w-xl mx-auto mb-14">
-            Straight from Instagram — real members, real results.
-          </p>
+      {transformationVideos.length > 0 && (
+        <section className="py-20">
+          <div className="max-w-6xl mx-auto px-6">
+            <motion.h2
+              className="font-display text-2xl md:text-3xl text-brand-blue text-center mb-4"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              REAL TRANSFORMATIONS
+            </motion.h2>
+            <p className="text-brand-blue/70 text-center max-w-xl mx-auto mb-14">
+              Real members, real results.
+            </p>
 
-          <InstagramReelsSlider />
-        </div>
-      </section>
-      */}
+            <div className="flex flex-wrap justify-center gap-6">
+              {transformationVideos.map((video, i) => (
+                <motion.div
+                  key={video._id}
+                  className="w-full max-w-[260px] sm:w-64"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                >
+                  <Card className="p-2">
+                    <div className="aspect-[9/16] rounded-xl overflow-hidden bg-brand-blue-pale">
+                      <iframe
+                        src={getYoutubeEmbedSrc(video.youtube_link)}
+                        title={video.title || "Transformation"}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                    {video.title && (
+                      <h3 className="font-display text-brand-blue text-sm mt-2 text-center">
+                        {video.title}
+                      </h3>
+                    )}
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
       {/* Pillars */}
       <section className="max-w-6xl mx-auto px-6 py-20">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

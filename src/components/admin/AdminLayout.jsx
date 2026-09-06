@@ -19,8 +19,7 @@ import {
   LogOut,
   Menu,
   X,
-  Quote,
-  Film,
+  Clapperboard,
 } from "lucide-react";
 
 const navItems = [
@@ -33,8 +32,7 @@ const navItems = [
   { label: "Professionals", to: "/admin/professionals", icon: Briefcase },
   { label: "Sales", to: "/admin/sales", icon: BarChart3 },
   { label: "Content", to: "/admin/content", icon: Video },
-  { label: "Testimonials", to: "/admin/testimonials", icon: Quote },
-  { label: "Demo Videos", to: "/admin/demo-videos", icon: Film },
+  { label: "Home Content", to: "/admin/home-content", icon: Clapperboard },
   { label: "E-Books", to: "/admin/ebooks", icon: BookOpen },
   { label: "Offers", to: "/admin/offers", icon: Megaphone },
   { label: "Coupons", to: "/admin/coupons", icon: Tag },
