@@ -12,6 +12,14 @@ const statusColors = {
   expired: "bg-red-100 text-red-700",
 };
 
+// Converts any ISO 3166-1 alpha-2 code (e.g. "PK") into its flag emoji via
+// the Unicode regional indicator symbols — works for every country, not
+// just a hardcoded shortlist.
+const countryCodeToFlag = (code) =>
+  code
+    ?.toUpperCase()
+    .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
+
 const Enrollments = () => {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -225,7 +233,14 @@ const Enrollments = () => {
                   animate={{ opacity: 1 }}
                 >
                   <td className="py-3 px-2 font-medium text-brand-blue">
-                    {client.name}
+                    <span className="inline-flex items-center gap-1.5">
+                      {client.country_code && (
+                        <span title={client.country}>
+                          {countryCodeToFlag(client.country_code) || "🌍"}
+                        </span>
+                      )}
+                      {client.name}
+                    </span>
                   </td>
                   <td className="py-3 px-2 text-brand-blue-light">
                     {client.phone_number}

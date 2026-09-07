@@ -224,7 +224,7 @@ const Consultants = () => {
                 {consultant.session_duration
                   ? ` · ${consultant.session_duration}`
                   : ""}
-                {consultant.fee ? ` · Rs ${consultant.fee.toLocaleString()}` : ""}
+                {consultant.fee ? ` · ₹${consultant.fee.toLocaleString("en-IN")}` : ""}
               </p>
               <div className="flex gap-3">
                 <button
@@ -338,7 +338,7 @@ const Consultants = () => {
             <input
               type="number"
               name="fee"
-              placeholder="Fee (Rs per session)"
+              placeholder="Fee (₹ per session)"
               min="0"
               value={formData.fee}
               onChange={handleChange}

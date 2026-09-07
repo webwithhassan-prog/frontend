@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Button from "./Button";
 import InstagramIcon from "./InstagramIcon";
+import CurrencySwitcher from "./CurrencySwitcher";
 import logo from "../../assets/logo.jpeg";
 import { useAuth } from "../../context/AuthContext";
 
@@ -157,6 +158,7 @@ const Navbar = () => {
 
           {/* Desktop actions */}
           <div className="hidden lg:flex items-center gap-4 pl-4 ml-2 border-l border-brand-blue-pale">
+            <CurrencySwitcher />
             <a
               href={whatsappLink}
               target="_blank"
@@ -374,6 +376,7 @@ const Navbar = () => {
               </div>
 
               <div className="flex items-center gap-6 mt-6">
+                <CurrencySwitcher />
                 <a
                   href={whatsappLink}
                   target="_blank"

@@ -8,6 +8,7 @@ import { useAuth } from "../../context/AuthContext";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 import { trackEvent } from "../../utils/analytics";
+import { useCurrency } from "../../context/CurrencyContext";
 
 const durations = [30, 90, 180];
 
@@ -55,6 +56,7 @@ const Plans = () => {
   const navigate = useNavigate();
   const { role } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { format } = useCurrency();
 
   const [couponInput, setCouponInput] = useState("");
   const [couponChecking, setCouponChecking] = useState(false);
@@ -84,10 +86,19 @@ const Plans = () => {
     const workout = plans.find(
       (p) => p.product_type === "workout" && p.duration_days === duration,
     );
+    const combo = plans.find(
+      (p) => p.product_type === "combo" && p.duration_days === duration,
+    );
 
     if (selectedType === "dietplan") return dietplan ? [dietplan] : [];
     if (selectedType === "workout") return workout ? [workout] : [];
-    if (selectedType === "combo") return [dietplan, workout].filter(Boolean);
+    // A dedicated combo plan (its own price + features) takes priority;
+    // falling back to summing Dietplan + Workout keeps older durations
+    // working before a combo price is set for them.
+    if (selectedType === "combo") {
+      if (combo) return [combo];
+      return [dietplan, workout].filter(Boolean);
+    }
     return [];
   };
 
@@ -289,6 +300,15 @@ const Plans = () => {
             const dietplan = selection.find(
               (p) => p.product_type === "dietplan",
             );
+            const isDedicatedCombo =
+              selectedType === "combo" &&
+              selection.length === 1 &&
+              selection[0].product_type === "combo";
+            const dietPlansIncluded = isDedicatedCombo
+              ? selection[0].diet_plans_included
+              : selectedType === "dietplan"
+                ? dietplan?.diet_plans_included
+                : null;
             const isMiddle = i === 1;
             const perDay =
               selection.length > 0 ? Math.round(total / duration) : null;
@@ -319,9 +339,7 @@ const Plans = () => {
                   </h3>
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-display text-3xl text-brand-blue">
-                      {selection.length > 0
-                        ? `Rs ${total.toLocaleString()}`
-                        : "—"}
+                      {selection.length > 0 ? format(total) : "—"}
                     </p>
                     {hasDiscount && (
                       <span className="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-full">
@@ -331,23 +349,22 @@ const Plans = () => {
                   </div>
                   {hasDiscount && (
                     <p className="text-sm text-brand-blue/40 line-through">
-                      Rs {originalTotal.toLocaleString()}
+                      {format(originalTotal)}
                     </p>
                   )}
                   {perDay && (
                     <p className="text-xs text-brand-blue/50 mb-4">
-                      ≈ Rs {perDay.toLocaleString()} / day
+                      ≈ {format(perDay)} / day
                     </p>
                   )}
 
-                  {selectedType === "dietplan" &&
-                    dietplan?.diet_plans_included && (
-                      <p className="text-sm text-brand-blue/70 mb-2">
-                        Includes {dietplan.diet_plans_included} diet plans
-                      </p>
-                    )}
+                  {dietPlansIncluded && (
+                    <p className="text-sm text-brand-blue/70 mb-2">
+                      Includes {dietPlansIncluded} diet plans
+                    </p>
+                  )}
 
-                  {selectedType === "combo" ? (
+                  {selectedType === "combo" && !isDedicatedCombo ? (
                     <div className="grid grid-cols-2 gap-4 my-4 flex-1">
                       <div className="pr-4 border-r border-brand-blue-pale">
                         <p className="text-[11px] font-bold text-brand-blue uppercase tracking-wide mb-2.5">
@@ -390,7 +407,10 @@ const Plans = () => {
                     </div>
                   ) : (
                     <ul className="space-y-2.5 my-4 flex-1">
-                      {(featuresByType[selectedType] || []).map((f) => (
+                      {(selection.length === 1 && selection[0].features?.length
+                        ? selection[0].features
+                        : featuresByType[selectedType] || []
+                      ).map((f) => (
                         <li
                           key={f}
                           className="flex items-start gap-2 text-sm text-brand-blue/70"

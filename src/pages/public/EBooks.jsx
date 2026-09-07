@@ -6,6 +6,7 @@ import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
+import { useCurrency } from "../../context/CurrencyContext";
 
 const EBooks = () => {
   const [ebooks, setEbooks] = useState([]);
@@ -13,6 +14,7 @@ const EBooks = () => {
   const [buyingId, setBuyingId] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { format } = useCurrency();
   const { role } = useAuth();
 
   useEffect(() => {
@@ -97,7 +99,7 @@ const EBooks = () => {
                   {ebook.description}
                 </p>
                 <p className="font-display text-xl text-brand-blue mb-4">
-                  Rs {ebook.price.toLocaleString()}
+                  {format(ebook.price)}
                 </p>
                 <Button
                   onClick={() => handleBuy(ebook)}

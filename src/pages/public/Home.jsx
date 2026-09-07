@@ -32,6 +32,7 @@ import TestimonialsSlider from "../../components/common/TestimonialsSlider";
 import AchievementMarquee from "../../components/common/AchievementMarquee";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
+import { useCurrency } from "../../context/CurrencyContext";
 import heroBanner from "../../assets/cleanBanner.jpeg";
 
 const pillars = [
@@ -111,6 +112,7 @@ const Home = () => {
   const [transformationVideos, setTransformationVideos] = useState([]);
   const navigate = useNavigate();
   const { role } = useAuth();
+  const { format } = useCurrency();
 
   useEffect(() => {
     const fetchDemoVideos = async () => {
@@ -581,7 +583,7 @@ const Home = () => {
                           )}
                           {c.fee && (
                             <span className="flex items-center gap-1">
-                              <Wallet size={12} /> Rs {c.fee.toLocaleString()}
+                              <Wallet size={12} /> {format(c.fee)}
                             </span>
                           )}
                           {c.max_clients_per_session && (

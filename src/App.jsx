@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { CurrencyProvider } from "./context/CurrencyContext";
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
 import OfferPopup from "./components/common/OfferPopup";
@@ -276,6 +277,7 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
+      <CurrencyProvider>
       <Toaster
         position="top-center"
         toastOptions={{
@@ -296,6 +298,7 @@ function App() {
         }}
       />
       <AppRoutes />
+      </CurrencyProvider>
     </AuthProvider>
   );
 }

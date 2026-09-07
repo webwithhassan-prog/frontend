@@ -363,7 +363,7 @@ const Professionals = () => {
           />
           <input
             type="number"
-            placeholder="Consultation fee (Rs per session) — shown to clients"
+            placeholder="Consultation fee (₹ per session) — shown to clients"
             min="0"
             value={offerFee}
             onChange={(e) => setOfferFee(e.target.value)}
@@ -383,7 +383,7 @@ const Professionals = () => {
         <form onSubmit={handleRecordPayment} className="space-y-4">
           <input
             type="number"
-            placeholder="Amount (Rs)"
+            placeholder="Amount (₹)"
             value={paymentAmount}
             onChange={(e) => setPaymentAmount(e.target.value)}
             required
@@ -402,7 +402,7 @@ const Professionals = () => {
           <p className="text-sm text-brand-blue-light">
             Platform commission (15%):{" "}
             <span className="font-semibold text-brand-blue">
-              Rs {commission}
+              ₹{commission}
             </span>
           </p>
 

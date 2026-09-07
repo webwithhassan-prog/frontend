@@ -8,7 +8,12 @@ import Button from "../../components/common/Button";
 const categories = ["plan", "consultation", "package"];
 
 const Sales = () => {
-  const [summary, setSummary] = useState({ daily_total: 0, monthly_total: 0 });
+  const [summary, setSummary] = useState({
+    daily_total: 0,
+    monthly_total: 0,
+    daily_total_usd: 0,
+    monthly_total_usd: 0,
+  });
   const [category, setCategory] = useState("");
   const [searchResults, setSearchResults] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -58,16 +63,30 @@ const Sales = () => {
         <Card>
           <p className="text-brand-blue-light text-sm mb-1">Today's Sales</p>
           <p className="text-3xl font-bold text-brand-blue">
-            {loading ? "—" : `Rs ${summary.daily_total.toLocaleString()}`}
+            {loading
+              ? "—"
+              : `$${summary.daily_total_usd.toLocaleString("en-US", { maximumFractionDigits: 2 })}`}
           </p>
+          {!loading && (
+            <p className="text-brand-blue-light text-xs mt-1">
+              ₹{summary.daily_total.toLocaleString("en-IN")} base price
+            </p>
+          )}
         </Card>
         <Card>
           <p className="text-brand-blue-light text-sm mb-1">
             This Month's Sales
           </p>
           <p className="text-3xl font-bold text-brand-blue">
-            {loading ? "—" : `Rs ${summary.monthly_total.toLocaleString()}`}
+            {loading
+              ? "—"
+              : `$${summary.monthly_total_usd.toLocaleString("en-US", { maximumFractionDigits: 2 })}`}
           </p>
+          {!loading && (
+            <p className="text-brand-blue-light text-xs mt-1">
+              ₹{summary.monthly_total.toLocaleString("en-IN")} base price
+            </p>
+          )}
         </Card>
       </div>
 
@@ -102,15 +121,19 @@ const Sales = () => {
       {searchResults && !searching && (
         <Card className="overflow-x-auto">
           <p className="text-brand-blue font-semibold mb-4">
-            Total: Rs {searchResults.total.toLocaleString()} (
-            {searchResults.count} entries)
+            Total: $
+            {searchResults.total_usd.toLocaleString("en-US", {
+              maximumFractionDigits: 2,
+            })}{" "}
+            ({searchResults.count} entries)
           </p>
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-brand-blue border-b border-brand-blue-pale">
                 <th className="py-3 px-2">Date</th>
                 <th className="py-3 px-2">Category</th>
-                <th className="py-3 px-2">Amount</th>
+                <th className="py-3 px-2">Amount Paid</th>
+                <th className="py-3 px-2">Base Price</th>
               </tr>
             </thead>
             <tbody>
@@ -128,7 +151,13 @@ const Sales = () => {
                     {log.category}
                   </td>
                   <td className="py-3 px-2 text-brand-blue font-medium">
-                    Rs {log.amount.toLocaleString()}
+                    $
+                    {log.amount_usd.toLocaleString("en-US", {
+                      maximumFractionDigits: 2,
+                    })}
+                  </td>
+                  <td className="py-3 px-2 text-brand-blue-light">
+                    ₹{log.amount.toLocaleString("en-IN")}
                   </td>
                 </motion.tr>
               ))}

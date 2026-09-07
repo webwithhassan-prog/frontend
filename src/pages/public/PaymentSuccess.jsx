@@ -109,7 +109,7 @@ const PaymentSuccess = () => {
                 >
                   <span className="text-brand-blue">{item.name}</span>
                   <span className="text-brand-blue font-medium">
-                    Rs {item.amount.toLocaleString()}
+                    ₹{item.amount.toLocaleString("en-IN")}
                   </span>
                 </div>
               ))}
@@ -120,7 +120,7 @@ const PaymentSuccess = () => {
                 TOTAL
               </span>
               <span className="font-display text-brand-blue text-lg">
-                Rs {receipt.total.toLocaleString()}
+                ₹{receipt.total.toLocaleString("en-IN")}
               </span>
             </div>
 

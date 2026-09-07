@@ -98,7 +98,7 @@ const EBooks = () => {
                 {ebook.description}
               </p>
               <p className="text-brand-blue font-semibold mb-4">
-                Rs {ebook.price.toLocaleString()}
+                ₹{ebook.price.toLocaleString("en-IN")}
               </p>
               <div className="flex gap-3">
                 <button

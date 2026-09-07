@@ -20,6 +20,7 @@ import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
+import { useCurrency } from "../../context/CurrencyContext";
 
 const consultationSpecialties = [
   { value: "dietician", label: "Dietician", icon: Apple },
@@ -38,6 +39,7 @@ const Consultation = () => {
   const [bookingId, setBookingId] = useState(null);
   const navigate = useNavigate();
   const { role } = useAuth();
+  const { format } = useCurrency();
 
   const handleSelectSpecialty = async (specialty) => {
     setSelectedSpecialty(specialty);
@@ -192,7 +194,7 @@ const Consultation = () => {
                       )}
                       {c.fee && (
                         <span className="flex items-center gap-1">
-                          <Wallet size={12} /> Rs {c.fee.toLocaleString()}
+                          <Wallet size={12} /> {format(c.fee)}
                         </span>
                       )}
                       {c.max_clients_per_session && (
