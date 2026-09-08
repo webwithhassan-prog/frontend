@@ -1,9 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Ban, ShieldCheck, Trash2, MoreVertical } from "lucide-react";
+import {
+  Search,
+  X,
+  Ban,
+  ShieldCheck,
+  Trash2,
+  MoreVertical,
+  UserPlus,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
+import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 
 const statusColors = {
@@ -11,6 +26,8 @@ const statusColors = {
   paused: "bg-yellow-100 text-yellow-700",
   expired: "bg-red-100 text-red-700",
 };
+
+const PAGE_SIZE = 15;
 
 // Converts any ISO 3166-1 alpha-2 code (e.g. "PK") into its flag emoji via
 // the Unicode regional indicator symbols — works for every country, not
@@ -20,12 +37,30 @@ const countryCodeToFlag = (code) =>
     ?.toUpperCase()
     .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
 
+const sortAccessors = {
+  name: (c) => (c.name || "").toLowerCase(),
+  status: (c) => (c.status || "").toLowerCase(),
+  days_remaining: (c) => c.days_remaining ?? -Infinity,
+};
+
 const Enrollments = () => {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [extendDays, setExtendDays] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [sortField, setSortField] = useState(null);
+  const [sortDir, setSortDir] = useState("asc");
+  const [page, setPage] = useState(1);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addForm, setAddForm] = useState({
+    name: "",
+    phone_number: "",
+    email: "",
+    password: "",
+  });
+  const [adding, setAdding] = useState(false);
+  const [generatedCreds, setGeneratedCreds] = useState(null);
 
   const filteredClients = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -36,6 +71,56 @@ const Enrollments = () => {
       return name.includes(q) || phone.includes(q);
     });
   }, [clients, searchQuery]);
+
+  const sortedClients = useMemo(() => {
+    if (!sortField) return filteredClients;
+    const accessor = sortAccessors[sortField];
+    const sorted = [...filteredClients].sort((a, b) => {
+      const av = accessor(a);
+      const bv = accessor(b);
+      if (av < bv) return -1;
+      if (av > bv) return 1;
+      return 0;
+    });
+    if (sortDir === "desc") sorted.reverse();
+    return sorted;
+  }, [filteredClients, sortField, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedClients.length / PAGE_SIZE));
+  const pagedClients = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return sortedClients.slice(start, start + PAGE_SIZE);
+  }, [sortedClients, page]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, sortField, sortDir]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [totalPages, page]);
+
+  const toggleSort = (field) => {
+    if (sortField !== field) {
+      setSortField(field);
+      setSortDir("asc");
+    } else if (sortDir === "asc") {
+      setSortDir("desc");
+    } else {
+      setSortField(null);
+      setSortDir("asc");
+    }
+  };
+
+  const SortIcon = ({ field }) => {
+    if (sortField !== field)
+      return <ArrowUpDown size={12} className="text-brand-blue-light/50" />;
+    return sortDir === "asc" ? (
+      <ArrowUp size={12} className="text-brand-orange" />
+    ) : (
+      <ArrowDown size={12} className="text-brand-orange" />
+    );
+  };
 
   const fetchClients = async () => {
     try {
@@ -137,10 +222,6 @@ const Enrollments = () => {
             : client.has_dietplan,
         has_workout:
           field === "has_workout" ? !client.has_workout : client.has_workout,
-        has_premium:
-          field === "has_premium"
-            ? !client.has_premium
-            : client.has_premium,
       });
       fetchClients();
     } catch (err) {
@@ -160,6 +241,39 @@ const Enrollments = () => {
     }
   };
 
+  const handleAddClient = async (e) => {
+    e.preventDefault();
+    if (!addForm.name || !addForm.phone_number || !addForm.email) {
+      toast.error("Name, phone number, and email are required");
+      return;
+    }
+    setAdding(true);
+    try {
+      const res = await api.post("/clients", addForm);
+      toast.success(`${addForm.name} added`);
+      fetchClients();
+      if (res.data.generated_password) {
+        setGeneratedCreds({
+          email: addForm.email,
+          password: res.data.generated_password,
+        });
+      } else {
+        setShowAddModal(false);
+        setAddForm({ name: "", phone_number: "", email: "", password: "" });
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to add client");
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const closeAddModal = () => {
+    setShowAddModal(false);
+    setGeneratedCreds(null);
+    setAddForm({ name: "", phone_number: "", email: "", password: "" });
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between gap-4 mb-8 flex-wrap">
@@ -171,6 +285,11 @@ const Enrollments = () => {
           Enrollments
         </motion.h1>
 
+        <div className="flex items-center gap-3 flex-wrap">
+        <Button size="sm" onClick={() => setShowAddModal(true)}>
+          <UserPlus size={15} className="inline mr-1.5 -mt-0.5" />
+          Add Client
+        </Button>
         <div className="relative w-full sm:w-72">
           <Search
             size={16}
@@ -193,10 +312,11 @@ const Enrollments = () => {
             </button>
           )}
         </div>
+        </div>
       </div>
 
       {loading ? (
-        <p className="text-brand-blue-light">Loading...</p>
+        <Loader />
       ) : filteredClients.length === 0 ? (
         <p className="text-brand-blue-light text-sm">
           {searchQuery
@@ -214,18 +334,38 @@ const Enrollments = () => {
             <table className="w-full text-sm">
               <thead>
               <tr className="text-left text-brand-blue border-b border-brand-blue-pale">
-                <th className="py-3 px-2">Name</th>
+                <th className="py-3 px-2">
+                  <button
+                    onClick={() => toggleSort("name")}
+                    className="flex items-center gap-1.5 hover:text-brand-orange transition-colors"
+                  >
+                    Name <SortIcon field="name" />
+                  </button>
+                </th>
                 <th className="py-3 px-2">Phone</th>
-                <th className="py-3 px-2">Status</th>
-                <th className="py-3 px-2">Days Remaining</th>
+                <th className="py-3 px-2">
+                  <button
+                    onClick={() => toggleSort("status")}
+                    className="flex items-center gap-1.5 hover:text-brand-orange transition-colors"
+                  >
+                    Status <SortIcon field="status" />
+                  </button>
+                </th>
+                <th className="py-3 px-2">
+                  <button
+                    onClick={() => toggleSort("days_remaining")}
+                    className="flex items-center gap-1.5 hover:text-brand-orange transition-colors"
+                  >
+                    Days Remaining <SortIcon field="days_remaining" />
+                  </button>
+                </th>
                 <th className="py-3 px-2">Packages</th>
                 <th className="py-3 px-2">Diet Plans</th>
-                <th className="py-3 px-2">Premium Sessions</th>
                 <th className="py-3 px-2">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredClients.map((client) => (
+              {pagedClients.map((client) => (
                 <motion.tr
                   key={client._id}
                   className="border-b border-brand-blue-pale/60"
@@ -289,17 +429,6 @@ const Enrollments = () => {
                         />
                         Workout
                       </label>
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={client.has_premium}
-                          onChange={() =>
-                            handleTogglePackage(client, "has_premium")
-                          }
-                          className="accent-brand-orange"
-                        />
-                        Premium
-                      </label>
                     </div>
                   </td>
                   <td className="py-3 px-2">
@@ -319,18 +448,6 @@ const Enrollments = () => {
                           Deliver Diet Plan
                         </button>
                       </div>
-                    ) : (
-                      <span className="text-xs text-brand-blue-light/50">
-                        —
-                      </span>
-                    )}
-                  </td>
-                  <td className="py-3 px-2">
-                    {client.has_premium ? (
-                      <span className="text-xs text-brand-blue-light">
-                        {client.premium_sessions_used} of{" "}
-                        {client.premium_sessions_total} used
-                      </span>
                     ) : (
                       <span className="text-xs text-brand-blue-light/50">
                         —
@@ -431,8 +548,159 @@ const Enrollments = () => {
             </tbody>
           </table>
           </Card>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between gap-4 mt-4 flex-wrap">
+              <p className="text-brand-blue-light text-xs">
+                Page {page} of {totalPages} — {sortedClients.length} clients
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="w-8 h-8 flex items-center justify-center rounded-full border border-brand-blue-pale text-brand-blue disabled:opacity-30 disabled:cursor-not-allowed hover:bg-brand-blue-pale transition-colors"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="w-8 h-8 flex items-center justify-center rounded-full border border-brand-blue-pale text-brand-blue disabled:opacity-30 disabled:cursor-not-allowed hover:bg-brand-blue-pale transition-colors"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          )}
         </>
       )}
+
+      <AnimatePresence>
+        {showAddModal && (
+          <motion.div
+            className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closeAddModal}
+          >
+            <motion.div
+              className="bg-white rounded-2xl p-6 w-full max-w-md"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {generatedCreds ? (
+                <>
+                  <h2 className="text-lg font-bold text-brand-blue mb-2">
+                    Client added
+                  </h2>
+                  <p className="text-sm text-brand-blue-light mb-4">
+                    No password was set, so one was generated. Share these
+                    login details with the client — this won't be shown
+                    again.
+                  </p>
+                  <div className="bg-brand-blue-pale/40 rounded-xl p-4 mb-4 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs text-brand-blue-light">
+                        Email
+                      </span>
+                      <span className="text-sm font-mono text-brand-blue">
+                        {generatedCreds.email}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs text-brand-blue-light">
+                        Password
+                      </span>
+                      <span className="flex items-center gap-2 text-sm font-mono text-brand-blue">
+                        {generatedCreds.password}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              generatedCreds.password,
+                            );
+                            toast.success("Password copied");
+                          }}
+                          title="Copy password"
+                          className="text-brand-blue-light hover:text-brand-orange"
+                        >
+                          <Copy size={14} />
+                        </button>
+                      </span>
+                    </div>
+                  </div>
+                  <Button className="w-full" onClick={closeAddModal}>
+                    Done
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-lg font-bold text-brand-blue mb-4">
+                    Add Client Manually
+                  </h2>
+                  <form onSubmit={handleAddClient} className="space-y-3">
+                    <input
+                      type="text"
+                      placeholder="Full name"
+                      value={addForm.name}
+                      onChange={(e) =>
+                        setAddForm({ ...addForm, name: e.target.value })
+                      }
+                      className="w-full border border-brand-blue-pale rounded-lg px-3 py-2.5 text-sm text-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Phone number"
+                      value={addForm.phone_number}
+                      onChange={(e) =>
+                        setAddForm({
+                          ...addForm,
+                          phone_number: e.target.value,
+                        })
+                      }
+                      className="w-full border border-brand-blue-pale rounded-lg px-3 py-2.5 text-sm text-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                    />
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      value={addForm.email}
+                      onChange={(e) =>
+                        setAddForm({ ...addForm, email: e.target.value })
+                      }
+                      className="w-full border border-brand-blue-pale rounded-lg px-3 py-2.5 text-sm text-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Password (optional — auto-generated if blank)"
+                      value={addForm.password}
+                      onChange={(e) =>
+                        setAddForm({ ...addForm, password: e.target.value })
+                      }
+                      className="w-full border border-brand-blue-pale rounded-lg px-3 py-2.5 text-sm text-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                    />
+                    <div className="flex items-center gap-3 pt-2">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="flex-1"
+                        onClick={closeAddModal}
+                      >
+                        Cancel
+                      </Button>
+                      <Button type="submit" className="flex-1" disabled={adding}>
+                        {adding ? "Adding..." : "Add Client"}
+                      </Button>
+                    </div>
+                  </form>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

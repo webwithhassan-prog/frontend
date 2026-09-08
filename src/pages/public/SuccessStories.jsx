@@ -1,13 +1,26 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-
-const images = Object.values(
-  import.meta.glob("../../assets/testimonials/*.{jpg,jpeg,png,JPG,JPEG,PNG}", {
-    eager: true,
-    import: "default",
-  }),
-);
+import api from "../../services/api";
+import Loader from "../../components/common/Loader";
 
 const SuccessStories = () => {
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const res = await api.get("/testimonials/public");
+        setImages(res.data.map((t) => t.image_url));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTestimonials();
+  }, []);
+
   return (
     <section className="max-w-5xl mx-auto px-6 py-20">
       <motion.h1
@@ -22,15 +35,17 @@ const SuccessStories = () => {
         Real check-ins, real progress, from real members.
       </p>
 
-      {images.length === 0 ? (
+      {loading ? (
+        <Loader />
+      ) : images.length === 0 ? (
         <p className="text-center text-brand-blue/50 text-sm">
-          No stories added yet — add images to src/assets/testimonials/.
+          No stories added yet — check back soon.
         </p>
       ) : (
         <div className="columns-1 sm:columns-2 md:columns-3 gap-6 space-y-6">
           {images.map((src, i) => (
             <motion.img
-              key={i}
+              key={src}
               src={src}
               alt={`Success story ${i + 1}`}
               className="w-full rounded-2xl shadow-md break-inside-avoid"

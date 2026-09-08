@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Check, X, DollarSign, Calendar, User } from "lucide-react";
+import { Check, X, DollarSign, Calendar, User, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
+import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import Modal from "../../components/admin/Modal";
 
@@ -95,6 +97,25 @@ const Professionals = () => {
     fetchData();
   };
 
+  const handleDeleteApplication = async (app) => {
+    if (
+      !window.confirm(
+        `Permanently delete ${app.name}'s application? This can't be undone.`,
+      )
+    ) {
+      return;
+    }
+    try {
+      await api.delete(`/applications/${app._id}`);
+      toast.success("Application deleted");
+      fetchData();
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Could not delete application",
+      );
+    }
+  };
+
   const openPaymentModal = (consultation) => {
     setSelectedConsultation(consultation);
     setPaymentAmount("");
@@ -151,7 +172,7 @@ const Professionals = () => {
       </motion.h1>
 
       {loading ? (
-        <p className="text-brand-blue-light">Loading...</p>
+        <Loader />
       ) : (
         <>
           {/* Consultation Requests */}
@@ -282,22 +303,30 @@ const Professionals = () => {
                   </p>
                 )}
 
-                {app.status === "pending" && (
-                  <div className="flex gap-3 mt-3">
-                    <button
-                      onClick={() => openOfferModal(app)}
-                      className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
-                    >
-                      <Check size={14} /> Approve
-                    </button>
-                    <button
-                      onClick={() => handleReject(app._id)}
-                      className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
-                    >
-                      <X size={14} /> Reject
-                    </button>
-                  </div>
-                )}
+                <div className="flex gap-3 mt-3">
+                  {app.status === "pending" && (
+                    <>
+                      <button
+                        onClick={() => openOfferModal(app)}
+                        className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+                      >
+                        <Check size={14} /> Approve
+                      </button>
+                      <button
+                        onClick={() => handleReject(app._id)}
+                        className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+                      >
+                        <X size={14} /> Reject
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={() => handleDeleteApplication(app)}
+                    className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-brand-blue-pale text-brand-blue-light hover:bg-red-100 hover:text-red-600 transition-colors"
+                  >
+                    <Trash2 size={14} /> Delete
+                  </button>
+                </div>
               </Card>
             ))}
           </div>

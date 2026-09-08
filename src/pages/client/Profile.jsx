@@ -3,17 +3,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toPng } from "html-to-image";
 import {
   Download,
-  ChevronDown,
   Footprints,
   Droplet,
   Lock,
   Check,
   UtensilsCrossed,
+  Star,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
+import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
+import WhatsAppIcon from "../../components/common/WhatsAppIcon";
+import Modal from "../../components/admin/Modal";
+import { useSettings } from "../../context/SettingsContext";
 
 const statusColors = {
   active: "bg-green-100 text-green-700",
@@ -70,11 +74,12 @@ const emptyOnboardingForm = {
 const Profile = () => {
   const [client, setClient] = useState(null);
   const [allUpcomingClasses, setAllUpcomingClasses] = useState([]);
-  const [showFullWeek, setShowFullWeek] = useState(false);
   const [ebooks, setEbooks] = useState([]);
-  const [recordedContent, setRecordedContent] = useState([]);
-  const [contentLocked, setContentLocked] = useState(false);
+  const [courses, setCourses] = useState([]);
+  const [recordedGallery, setRecordedGallery] = useState([]);
+  const [consultations, setConsultations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { settings } = useSettings();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [passwordMessage, setPasswordMessage] = useState("");
@@ -100,23 +105,35 @@ const Profile = () => {
   const [dailyWater, setDailyWater] = useState("");
   const [dailyLogMessage, setDailyLogMessage] = useState("");
 
+  const [reviewTarget, setReviewTarget] = useState(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState("");
+  const [reviewPromptDismissed, setReviewPromptDismissed] = useState(false);
+
   const fetchData = async () => {
     try {
       const clientId = localStorage.getItem("client_id");
       const [clientRes, classesRes, ebooksRes] = await Promise.all([
         api.get(`/clients/${clientId}`),
-        api.get("/classes/public"),
+        api.get("/classes/public?scope=today"),
         api.get("/ebooks/public"),
       ]);
       setClient(clientRes.data);
 
       const now = new Date();
+      const startOfToday = new Date(now);
+      startOfToday.setHours(0, 0, 0, 0);
       const sevenDaysOut = new Date(now);
       sevenDaysOut.setDate(now.getDate() + 7);
+      // Includes classes already conducted earlier today (not just ones still
+      // upcoming) — renderClassCard marks those "Conducted" rather than
+      // hiding them, so today's full schedule always shows all 11 slots.
       const upcoming = classesRes.data
         .filter((c) => {
           const d = new Date(c.datetime);
-          return d >= now && d <= sevenDaysOut;
+          return d >= startOfToday && d <= sevenDaysOut;
         })
         .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
       setAllUpcomingClasses(upcoming);
@@ -127,14 +144,29 @@ const Profile = () => {
       setEbooks(ebooksRes.data.filter((e) => purchasedIds.includes(e._id)));
 
       try {
-        const contentRes = await api.get(`/content/client/${clientId}`);
-        setRecordedContent(contentRes.data);
-        setContentLocked(false);
-      } catch (contentErr) {
-        if (contentErr.response?.status === 403) {
-          setContentLocked(true);
-        } else {
-          console.error(contentErr);
+        const coursesRes = await api.get(`/courses/client/${clientId}`);
+        setCourses(coursesRes.data);
+      } catch (coursesErr) {
+        console.error(coursesErr);
+      }
+
+      try {
+        const consultationsRes = await api.get(
+          `/consultations/client/${clientId}`,
+        );
+        setConsultations(consultationsRes.data);
+      } catch (consultationsErr) {
+        console.error(consultationsErr);
+      }
+
+      if (clientRes.data.has_workout) {
+        try {
+          const galleryRes = await api.get(
+            `/recorded-gallery/client/${clientId}`,
+          );
+          setRecordedGallery(galleryRes.data);
+        } catch (galleryErr) {
+          console.error(galleryErr);
         }
       }
 
@@ -155,6 +187,53 @@ const Profile = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Prompt for a review of the most recent completed, unreviewed 1-on-1
+  // session — once per page load, not re-shown if dismissed.
+  useEffect(() => {
+    if (reviewPromptDismissed || reviewTarget) return;
+    const now = new Date();
+    const dueForReview = consultations
+      .filter((c) => new Date(c.datetime) < now && !c.has_review)
+      .sort((a, b) => new Date(b.datetime) - new Date(a.datetime))[0];
+    if (dueForReview) setReviewTarget(dueForReview);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [consultations]);
+
+  const closeReviewPrompt = () => {
+    setReviewTarget(null);
+    setReviewPromptDismissed(true);
+    setReviewRating(0);
+    setReviewComment("");
+    setReviewError("");
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    if (!reviewRating) {
+      setReviewError("Please pick a star rating");
+      return;
+    }
+    setReviewSubmitting(true);
+    setReviewError("");
+    try {
+      await api.post("/reviews", {
+        consultation_id: reviewTarget._id,
+        rating: reviewRating,
+        comment: reviewComment,
+      });
+      setConsultations((prev) =>
+        prev.map((c) =>
+          c._id === reviewTarget._id ? { ...c, has_review: true } : c,
+        ),
+      );
+      closeReviewPrompt();
+    } catch (err) {
+      setReviewError(err.response?.data?.message || "Could not submit review");
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -294,6 +373,8 @@ const Profile = () => {
     window.location.href = `${import.meta.env.VITE_API_URL}/join/class/${classId}?client_id=${clientId}`;
   };
 
+  // Only today's fixed daily classes — no next-days view, per the client
+  // panel showing exactly the day's schedule (currently 11 classes/day).
   const todayClasses = allUpcomingClasses.filter((c) => {
     const d = new Date(c.datetime);
     const now = new Date();
@@ -304,39 +385,44 @@ const Profile = () => {
     );
   });
 
-  const classesToShow = showFullWeek ? allUpcomingClasses : todayClasses;
+  const classesToShow = todayClasses;
+  const allClassesDone =
+    classesToShow.length > 0 &&
+    classesToShow.every(
+      (c) => c.status === "cancelled" || new Date(c.datetime) < new Date(),
+    );
 
   const renderClassCard = (c) => {
     const isCancelled = c.status === "cancelled";
+    const isConducted = !isCancelled && new Date(c.datetime) < new Date();
     return (
       <Card
         key={c._id}
-        className={isCancelled ? "opacity-70 border-red-200 border-2" : ""}
+        className={
+          isCancelled
+            ? "opacity-70 border-red-200 border-2"
+            : isConducted
+              ? "opacity-70"
+              : ""
+        }
       >
         <h3 className="font-display text-brand-blue text-sm mb-1">{c.type}</h3>
         <p className="text-brand-blue/70 text-xs mb-1">
           with {c.trainer_ref?.name || "Fitness Zone Trainer"}
         </p>
         <p className="text-brand-blue/70 text-xs mb-4">
-          {showFullWeek
-            ? new Date(c.datetime).toLocaleString(undefined, {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })
-            : new Date(c.datetime).toLocaleTimeString(undefined, {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              })}
+          {new Date(c.datetime).toLocaleTimeString(undefined, {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          })}
         </p>
         {isCancelled ? (
           <span className="inline-block text-xs font-semibold px-3 py-1.5 rounded-full bg-red-100 text-red-700">
             Cancelled{c.cancel_reason ? ` — ${c.cancel_reason}` : ""}
           </span>
+        ) : isConducted ? (
+          <Button disabled>Class Done</Button>
         ) : (
           <Button onClick={() => handleJoin(c._id)}>Join Class</Button>
         )}
@@ -344,11 +430,24 @@ const Profile = () => {
     );
   };
 
-  const contentByCategory = recordedContent.reduce((acc, item) => {
-    if (!acc[item.category]) acc[item.category] = [];
-    acc[item.category].push(item);
-    return acc;
-  }, {});
+  // A dietplan-only client sees onboarding/check-ins, not live classes; a
+  // workout-only client sees classes, not diet forms. A combo client (both
+  // flags true) sees everything — nothing here needs a separate branch.
+  const hasDietplan = !!client?.has_dietplan;
+  const hasWorkout = !!client?.has_workout;
+  const dietWhatsappLink = `https://wa.me/${settings.whatsapp_dietician}?text=${encodeURIComponent(
+    "Hi! I just saved my check-in image and I'm sending it here.",
+  )}`;
+
+  const upcomingConsultation =
+    consultations
+      .filter((c) => new Date(c.datetime) >= new Date())
+      .sort((a, b) => new Date(a.datetime) - new Date(b.datetime))[0] || null;
+  const consultationWhatsappLink = upcomingConsultation
+    ? `https://wa.me/${settings.whatsapp_general}?text=${encodeURIComponent(
+        `Hi! I have a 1-on-1 consultation booked with ${upcomingConsultation.consultant_ref?.name || "a specialist"}${upcomingConsultation.consultant_ref?.specialty ? ` (${upcomingConsultation.consultant_ref.specialty})` : ""} on ${new Date(upcomingConsultation.datetime).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}. I'd like to confirm the details.`,
+      )}`
+    : "";
 
   const daysSinceCheckin = client?.last_progress_checkin
     ? Math.floor(
@@ -371,43 +470,44 @@ const Profile = () => {
     },
     {
       key: "followup",
-      label: "FOLLOW UP",
-      subtitle: checkinDue
-        ? daysSinceCheckin === null
-          ? "You haven't checked in yet"
-          : `Overdue by ${daysSinceCheckin - 7} day(s)`
-        : `Days remaining: ${daysUntilCheckin}`,
-      active: client?.has_dietplan || client?.has_workout,
-      upgradeType: "workout",
+      label: "DIETPLAN",
+      subtitle: hasDietplan
+        ? checkinDue
+          ? daysSinceCheckin === null
+            ? "You haven't checked in yet"
+            : `Overdue by ${daysSinceCheckin - 7} day(s)`
+          : `Days remaining: ${daysUntilCheckin}`
+        : "Weekly check-in for dietplan clients",
+      active: hasDietplan,
+      upgradeType: "dietplan",
     },
     {
       key: "premium",
       label: "1-ON-1 CONSULTATIONS",
-      subtitle: client?.has_premium
-        ? `${client.premium_sessions_total - client.premium_sessions_used} of ${client.premium_sessions_total} sessions left`
+      subtitle: upcomingConsultation
+        ? `Booked: ${upcomingConsultation.consultant_ref?.name || "Specialist"} on ${new Date(upcomingConsultation.datetime).toLocaleDateString()}`
         : "Dietician, gyne, psychiatrist",
-      active: client?.status === "active" && client?.has_premium,
-      upgradeType: "combo",
+      active: client?.status === "active" && !!upcomingConsultation,
     },
     {
       key: "ebooks",
-      label: "E-BOOKS",
+      label: "MY E-BOOKS & COURSES",
       subtitle:
-        ebooks.length > 0
-          ? `${ebooks.length} e-book${ebooks.length > 1 ? "s" : ""} available`
-          : "No e-books purchased yet",
-      active: ebooks.length > 0,
+        ebooks.length + courses.length > 0
+          ? `${ebooks.length} e-book${ebooks.length === 1 ? "" : "s"}, ${courses.length} course${courses.length === 1 ? "" : "s"}`
+          : "Nothing purchased yet",
+      active: ebooks.length + courses.length > 0,
     },
   ];
 
   return (
     <div>
       {loading ? (
-        <p className="text-brand-blue/70">Loading...</p>
+        <Loader />
       ) : (
         <>
-          {/* Day 1 Onboarding — shown once for new clients */}
-          {!client?.onboarding_completed && (
+          {/* Day 1 Onboarding — shown once for new clients with a dietplan */}
+          {hasDietplan && !client?.onboarding_completed && (
             <>
               <h2 className="font-display text-lg text-brand-blue mb-2">
                 DAY 1 — ONBOARDING FORM
@@ -432,7 +532,7 @@ const Profile = () => {
                         onSubmit={handleOnboardingSubmit}
                         className="space-y-4"
                       >
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <input
                             type="date"
                             name="starting_date"
@@ -452,7 +552,7 @@ const Profile = () => {
                           />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <input
                             type="text"
                             name="country"
@@ -473,7 +573,7 @@ const Profile = () => {
                           />
                         </div>
 
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           <input
                             type="text"
                             name="current_weight"
@@ -520,7 +620,7 @@ const Profile = () => {
                         <input
                           type="text"
                           name="medical_issues"
-                          placeholder="Medical Issues / Health Conditions (names only, e.g. PCOS, Thyroid)"
+                          placeholder="Medical Issues (e.g. PCOS)"
                           value={onboardingForm.medical_issues}
                           onChange={handleOnboardingChange}
                           className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
@@ -539,7 +639,7 @@ const Profile = () => {
                           Lifestyle Details
                         </p>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <input
                             type="text"
                             name="smoking_habit"
@@ -558,7 +658,7 @@ const Profile = () => {
                           />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <input
                             type="text"
                             name="marital_status"
@@ -591,7 +691,7 @@ const Profile = () => {
                           inches/cm)
                         </p>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <input
                             type="text"
                             name="measurement_shoulders"
@@ -610,7 +710,7 @@ const Profile = () => {
                           />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <input
                             type="text"
                             name="measurement_arms"
@@ -629,7 +729,7 @@ const Profile = () => {
                           />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <input
                             type="text"
                             name="measurement_abdomen"
@@ -706,14 +806,24 @@ const Profile = () => {
                       </div>
                     </div>
 
-                    <div className="flex gap-4 mt-6">
+                    <div className="flex flex-wrap gap-4 mt-6">
                       <Button onClick={handleSaveOnboardingImage}>
                         Save Image
                       </Button>
+                      <a
+                        href={dietWhatsappLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 bg-[#25D366] text-white font-semibold rounded-full px-6 py-3 hover:brightness-95 transition-all"
+                      >
+                        <WhatsAppIcon size={16} />
+                        Send to Dietician
+                      </a>
                     </div>
 
                     <p className="text-brand-blue/70 text-sm mt-6">
-                      Send this image to us on WhatsApp — welcome aboard!
+                      Save the image above, then tap "Send to Dietician" and
+                      attach it — welcome aboard!
                     </p>
                   </motion.div>
                 )}
@@ -748,7 +858,7 @@ const Profile = () => {
           </motion.div>
 
           {/* Dietplan renewal notification */}
-          {client?.dietplan_notification_pending && (
+          {hasDietplan && client?.dietplan_notification_pending && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -815,8 +925,12 @@ const Profile = () => {
                         document
                           .getElementById("upcoming-classes")
                           ?.scrollIntoView({ behavior: "smooth" });
-                      if (s.key === "premium")
-                        navigate("/client/book-consultation");
+                      if (s.key === "premium" && consultationWhatsappLink)
+                        window.open(
+                          consultationWhatsappLink,
+                          "_blank",
+                          "noopener,noreferrer",
+                        );
                       if (s.key === "ebooks")
                         document
                           .getElementById("my-ebooks")
@@ -847,117 +961,98 @@ const Profile = () => {
             ))}
           </div>
 
-          {/* Upcoming classes */}
-          <div
-            id="upcoming-classes"
-            className="flex items-center justify-between mb-4"
-          >
-            <h2 className="font-display text-lg text-brand-blue">
-              {showFullWeek
-                ? "UPCOMING CLASSES — NEXT 7 DAYS"
-                : "TODAY'S CLASSES"}
-            </h2>
-            {client?.status === "active" && client?.has_workout && (
-              <button
-                onClick={() => setShowFullWeek(!showFullWeek)}
-                className="flex items-center gap-1 text-sm font-semibold text-brand-orange"
-              >
-                {showFullWeek ? "Show Today Only" : "Show Upcoming Week"}
-                <ChevronDown
-                  size={16}
-                  className={`transition-transform ${showFullWeek ? "rotate-180" : ""}`}
-                />
-              </button>
-            )}
-          </div>
-
-          {client?.status !== "active" || !client?.has_workout ? (
-            <Card className="mb-12 border-brand-orange border-2 text-center max-w-lg">
-              <p className="text-brand-blue font-semibold mb-4">
-                Your Workout package isn't active — activate it to see and join
-                live classes.
-              </p>
-              <Button onClick={() => navigate("/plans?type=workout")}>
-                View Workout Packages
-              </Button>
-            </Card>
-          ) : classesToShow.length === 0 ? (
-            <p className="text-brand-blue/70 mb-12">
-              {showFullWeek
-                ? "No classes scheduled in the next 7 days."
-                : "No classes scheduled for today."}
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-              {classesToShow.map(renderClassCard)}
-            </div>
-          )}
-
-          {/* Today's Log */}
-          <h2 className="font-display text-lg text-brand-blue mb-4">
-            TODAY'S LOG
-          </h2>
-          <Card className="max-w-md mb-12">
-            <form onSubmit={handleSaveDailyLog} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="flex items-center gap-1 text-sm text-brand-blue/60 mb-1">
-                    <Footprints size={14} /> Steps
-                  </label>
-                  <input
-                    type="number"
-                    value={dailySteps}
-                    onChange={(e) => setDailySteps(e.target.value)}
-                    className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                  />
-                </div>
-                <div>
-                  <label className="flex items-center gap-1 text-sm text-brand-blue/60 mb-1">
-                    <Droplet size={14} /> Water (liters)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={dailyWater}
-                    onChange={(e) => setDailyWater(e.target.value)}
-                    className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                  />
-                </div>
+          {/* Upcoming classes + daily log + recorded gallery — workout clients only */}
+          {hasWorkout && (
+            <>
+              <div id="upcoming-classes" className="mb-1">
+                <h2 className="font-display text-lg text-brand-blue">
+                  TODAY'S CLASSES
+                </h2>
               </div>
-              {dailyLogMessage && (
-                <p className="text-brand-blue text-sm">{dailyLogMessage}</p>
-              )}
-              <Button type="submit">Save Today's Log</Button>
-            </form>
-          </Card>
-
-          {/* Recorded Library */}
-          <h2
-            id="recorded-library"
-            className="font-display text-lg text-brand-blue mb-4"
-          >
-            RECORDED LIBRARY
-          </h2>
-          {contentLocked ? (
-            <Card className="mb-12 border-brand-orange border-2 text-center max-w-lg">
-              <p className="text-brand-blue font-semibold mb-4">
-                Your subscription isn't active — renew to unlock the recorded
-                library.
+              <p className="text-brand-blue/50 text-xs mb-4">
+                Class times are the same every day — join links are added
+                fresh before each session.
               </p>
-              <Button onClick={() => navigate("/plans")}>View Packages</Button>
-            </Card>
-          ) : recordedContent.length === 0 ? (
-            <p className="text-brand-blue/70 mb-12">
-              No recorded videos available yet.
-            </p>
-          ) : (
-            Object.entries(contentByCategory).map(([category, items]) => (
-              <div key={category} className="mb-8">
-                <p className="text-brand-blue/60 text-xs uppercase tracking-wide mb-3">
-                  {category}
+
+              {client?.status !== "active" ? (
+                <Card className="mb-12 border-brand-orange border-2 text-center max-w-lg">
+                  <p className="text-brand-blue font-semibold mb-4">
+                    Your Workout package isn't active — reactivate it to see
+                    and join live classes.
+                  </p>
+                  <Button onClick={() => navigate("/plans?type=workout")}>
+                    View Workout Packages
+                  </Button>
+                </Card>
+              ) : classesToShow.length === 0 ? (
+                <p className="text-brand-blue/70 mb-12">
+                  No classes scheduled for today.
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {items.map((item) => (
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                    {classesToShow.map(renderClassCard)}
+                  </div>
+                  {allClassesDone && (
+                    <p className="text-brand-blue/70 text-sm mb-12">
+                      That's all for today — new schedule drops tomorrow!
+                    </p>
+                  )}
+                  {!allClassesDone && <div className="mb-12" />}
+                </>
+              )}
+
+              {/* Today's Log */}
+              <h2 className="font-display text-lg text-brand-blue mb-4">
+                TODAY'S LOG
+              </h2>
+              <Card className="max-w-md mb-12">
+                <form onSubmit={handleSaveDailyLog} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="flex items-center gap-1 text-sm text-brand-blue/60 mb-1">
+                        <Footprints size={14} /> Steps
+                      </label>
+                      <input
+                        type="number"
+                        value={dailySteps}
+                        onChange={(e) => setDailySteps(e.target.value)}
+                        className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                      />
+                    </div>
+                    <div>
+                      <label className="flex items-center gap-1 text-sm text-brand-blue/60 mb-1">
+                        <Droplet size={14} /> Water (liters)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={dailyWater}
+                        onChange={(e) => setDailyWater(e.target.value)}
+                        className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                      />
+                    </div>
+                  </div>
+                  {dailyLogMessage && (
+                    <p className="text-brand-blue text-sm">{dailyLogMessage}</p>
+                  )}
+                  <Button type="submit">Save Today's Log</Button>
+                </form>
+              </Card>
+
+              {/* Recorded Gallery — weekly session recordings, separate
+                  from the Recorded Content below */}
+              <h2 className="font-display text-lg text-brand-blue mb-4">
+                RECORDED GALLERY
+              </h2>
+              {recordedGallery.length === 0 ? (
+                <p className="text-brand-blue/70 mb-12">
+                  No session recordings yet — check back after this week's
+                  classes.
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                  {recordedGallery.map((item) => (
                     <Card key={item._id}>
                       <div className="aspect-video mb-3 rounded-lg overflow-hidden bg-brand-blue-pale">
                         <iframe
@@ -967,16 +1062,18 @@ const Profile = () => {
                           allowFullScreen
                         />
                       </div>
-                      <h3 className="font-display text-brand-blue text-sm">
+                      <h3 className="font-display text-brand-blue text-sm mb-1">
                         {item.title}
                       </h3>
+                      <p className="text-brand-blue/50 text-xs">
+                        Added {new Date(item.createdAt).toLocaleDateString()}
+                      </p>
                     </Card>
                   ))}
                 </div>
-              </div>
-            ))
+              )}
+            </>
           )}
-          <div className="mb-4" />
 
           {/* My E-Books */}
           <h2
@@ -1012,7 +1109,57 @@ const Profile = () => {
             </div>
           )}
 
-          {/* Weekly Progress form */}
+          {/* My Courses — paired with E-Books since the public E-Books &
+              Courses page sells them the same way */}
+          <h2
+            id="my-courses"
+            className="font-display text-lg text-brand-blue mb-4"
+          >
+            MY COURSES
+          </h2>
+          {courses.length === 0 ? (
+            <p className="text-brand-blue/70 mb-12">
+              No courses purchased yet — check the E-Books & Courses page to
+              browse.
+            </p>
+          ) : (
+            <div className="space-y-8 mb-12">
+              {courses.map((course) => (
+                <div key={course._id}>
+                  <h3 className="font-display text-brand-blue text-sm mb-1">
+                    {course.title}
+                  </h3>
+                  <p className="text-brand-blue/70 text-xs mb-4">
+                    {course.description}
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {course.lessons.map((lesson, i) => (
+                      <Card key={i}>
+                        <div className="aspect-video mb-3 rounded-lg overflow-hidden bg-brand-blue-pale">
+                          <iframe
+                            src={lesson.youtube_link.replace(
+                              "watch?v=",
+                              "embed/",
+                            )}
+                            title={lesson.title}
+                            className="w-full h-full"
+                            allowFullScreen
+                          />
+                        </div>
+                        <h4 className="font-display text-brand-blue text-sm">
+                          {lesson.title}
+                        </h4>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Weekly Progress form — dietplan clients only */}
+          {hasDietplan && (
+          <>
           <h2
             id="weekly-progress"
             className="font-display text-lg text-brand-blue mb-2 mt-12"
@@ -1228,8 +1375,17 @@ const Profile = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-4 mt-6">
+                <div className="flex flex-wrap gap-4 mt-6">
                   <Button onClick={handleSaveProgressImage}>Save Image</Button>
+                  <a
+                    href={dietWhatsappLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 bg-[#25D366] text-white font-semibold rounded-full px-6 py-3 hover:brightness-95 transition-all"
+                  >
+                    <WhatsAppIcon size={16} />
+                    Send to Dietician
+                  </a>
                   <button
                     onClick={handleProgressReset}
                     className="text-sm font-semibold text-brand-blue/60 hover:text-brand-blue"
@@ -1239,12 +1395,14 @@ const Profile = () => {
                 </div>
 
                 <p className="text-brand-blue/70 text-sm mt-6">
-                  Send this image to us on WhatsApp — your next reminder will
-                  show up in 7 days.
+                  Save the image above, then tap "Send to Dietician" and
+                  attach it — your next reminder will show up in 7 days.
                 </p>
               </motion.div>
             )}
           </AnimatePresence>
+          </>
+          )}
         </>
       )}
 
@@ -1278,6 +1436,66 @@ const Profile = () => {
           <Button type="submit">Update Password</Button>
         </form>
       </Card>
+
+      <Modal
+        isOpen={!!reviewTarget}
+        onClose={closeReviewPrompt}
+        title="How was your session?"
+      >
+        {reviewTarget && (
+          <form onSubmit={handleSubmitReview} className="space-y-4">
+            <p className="text-sm text-brand-blue/70">
+              Your 1-on-1 with{" "}
+              <span className="font-semibold text-brand-blue">
+                {reviewTarget.consultant_ref?.name || "your consultant"}
+              </span>{" "}
+              on {new Date(reviewTarget.datetime).toLocaleDateString()} — how
+              did it go?
+            </p>
+            <div className="flex items-center justify-center gap-1">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setReviewRating(n)}
+                  aria-label={`${n} star${n > 1 ? "s" : ""}`}
+                >
+                  <Star
+                    size={32}
+                    className={
+                      n <= reviewRating
+                        ? "fill-brand-orange text-brand-orange"
+                        : "text-brand-blue-pale"
+                    }
+                  />
+                </button>
+              ))}
+            </div>
+            <textarea
+              placeholder="Anything you'd like to share? (optional)"
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              rows={3}
+              className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+            />
+            {reviewError && (
+              <p className="text-red-500 text-sm">{reviewError}</p>
+            )}
+            <div className="flex gap-3">
+              <Button type="submit" className="flex-1" disabled={reviewSubmitting}>
+                {reviewSubmitting ? "Submitting..." : "Submit Review"}
+              </Button>
+              <button
+                type="button"
+                onClick={closeReviewPrompt}
+                className="text-sm text-brand-blue/60 hover:text-brand-blue px-3"
+              >
+                Maybe Later
+              </button>
+            </div>
+          </form>
+        )}
+      </Modal>
     </div>
   );
 };

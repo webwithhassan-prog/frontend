@@ -18,9 +18,15 @@ const Button = ({
   };
 
   const variants = {
-    primary: "bg-brand-orange text-white shadow-lg hover:bg-brand-orange-dark",
+    primary:
+      "bg-brand-blue-light text-white shadow-lg hover:bg-brand-blue-light-dark",
     secondary:
       "bg-white text-brand-blue border-2 border-brand-blue hover:bg-brand-blue-pale",
+  };
+
+  const hoverShadow = {
+    primary: "0 8px 20px rgba(44,68,209,0.35)",
+    secondary: "0 8px 20px rgba(18,34,74,0.15)",
   };
 
   return (
@@ -32,12 +38,11 @@ const Button = ({
       whileHover={
         disabled
           ? {}
-          : { scale: 1.05, boxShadow: "0 8px 20px rgba(249,115,22,0.35)" }
+          : { scale: 1.05, boxShadow: hoverShadow[variant] }
       }
       whileTap={disabled ? {} : { scale: 0.95 }}
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: disabled ? 0.5 : 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      animate={{ opacity: disabled ? 0.5 : 1 }}
+      transition={{ duration: 0.2 }}
     >
       {children}
     </motion.button>

@@ -58,7 +58,15 @@ const ForgotPassword = () => {
           />
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
-          {message && <p className="text-brand-blue text-sm">{message}</p>}
+          {message && (
+            <div>
+              <p className="text-brand-blue text-sm">{message}</p>
+              <p className="text-brand-blue/50 text-xs mt-1">
+                Don't see it? Check your spam or junk folder — it can take a
+                minute to arrive.
+              </p>
+            </div>
+          )}
 
           <Button type="submit" className="w-full" disabled={submitting}>
             {submitting ? "Sending..." : "Send Reset Link"}

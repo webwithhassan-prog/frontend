@@ -1,16 +1,17 @@
 import { motion } from "framer-motion";
-import { MessageCircle, User } from "lucide-react";
+import { User } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-
-// TODO: add your WhatsApp number here, e.g. "https://wa.me/923001234567"
-const whatsappLink = "https://wa.me/";
+import { useSettings } from "../../context/SettingsContext";
+import WhatsAppIcon from "./WhatsAppIcon";
 
 const FloatingActions = () => {
   const { role } = useAuth();
+  const { settings } = useSettings();
   const isClient = role === "client";
+  const whatsappLink = `https://wa.me/${settings.whatsapp_general}`;
 
   return (
-    <div className="fixed bottom-5 left-5 z-40 flex flex-col items-start gap-3">
+    <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-3">
       {isClient && (
         <motion.a
           href="/client"
@@ -32,7 +33,7 @@ const FloatingActions = () => {
         className="flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] text-white shadow-lg hover:scale-105 transition-transform"
         title="Chat on WhatsApp"
       >
-        <MessageCircle size={24} fill="white" />
+        <WhatsAppIcon size={26} />
       </motion.a>
     </div>
   );

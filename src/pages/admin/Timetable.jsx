@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import api from "../../services/api";
 import Button from "../../components/common/Button";
+import Loader from "../../components/common/Loader";
 import Modal from "../../components/admin/Modal";
 
 const dayNames = [
@@ -64,26 +65,31 @@ const Timetable = () => {
 
   const fetchData = async () => {
     try {
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+      const endOfTomorrow = new Date(startOfToday);
+      endOfTomorrow.setDate(endOfTomorrow.getDate() + 2);
+      endOfTomorrow.setMilliseconds(-1); // 23:59:59.999 tomorrow
+
       const [dayPlansRes, timeSlotsRes, classesRes, trainersRes] =
         await Promise.all([
           api.get("/day-plans"),
           api.get("/time-slots"),
-          api.get("/classes"),
+          api.get("/classes", {
+            params: {
+              from: startOfToday.toISOString(),
+              to: endOfTomorrow.toISOString(),
+            },
+          }),
           api.get("/trainers"),
         ]);
       setDayPlans(dayPlansRes.data);
       setTimeSlots(timeSlotsRes.data);
       setTrainers(trainersRes.data);
 
-      const now = new Date();
-      const sevenDaysOut = new Date(now);
-      sevenDaysOut.setDate(now.getDate() + 7);
-      const upcoming = classesRes.data
-        .filter((c) => {
-          const d = new Date(c.datetime);
-          return d >= now && d <= sevenDaysOut;
-        })
-        .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+      const upcoming = [...classesRes.data].sort(
+        (a, b) => new Date(a.datetime) - new Date(b.datetime),
+      );
       setUpcomingClasses(upcoming);
     } catch (err) {
       console.error(err);
@@ -159,7 +165,7 @@ const Timetable = () => {
     try {
       const res = await api.post("/timetable/regenerate");
       setRegenerateMessage(
-        `Done — ${res.data.created} new classes created, ${res.data.updated} updated.`,
+        `Done — ${res.data.created} new classes created, ${res.data.updated} updated, ${res.data.removed || 0} stale sessions removed.`,
       );
       fetchData();
     } catch (err) {
@@ -227,7 +233,7 @@ const Timetable = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between gap-4 mb-8 flex-wrap">
         <motion.h1
           className="text-2xl font-bold text-brand-blue"
           initial={{ opacity: 0, y: 10 }}
@@ -255,12 +261,12 @@ const Timetable = () => {
       )}
 
       {loading ? (
-        <p className="text-brand-blue-light">Loading...</p>
+        <Loader />
       ) : (
         <>
           {/* Upcoming Sessions — real instances, cancel/restore per session */}
           <h2 className="text-lg font-bold text-brand-blue mb-2">
-            Upcoming Sessions (Next 7 Days)
+            Today &amp; Tomorrow's Sessions
           </h2>
           <p className="text-brand-blue-light text-sm mb-4">
             Cancel an individual session (holiday, trainer unavailable, etc.)
@@ -270,7 +276,7 @@ const Timetable = () => {
             {sessionsByDay.length === 0 ? (
               <StaticCard>
                 <p className="text-brand-blue-light text-sm py-2">
-                  No upcoming sessions — regenerate the schedule after setting
+                  No sessions for today or tomorrow — regenerate the schedule after setting
                   up your Weekly Plan and Time Slots.
                 </p>
               </StaticCard>

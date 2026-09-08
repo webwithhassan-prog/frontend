@@ -64,16 +64,24 @@ export const CurrencyProvider = ({ children }) => {
       return `₹${Math.round(inrAmount).toLocaleString("en-IN")}`;
     }
     const raw = inrAmount * (rates[currency.code] || 1);
-    // Plain rounding, no coarsening — but a genuinely nonzero price should
-    // never display as "0" just because a strong currency (e.g. GBP, EUR)
-    // makes a small per-day amount round down to nothing.
-    const converted = raw > 0 ? Math.max(1, Math.round(raw)) : 0;
+    if (raw <= 0) return `${currency.symbol}0`;
+    // Small amounts (e.g. a per-day estimate in a strong currency like GBP
+    // or EUR) get up to 2 decimals so the real cost shows instead of being
+    // rounded away to "0" or padded up to a misleading "1". Larger amounts
+    // stay whole numbers — no one wants "$23.47" on a plan total.
+    if (raw < 10) {
+      const converted = Math.round(raw * 100) / 100;
+      return `${currency.symbol}${converted.toLocaleString(undefined, {
+        maximumFractionDigits: 2,
+      })}`;
+    }
+    const converted = Math.round(raw);
     return `${currency.symbol}${converted.toLocaleString()}`;
   };
 
   return (
     <CurrencyContext.Provider
-      value={{ currency, currencies, setCurrency, format }}
+      value={{ currency, currencies, setCurrency, format, rates }}
     >
       {children}
     </CurrencyContext.Provider>

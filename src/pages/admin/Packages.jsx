@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
+import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import Modal from "../../components/admin/Modal";
 
@@ -24,26 +25,15 @@ const durations = [30, 90, 180];
 
 const Packages = () => {
   const [plans, setPlans] = useState([]);
-  const [premiumAddon, setPremiumAddon] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState(emptyForm);
-  const [premiumPrice, setPremiumPrice] = useState("");
-  const [premiumSessions, setPremiumSessions] = useState("");
 
   const fetchData = async () => {
     try {
-      const [plansRes, premiumRes] = await Promise.all([
-        api.get("/plans"),
-        api.get("/premium-addon"),
-      ]);
+      const plansRes = await api.get("/plans");
       setPlans(plansRes.data);
-      setPremiumAddon(premiumRes.data);
-      if (premiumRes.data) {
-        setPremiumPrice(premiumRes.data.price);
-        setPremiumSessions(premiumRes.data.sessions_included);
-      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -107,22 +97,6 @@ const Packages = () => {
     fetchData();
   };
 
-  const handlePremiumUpdate = async (e) => {
-    e.preventDefault();
-    if (premiumAddon) {
-      await api.put(`/premium-addon/${premiumAddon._id}`, {
-        price: Number(premiumPrice),
-        sessions_included: Number(premiumSessions),
-      });
-    } else {
-      await api.post("/premium-addon", {
-        price: Number(premiumPrice),
-        sessions_included: Number(premiumSessions),
-      });
-    }
-    fetchData();
-  };
-
   const dietplans = plans.filter((p) => p.product_type === "dietplan");
   const workoutPlans = plans.filter((p) => p.product_type === "workout");
   const comboPlans = plans.filter((p) => p.product_type === "combo");
@@ -145,7 +119,7 @@ const Packages = () => {
       </div>
 
       {loading ? (
-        <p className="text-brand-blue-light">Loading...</p>
+        <Loader />
       ) : (
         <>
           <h2 className="text-lg font-bold text-brand-blue mb-4">
@@ -278,40 +252,6 @@ const Packages = () => {
             )}
           </div>
 
-          <h2 className="text-lg font-bold text-brand-blue mb-4">
-            Premium Add-on
-          </h2>
-          <Card className="max-w-md">
-            <form onSubmit={handlePremiumUpdate} className="space-y-4">
-              <div>
-                <label className="text-sm text-brand-blue-light">
-                  Price (₹)
-                </label>
-                <input
-                  type="number"
-                  value={premiumPrice}
-                  onChange={(e) => setPremiumPrice(e.target.value)}
-                  required
-                  className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 mt-1 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                />
-              </div>
-              <div>
-                <label className="text-sm text-brand-blue-light">
-                  Sessions Included
-                </label>
-                <input
-                  type="number"
-                  value={premiumSessions}
-                  onChange={(e) => setPremiumSessions(e.target.value)}
-                  required
-                  className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 mt-1 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                />
-              </div>
-              <Button type="submit" className="w-full">
-                {premiumAddon ? "Update" : "Create"} Premium Add-on
-              </Button>
-            </form>
-          </Card>
         </>
       )}
 

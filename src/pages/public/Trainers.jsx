@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import Card from '../../components/common/Card';
+import Loader from '../../components/common/Loader';
 
 const Trainers = () => {
   const [trainers, setTrainers] = useState([]);
@@ -38,28 +39,40 @@ const Trainers = () => {
       </motion.h1>
 
       {loading ? (
-        <p className="text-center text-brand-blue/70">Loading...</p>
+        <Loader />
       ) : (
         <>
           <h2 className="font-display text-lg text-brand-blue mb-6">TRAINERS</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            {trainers.map((t) => (
-              <Card key={t._id}>
-                <h3 className="font-display text-brand-blue text-base">{t.name}</h3>
-                <p className="text-brand-blue/70 text-sm mt-1">{t.specialty}</p>
-              </Card>
-            ))}
-          </div>
+          {trainers.length === 0 ? (
+            <p className="text-brand-blue/60 text-sm mb-16">
+              No trainers added yet — check back soon.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+              {trainers.map((t) => (
+                <Card key={t._id}>
+                  <h3 className="font-display text-brand-blue text-base">{t.name}</h3>
+                  <p className="text-brand-blue/70 text-sm mt-1">{t.specialty}</p>
+                </Card>
+              ))}
+            </div>
+          )}
 
           <h2 className="font-display text-lg text-brand-blue mb-6">CONSULTANTS</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {consultants.map((c) => (
-              <Card key={c._id}>
-                <h3 className="font-display text-brand-blue text-base">{c.name}</h3>
-                <p className="text-brand-blue/70 text-sm mt-1 capitalize">{c.specialty}</p>
-              </Card>
-            ))}
-          </div>
+          {consultants.length === 0 ? (
+            <p className="text-brand-blue/60 text-sm">
+              No consultants added yet — check back soon.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {consultants.map((c) => (
+                <Card key={c._id}>
+                  <h3 className="font-display text-brand-blue text-base">{c.name}</h3>
+                  <p className="text-brand-blue/70 text-sm mt-1 capitalize">{c.specialty}</p>
+                </Card>
+              ))}
+            </div>
+          )}
         </>
       )}
     </section>

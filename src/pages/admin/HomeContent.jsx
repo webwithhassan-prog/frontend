@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { Pencil, Trash2, Plus, Upload } from "lucide-react";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
+import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import Modal from "../../components/admin/Modal";
 
@@ -30,12 +31,297 @@ const formatUploadedAt = (isoDate) => {
 };
 
 const tabs = [
+  { key: "hero-banners", label: "Hero Banners" },
   { key: "transformations", label: "Transformation Videos" },
   { key: "demo-videos", label: "Demo Sessions" },
   { key: "testimonials", label: "Testimonials" },
 ];
 
 const emptyVideoForm = { title: "", youtube_link: "" };
+
+const emptyBannerForm = {
+  eyebrow: "",
+  title: "",
+  desc: "",
+  cta_label: "",
+  cta_link: "",
+  order: 0,
+};
+
+const HeroBannersManager = ({ onCountChange }) => {
+  const [banners, setBanners] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [formData, setFormData] = useState(emptyBannerForm);
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  const fetchBanners = async () => {
+    try {
+      const res = await api.get("/hero-banners");
+      setBanners(res.data);
+      onCountChange?.(res.data.length);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBanners();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const openAddModal = () => {
+    setFormData({ ...emptyBannerForm, order: banners.length });
+    setEditingId(null);
+    setPhotoFile(null);
+    setPhotoPreview(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (banner) => {
+    setFormData({
+      eyebrow: banner.eyebrow,
+      title: banner.title,
+      desc: banner.desc,
+      cta_label: banner.cta_label,
+      cta_link: banner.cta_link,
+      order: banner.order,
+    });
+    setEditingId(banner._id);
+    setPhotoFile(null);
+    setPhotoPreview(banner.image_url);
+    setIsModalOpen(true);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: name === "order" ? Number(value) : value });
+  };
+
+  const handlePhotoSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  };
+
+  const uploadPhotoToCloudinary = async () => {
+    const uploadData = new FormData();
+    uploadData.append("file", photoFile);
+    uploadData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    const res = await axios.post(
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+      uploadData,
+    );
+    return res.data.secure_url;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!editingId && !photoFile) {
+      toast.error("Please select an image");
+      return;
+    }
+    setSaving(true);
+    try {
+      const payload = { ...formData };
+      if (photoFile) {
+        payload.image_url = await uploadPhotoToCloudinary();
+      }
+      if (editingId) {
+        await api.put(`/hero-banners/${editingId}`, payload);
+        toast.success("Banner updated");
+      } else {
+        await api.post("/hero-banners", payload);
+        toast.success("Banner added");
+      }
+      setIsModalOpen(false);
+      fetchBanners();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Could not save banner");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this banner slide? This can't be undone.")) return;
+    try {
+      await api.delete(`/hero-banners/${id}`);
+      toast.success("Banner removed");
+      fetchBanners();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Could not remove banner");
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
+        <h2 className="text-lg font-bold text-brand-blue">Hero Banners</h2>
+        <Button onClick={openAddModal} className="self-start sm:self-auto">
+          <span className="flex items-center gap-2 whitespace-nowrap">
+            <Plus size={16} /> Add Banner
+          </span>
+        </Button>
+      </div>
+      <p className="text-brand-blue-light text-sm mb-6">
+        These are the sliding banners at the top of the Home page — image,
+        headline, description, and button all editable here. Shown in "Order"
+        sequence, lowest first.
+      </p>
+
+      {loading ? (
+        <Loader />
+      ) : banners.length === 0 ? (
+        <p className="text-brand-blue-light">
+          No banners yet — add one to show it on the Home page hero.
+        </p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {banners.map((b) => (
+            <Card key={b._id} className="overflow-hidden">
+              <div className="aspect-[2/1] rounded-lg overflow-hidden bg-brand-blue-pale mb-3">
+                <img
+                  src={b.image_url}
+                  alt={b.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <p className="text-brand-orange text-[10px] font-bold tracking-wide mb-1">
+                {b.eyebrow}
+              </p>
+              <h3 className="text-brand-blue font-bold text-sm mb-1">
+                {b.title}
+              </h3>
+              <p className="text-brand-blue-light text-xs mb-2 line-clamp-2">
+                {b.desc}
+              </p>
+              <p className="text-brand-blue-light text-xs mb-3">
+                Button: <span className="font-semibold">{b.cta_label}</span> →{" "}
+                {b.cta_link} · Order {b.order}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => openEditModal(b)}
+                  className="text-brand-blue-light hover:text-brand-blue"
+                >
+                  <Pencil size={18} />
+                </button>
+                <button
+                  onClick={() => handleDelete(b._id)}
+                  className="text-red-400 hover:text-red-600"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingId ? "Edit Banner" : "Add Banner"}
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-24 h-12 rounded-lg bg-brand-blue-pale overflow-hidden flex items-center justify-center flex-shrink-0">
+              {photoPreview ? (
+                <img
+                  src={photoPreview}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Upload size={20} className="text-brand-blue/40" />
+              )}
+            </div>
+            <label className="cursor-pointer text-sm font-semibold text-brand-orange">
+              {photoFile ? "Change Image" : "Upload Image"}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoSelect}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          <input
+            type="text"
+            name="eyebrow"
+            placeholder="Eyebrow tag (e.g. LIVE GROUP WORKOUTS)"
+            value={formData.eyebrow}
+            onChange={handleChange}
+            required
+            className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+          />
+          <input
+            type="text"
+            name="title"
+            placeholder="Headline"
+            value={formData.title}
+            onChange={handleChange}
+            required
+            className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+          />
+          <textarea
+            name="desc"
+            placeholder="Description"
+            value={formData.desc}
+            onChange={handleChange}
+            required
+            rows={3}
+            className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <input
+              type="text"
+              name="cta_label"
+              placeholder="Button Label"
+              value={formData.cta_label}
+              onChange={handleChange}
+              required
+              className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+            />
+            <input
+              type="text"
+              name="cta_link"
+              placeholder="Button Link (e.g. /plans)"
+              value={formData.cta_link}
+              onChange={handleChange}
+              required
+              className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-brand-blue-light mb-1 block">
+              Display order (lowest shows first)
+            </label>
+            <input
+              type="number"
+              name="order"
+              value={formData.order}
+              onChange={handleChange}
+              className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+            />
+          </div>
+
+          <Button type="submit" className="w-full" disabled={saving}>
+            {saving ? "Saving..." : editingId ? "Save Changes" : "Add Banner"}
+          </Button>
+        </form>
+      </Modal>
+    </div>
+  );
+};
 
 const VideoManager = ({ endpoint, title, description, aspect, onCountChange }) => {
   const [videos, setVideos] = useState([]);
@@ -122,7 +408,7 @@ const VideoManager = ({ endpoint, title, description, aspect, onCountChange }) =
       <p className="text-brand-blue-light text-sm mb-6">{description}</p>
 
       {loading ? (
-        <p className="text-brand-blue-light">Loading...</p>
+        <Loader />
       ) : videos.length === 0 ? (
         <p className="text-brand-blue-light">No videos yet — add one above.</p>
       ) : (
@@ -294,7 +580,7 @@ const TestimonialsManager = ({ onCountChange }) => {
       </p>
 
       {loading ? (
-        <p className="text-brand-blue-light">Loading...</p>
+        <Loader />
       ) : testimonials.length === 0 ? (
         <p className="text-brand-blue-light">
           No testimonials yet — add one to show it on the Home page slider.
@@ -365,8 +651,9 @@ const TestimonialsManager = ({ onCountChange }) => {
 };
 
 const HomeContent = () => {
-  const [activeTab, setActiveTab] = useState("transformations");
+  const [activeTab, setActiveTab] = useState("hero-banners");
   const [counts, setCounts] = useState({
+    "hero-banners": null,
     transformations: null,
     "demo-videos": null,
     testimonials: null,
@@ -377,6 +664,7 @@ const HomeContent = () => {
 
   useEffect(() => {
     const endpoints = {
+      "hero-banners": "hero-banners",
       transformations: "transformation-videos",
       "demo-videos": "demo-videos",
       testimonials: "testimonials",
@@ -435,6 +723,9 @@ const HomeContent = () => {
         <div className="pointer-events-none absolute right-0 top-0 bottom-1 w-8 bg-gradient-to-l from-brand-blue-pale to-transparent" />
       </div>
 
+      {activeTab === "hero-banners" && (
+        <HeroBannersManager onCountChange={setCount("hero-banners")} />
+      )}
       {activeTab === "transformations" && (
         <VideoManager
           endpoint="transformation-videos"

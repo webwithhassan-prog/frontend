@@ -1,23 +1,59 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { Search, Download, FileText } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
+import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
+import { useCurrency } from "../../context/CurrencyContext";
+import logo from "../../assets/logo.jpeg";
 
-const categories = ["plan", "consultation", "package"];
+// Brand palette, matching src/index.css — jsPDF wants plain RGB tuples,
+// not CSS variables.
+const BRAND_BLUE = [18, 34, 74];
+const BRAND_BLUE_LIGHT = [44, 68, 209];
+const BRAND_ORANGE = [247, 107, 28];
+const BRAND_BLUE_PALE = [234, 241, 255];
+
+const categories = ["plan", "consultation", "package", "ebook", "course", "custom"];
+
+// Escapes a value for a CSV cell — wraps in quotes and doubles any embedded
+// quotes whenever the value itself could contain a comma, quote, or newline.
+const csvCell = (value) => {
+  const str = String(value ?? "");
+  return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+};
+
+const downloadCsv = (filename, rows) => {
+  const csv = rows.map((row) => row.map(csvCell).join(",")).join("\r\n");
+  const blob = new Blob([`﻿${csv}`], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
 
 const Sales = () => {
   const [summary, setSummary] = useState({
     daily_total: 0,
     monthly_total: 0,
-    daily_total_usd: 0,
-    monthly_total_usd: 0,
+    daily_total_settled: 0,
+    monthly_total_settled: 0,
   });
   const [category, setCategory] = useState("");
   const [searchResults, setSearchResults] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
+  const { currencies } = useCurrency();
+
+  const symbolFor = (code) =>
+    currencies.find((c) => c.code === code)?.symbol || `${code || "INR"} `;
 
   const fetchSummary = async () => {
     try {
@@ -48,6 +84,128 @@ const Sales = () => {
     }
   };
 
+  const loadImageAsDataUrl = (src) =>
+    fetch(src)
+      .then((res) => res.blob())
+      .then(
+        (blob) =>
+          new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          }),
+      );
+
+  const handleExportPdf = async () => {
+    if (!searchResults) return;
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const today = new Date();
+
+    // Header band
+    doc.setFillColor(...BRAND_BLUE);
+    doc.rect(0, 0, pageWidth, 32, "F");
+
+    try {
+      const logoDataUrl = await loadImageAsDataUrl(logo);
+      doc.addImage(logoDataUrl, "JPEG", 14, 7, 18, 18);
+    } catch {
+      // Logo is a nice-to-have — a failed fetch shouldn't block the report.
+    }
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("FITNESS ZONE", 37, 15);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...BRAND_BLUE_PALE);
+    doc.text("Sales Report", 37, 22);
+
+    doc.setFontSize(9);
+    doc.text(
+      `Generated ${today.toLocaleDateString()} ${today.toLocaleTimeString()}`,
+      pageWidth - 14,
+      15,
+      { align: "right" },
+    );
+    doc.text(
+      `Category: ${category ? category[0].toUpperCase() + category.slice(1) : "All"}`,
+      pageWidth - 14,
+      22,
+      { align: "right" },
+    );
+
+    // Summary strip
+    doc.setTextColor(...BRAND_BLUE);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text(
+      `Total: £${searchResults.total_settled.toLocaleString("en-GB", { maximumFractionDigits: 2 })}  ·  ${searchResults.count} entries`,
+      14,
+      42,
+    );
+
+    autoTable(doc, {
+      startY: 48,
+      head: [["Date", "Category", "Currency", "Amount Paid", "Base Price (INR)"]],
+      body: searchResults.logs.map((log) => [
+        new Date(log.date).toLocaleDateString(),
+        log.category,
+        log.currency_code || "INR",
+        `${symbolFor(log.currency_code)}${(log.amount_display ?? log.amount).toLocaleString(undefined, { maximumFractionDigits: 2 })}`,
+        `INR ${log.amount.toLocaleString("en-IN")}`,
+      ]),
+      theme: "striped",
+      headStyles: {
+        fillColor: BRAND_BLUE,
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+      },
+      alternateRowStyles: { fillColor: BRAND_BLUE_PALE },
+      styles: { fontSize: 9, cellPadding: 4, textColor: BRAND_BLUE },
+      margin: { left: 14, right: 14 },
+      didDrawPage: () => {
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFontSize(8);
+        doc.setTextColor(...BRAND_BLUE_LIGHT);
+        doc.text(
+          "FITNESS ZONE • Confidential Sales Report",
+          14,
+          doc.internal.pageSize.getHeight() - 10,
+        );
+        doc.text(
+          `Page ${pageCount}`,
+          pageWidth - 14,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: "right" },
+        );
+      },
+    });
+
+    doc.save(`sales-${category || "all"}-${today.toISOString().slice(0, 10)}.pdf`);
+  };
+
+  const handleExportCsv = () => {
+    if (!searchResults) return;
+    const rows = [
+      ["Date", "Category", "Currency", "Amount Paid", "Base Price (INR)"],
+      ...searchResults.logs.map((log) => [
+        new Date(log.date).toLocaleDateString(),
+        log.category,
+        log.currency_code || "INR",
+        (log.amount_display ?? log.amount).toLocaleString(undefined, {
+          maximumFractionDigits: 2,
+        }),
+        log.amount,
+      ]),
+    ];
+    const today = new Date().toISOString().slice(0, 10);
+    downloadCsv(`sales-${category || "all"}-${today}.csv`, rows);
+  };
+
   return (
     <div>
       <motion.h1
@@ -65,7 +223,7 @@ const Sales = () => {
           <p className="text-3xl font-bold text-brand-blue">
             {loading
               ? "—"
-              : `$${summary.daily_total_usd.toLocaleString("en-US", { maximumFractionDigits: 2 })}`}
+              : `£${summary.daily_total_settled.toLocaleString("en-GB", { maximumFractionDigits: 2 })}`}
           </p>
           {!loading && (
             <p className="text-brand-blue-light text-xs mt-1">
@@ -80,7 +238,7 @@ const Sales = () => {
           <p className="text-3xl font-bold text-brand-blue">
             {loading
               ? "—"
-              : `$${summary.monthly_total_usd.toLocaleString("en-US", { maximumFractionDigits: 2 })}`}
+              : `£${summary.monthly_total_settled.toLocaleString("en-GB", { maximumFractionDigits: 2 })}`}
           </p>
           {!loading && (
             <p className="text-brand-blue-light text-xs mt-1">
@@ -116,17 +274,37 @@ const Sales = () => {
         </div>
       </Card>
 
-      {searching && <p className="text-brand-blue-light">Searching...</p>}
+      {searching && <Loader size={18} />}
 
       {searchResults && !searching && (
         <Card className="overflow-x-auto">
-          <p className="text-brand-blue font-semibold mb-4">
-            Total: $
-            {searchResults.total_usd.toLocaleString("en-US", {
-              maximumFractionDigits: 2,
-            })}{" "}
-            ({searchResults.count} entries)
-          </p>
+          <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
+            <p className="text-brand-blue font-semibold">
+              Total: £
+              {searchResults.total_settled.toLocaleString("en-GB", {
+                maximumFractionDigits: 2,
+              })}{" "}
+              ({searchResults.count} entries)
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleExportCsv}
+                disabled={searchResults.logs.length === 0}
+                className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full bg-brand-orange/10 text-brand-orange hover:bg-brand-orange/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Download size={14} />
+                Export CSV
+              </button>
+              <button
+                onClick={handleExportPdf}
+                disabled={searchResults.logs.length === 0}
+                className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full bg-brand-blue-light/10 text-brand-blue-light hover:bg-brand-blue-light/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <FileText size={14} />
+                Export PDF
+              </button>
+            </div>
+          </div>
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-brand-blue border-b border-brand-blue-pale">
@@ -151,10 +329,11 @@ const Sales = () => {
                     {log.category}
                   </td>
                   <td className="py-3 px-2 text-brand-blue font-medium">
-                    $
-                    {log.amount_usd.toLocaleString("en-US", {
-                      maximumFractionDigits: 2,
-                    })}
+                    {symbolFor(log.currency_code)}
+                    {(log.amount_display ?? log.amount).toLocaleString(
+                      undefined,
+                      { maximumFractionDigits: 2 },
+                    )}
                   </td>
                   <td className="py-3 px-2 text-brand-blue-light">
                     ₹{log.amount.toLocaleString("en-IN")}

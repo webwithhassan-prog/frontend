@@ -1,8 +1,12 @@
 import { motion } from "framer-motion";
-import { MessageCircle, Mail, MapPin, Building2, User } from "lucide-react";
+import { Mail, MapPin, Building2, User } from "lucide-react";
 import InstagramIcon from "../../components/common/InstagramIcon";
+import WhatsAppIcon from "../../components/common/WhatsAppIcon";
+import { useSettings } from "../../context/SettingsContext";
 
 const Contact = () => {
+  const { settings } = useSettings();
+
   return (
     <section className="max-w-4xl mx-auto px-6 py-20">
       <motion.h1
@@ -72,10 +76,11 @@ const Contact = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           {
-            icon: MessageCircle,
+            icon: WhatsAppIcon,
             label: "WHATSAPP",
             desc: "Fastest way to reach us",
-            onClick: () => window.open("https://wa.me/yourNumber", "_blank"),
+            onClick: () =>
+              window.open(`https://wa.me/${settings.whatsapp_general}`, "_blank"),
           },
           {
             icon: InstagramIcon,

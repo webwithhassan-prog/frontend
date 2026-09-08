@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
+import Loader from "../../components/common/Loader";
 
 const rangeOptions = [7, 30, 90];
 
@@ -82,7 +83,7 @@ const Analytics = () => {
       </div>
 
       {loading || !summary ? (
-        <p className="text-brand-blue-light">Loading...</p>
+        <Loader />
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">

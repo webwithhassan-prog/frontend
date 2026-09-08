@@ -1,6 +1,6 @@
 const siteName = "Fitness Zone";
 const defaultDescription =
-  "Fitness Zone is a fitness platform built for women — customized dietplans, live workout sessions with female trainers, and private 1-on-1 consultations with a dietician, gynecologist, or psychiatrist.";
+  "Fitness Zone is a fitness platform built for women — customized dietplans, live workout sessions with female trainers, and private 1-on-1 consultations with a dietician, gynecologist, psychiatrist, physiotherapist, or personal trainer.";
 
 // Path -> { title, description }. Falls back to the defaults below for any
 // route not listed here (e.g. dynamic ones like /reset-password/:token).
@@ -23,7 +23,7 @@ const pageMeta = {
   "/consultation": {
     title: `Book a 1-on-1 Consultation | ${siteName}`,
     description:
-      "Book a private consultation with a dietician, gynecologist, or psychiatrist — no package required.",
+      "Book a private consultation with a dietician, gynecologist, psychiatrist, physiotherapist, or personal trainer — no package required.",
   },
   "/timetable": {
     title: `Time Slots | ${siteName}`,
@@ -42,7 +42,7 @@ const pageMeta = {
   "/careers": {
     title: `Careers — Professional Partner Onboarding | ${siteName}`,
     description:
-      "Are you a dietician, gynecologist, psychiatrist, or personal trainer? Apply to offer 1-on-1 consultations through Fitness Zone.",
+      "Are you a dietician, gynecologist, psychiatrist, physiotherapist, or personal trainer? Apply to offer 1-on-1 consultations through Fitness Zone.",
   },
   "/contact": {
     title: `Contact Us | ${siteName}`,

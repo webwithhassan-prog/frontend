@@ -57,8 +57,7 @@ const PaymentSuccess = () => {
             PAYMENT SUCCESSFUL
           </h1>
           <p className="text-brand-blue/70 mb-8 leading-relaxed">
-            You're all set — your package is now active and ready in your
-            profile.
+            You're all set — this is now ready in your profile.
           </p>
           <Button
             onClick={() => (window.location.href = "/client")}
@@ -66,6 +65,10 @@ const PaymentSuccess = () => {
           >
             Go to My Profile
           </Button>
+          <p className="text-brand-blue/40 text-xs mt-4">
+            We've also emailed your receipt — check your spam or junk folder
+            if it doesn't show up in a few minutes.
+          </p>
         </Card>
       </motion.div>
 

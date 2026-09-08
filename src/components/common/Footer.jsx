@@ -1,7 +1,11 @@
 import { motion } from "framer-motion";
 import logo from "../../assets/logo.jpeg";
+import WhatsAppIcon from "./WhatsAppIcon";
+import { useSettings } from "../../context/SettingsContext";
 
 const Footer = () => {
+  const { settings } = useSettings();
+
   return (
     <footer className="bg-brand-blue text-white">
       <div className="max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -35,6 +39,7 @@ const Footer = () => {
           <ul className="space-y-2 text-sm">
             {[
               { label: "Home", href: "/" },
+              { label: "About Us", href: "/about" },
               { label: "Packages", href: "/plans" },
               { label: "Trainers", href: "/trainers" },
               { label: "Careers", href: "/careers" },
@@ -60,13 +65,14 @@ const Footer = () => {
           </h4>
           <div className="flex flex-col items-start gap-3">
             <motion.a
-              href="https://wa.me/yourNumber"
+              href={`https://wa.me/${settings.whatsapp_general}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-brand-orange px-5 py-2 rounded-full font-semibold text-sm"
+              className="inline-flex items-center gap-2 bg-brand-orange px-5 py-2 rounded-full font-semibold text-sm"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
+              <WhatsAppIcon size={16} />
               Chat on WhatsApp
             </motion.a>
             <motion.a

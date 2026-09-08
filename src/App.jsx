@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CurrencyProvider } from "./context/CurrencyContext";
+import { SettingsProvider } from "./context/SettingsContext";
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
 import OfferPopup from "./components/common/OfferPopup";
@@ -20,12 +21,15 @@ import Careers from "./pages/public/Careers";
 import Contact from "./pages/public/Contact";
 import ZoomAccess from "./pages/public/ZoomAccess";
 import PaymentSuccess from "./pages/public/PaymentSuccess";
+import InvoiceSuccess from "./pages/public/InvoiceSuccess";
+import PayNow from "./pages/public/PayNow";
 import PaymentCancelled from "./pages/public/PaymentCancelled";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import NotFound from "./pages/public/NotFound";
+import About from "./pages/public/About";
 import PrivacyPolicy from "./pages/public/PrivacyPolicy";
 import TermsOfService from "./pages/public/TermsOfService";
 
@@ -37,16 +41,18 @@ import Packages from "./pages/admin/Packages";
 import Timetable from "./pages/admin/Timetable";
 import Professionals from "./pages/admin/Professionals";
 import Sales from "./pages/admin/Sales";
-import Content from "./pages/admin/Content";
+import CustomInvoices from "./pages/admin/CustomInvoices";
 import HomeContent from "./pages/admin/HomeContent";
 import AdminEBooks from "./pages/admin/EBooks";
-import AdminOffers from "./pages/admin/Offers";
-import AdminCoupons from "./pages/admin/Coupons";
+import Promotions from "./pages/admin/Promotions";
+import AdminSettings from "./pages/admin/Settings";
+import AdminCourses from "./pages/admin/Courses";
+import RecordedGallery from "./pages/admin/RecordedGallery";
+import Reviews from "./pages/admin/Reviews";
 import Analytics from "./pages/admin/Analytics";
 
 import ClientLayout from "./components/client/ClientLayout";
 import Profile from "./pages/client/Profile";
-import BookConsultation from "./pages/client/BookConsultation";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const { role, loading } = useAuth();
@@ -90,6 +96,14 @@ function AppRoutes() {
           element={
             <PublicLayout>
               <NotFound />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <PublicLayout>
+              <About />
             </PublicLayout>
           }
         />
@@ -190,6 +204,22 @@ function AppRoutes() {
           }
         />
         <Route
+          path="/invoice-success"
+          element={
+            <PublicLayout>
+              <InvoiceSuccess />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/pay"
+          element={
+            <PublicLayout>
+              <PayNow />
+            </PublicLayout>
+          }
+        />
+        <Route
           path="/payment-cancelled"
           element={
             <PublicLayout>
@@ -242,7 +272,6 @@ function AppRoutes() {
           <Route index element={<Profile />} />
           <Route path="dashboard" element={<Navigate to="/client" replace />} />
           <Route path="profile" element={<Profile />} />
-          <Route path="book-consultation" element={<BookConsultation />} />
         </Route>
 
         {/* Admin panel — nested routes inside AdminLayout */}
@@ -262,11 +291,14 @@ function AppRoutes() {
           <Route path="timetable" element={<Timetable />} />
           <Route path="professionals" element={<Professionals />} />
           <Route path="sales" element={<Sales />} />
-          <Route path="content" element={<Content />} />
+          <Route path="custom-invoices" element={<CustomInvoices />} />
           <Route path="home-content" element={<HomeContent />} />
           <Route path="ebooks" element={<AdminEBooks />} />
-          <Route path="offers" element={<AdminOffers />} />
-          <Route path="coupons" element={<AdminCoupons />} />
+          <Route path="promotions" element={<Promotions />} />
+          <Route path="courses" element={<AdminCourses />} />
+          <Route path="recorded-gallery" element={<RecordedGallery />} />
+          <Route path="reviews" element={<Reviews />} />
+          <Route path="settings" element={<AdminSettings />} />
           <Route path="analytics" element={<Analytics />} />
         </Route>
       </Routes>
@@ -277,6 +309,7 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
+      <SettingsProvider>
       <CurrencyProvider>
       <Toaster
         position="top-center"
@@ -299,6 +332,7 @@ function App() {
       />
       <AppRoutes />
       </CurrencyProvider>
+      </SettingsProvider>
     </AuthProvider>
   );
 }

@@ -2,7 +2,8 @@
 
 @theme {
   --color-brand-blue: #12224a;
-  --color-brand-blue-light: #2b5fe2;
+  --color-brand-blue-light: #2c44d1;
+  --color-brand-blue-light-dark: #23359e;
   --color-brand-blue-pale: #eaf1ff;
   --color-brand-orange: #f76b1c;
   --color-brand-orange-dark: #d9560f;
@@ -13,7 +14,7 @@
 }
 
 body {
-  background-color: #fff;
+  background-color: #fcfcfc;
   color: var(--color-brand-blue);
   font-family: var(--font-body);
 }

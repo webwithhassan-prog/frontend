@@ -51,14 +51,11 @@ const Login = () => {
 
       // Resume a pending package checkout, if any
       const pendingPlanIdsRaw = localStorage.getItem("pending_plan_ids");
-      const pendingIncludePremium =
-        localStorage.getItem("pending_include_premium") === "true";
       const pendingCouponCode = localStorage.getItem("pending_coupon_code");
 
       if (pendingPlanIdsRaw) {
         const pendingPlanIds = JSON.parse(pendingPlanIdsRaw);
         localStorage.removeItem("pending_plan_ids");
-        localStorage.removeItem("pending_include_premium");
         localStorage.removeItem("pending_coupon_code");
 
         if (pendingPlanIds.length > 0) {
@@ -66,8 +63,8 @@ const Login = () => {
             const checkoutRes = await api.post("/payments/stripe/checkout", {
               client_id: res.data.client_id,
               plan_ids: pendingPlanIds,
-              include_premium: pendingIncludePremium,
               coupon_code: pendingCouponCode || undefined,
+              currency_code: localStorage.getItem("selected_currency") || "INR",
             });
             window.location.href = checkoutRes.data.url;
             return;
@@ -90,6 +87,7 @@ const Login = () => {
             {
               client_id: res.data.client_id,
               ebook_id: pendingEbookId,
+              currency_code: localStorage.getItem("selected_currency") || "INR",
             },
           );
           window.location.href = ebookCheckoutRes.data.url;
@@ -98,6 +96,29 @@ const Login = () => {
           toast.error(
             checkoutErr.response?.data?.message ||
               "We couldn't start checkout for your e-book. Please try again from the E-Books page.",
+          );
+        }
+      }
+
+      // Resume a pending course checkout, if any
+      const pendingCourseId = localStorage.getItem("pending_course_id");
+      if (pendingCourseId) {
+        localStorage.removeItem("pending_course_id");
+        try {
+          const courseCheckoutRes = await api.post(
+            "/payments/stripe/course-checkout",
+            {
+              client_id: res.data.client_id,
+              course_id: pendingCourseId,
+              currency_code: localStorage.getItem("selected_currency") || "INR",
+            },
+          );
+          window.location.href = courseCheckoutRes.data.url;
+          return;
+        } catch (checkoutErr) {
+          toast.error(
+            checkoutErr.response?.data?.message ||
+              "We couldn't start checkout for your course. Please try again from the E-Books & Courses page.",
           );
         }
       }
@@ -114,6 +135,7 @@ const Login = () => {
             {
               client_id: res.data.client_id,
               consultant_id: pendingConsultantId,
+              currency_code: localStorage.getItem("selected_currency") || "INR",
             },
           );
           window.location.href = consultationCheckoutRes.data.url;

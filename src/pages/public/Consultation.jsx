@@ -20,6 +20,7 @@ import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
+import Loader from "../../components/common/Loader";
 import { useCurrency } from "../../context/CurrencyContext";
 
 const consultationSpecialties = [
@@ -39,7 +40,7 @@ const Consultation = () => {
   const [bookingId, setBookingId] = useState(null);
   const navigate = useNavigate();
   const { role } = useAuth();
-  const { format } = useCurrency();
+  const { format, currency } = useCurrency();
 
   const handleSelectSpecialty = async (specialty) => {
     setSelectedSpecialty(specialty);
@@ -72,6 +73,7 @@ const Consultation = () => {
       const res = await api.post("/payments/stripe/consultation-checkout", {
         client_id: clientId,
         consultant_id: consultant._id,
+        currency_code: currency.code,
       });
       window.location.href = res.data.url;
     } catch (err) {
@@ -152,9 +154,7 @@ const Consultation = () => {
               Available {selectedSpecialty.label}s
             </p>
             {loadingConsultants ? (
-              <p className="text-brand-blue/60 text-sm text-center">
-                Loading...
-              </p>
+              <Loader size={18} />
             ) : consultants.length === 0 ? (
               <p className="text-brand-blue/60 text-sm text-center">
                 No {selectedSpecialty.label.toLowerCase()}s available right

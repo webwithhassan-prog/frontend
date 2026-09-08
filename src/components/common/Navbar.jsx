@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu,
   X,
-  MessageCircle,
   ChevronDown,
   User,
   LogOut,
@@ -12,9 +11,10 @@ import {
 } from "lucide-react";
 import Button from "./Button";
 import InstagramIcon from "./InstagramIcon";
-import CurrencySwitcher from "./CurrencySwitcher";
+import WhatsAppIcon from "./WhatsAppIcon";
 import logo from "../../assets/logo.jpeg";
 import { useAuth } from "../../context/AuthContext";
+import { useSettings } from "../../context/SettingsContext";
 
 const packageOptions = [
   { label: "Customized Dietplan", type: "dietplan" },
@@ -26,7 +26,7 @@ const navLinks = [
   { label: "Home", href: "/" },
   { label: "1-on-1", href: "/consultation" },
   { label: "Time Slots", href: "/timetable" },
-  { label: "Jobs", href: "/careers" },
+  { label: "Careers", href: "/careers" },
   { label: "E-Books & Courses", href: "/ebooks" },
 ];
 
@@ -44,12 +44,12 @@ const searchablePages = [
   { label: "Terms of Service", href: "/terms" },
 ];
 
-// TODO: add your WhatsApp number here, e.g. "https://wa.me/923001234567"
-const whatsappLink = "https://wa.me/";
 const instagramLink = "https://www.instagram.com/fitness_zone5566";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { settings } = useSettings();
+  const whatsappLink = `https://wa.me/${settings.whatsapp_general}`;
   const [isPackagesOpen, setIsPackagesOpen] = useState(false);
   const [isMobilePackagesOpen, setIsMobilePackagesOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -81,13 +81,13 @@ const Navbar = () => {
       <nav className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <a href="/" className="flex items-center gap-2">
+            <a href="/" className="flex items-center gap-2.5">
               <img
                 src={logo}
                 alt="Fitness Zone"
-                className="h-10 w-10 object-contain"
+                className="h-14 w-14 object-contain"
               />
-              <span className="font-display text-brand-blue text-sm tracking-wide hidden sm:block">
+              <span className="font-display text-brand-blue text-lg tracking-wide hidden sm:block">
                 FITNESS <span className="text-brand-orange">ZONE</span>
               </span>
             </a>
@@ -158,7 +158,6 @@ const Navbar = () => {
 
           {/* Desktop actions */}
           <div className="hidden lg:flex items-center gap-4 pl-4 ml-2 border-l border-brand-blue-pale">
-            <CurrencySwitcher />
             <a
               href={whatsappLink}
               target="_blank"
@@ -166,7 +165,7 @@ const Navbar = () => {
               className="text-brand-blue/70 hover:text-brand-orange transition-colors"
               title="Chat on WhatsApp"
             >
-              <MessageCircle size={19} />
+              <WhatsAppIcon size={19} />
             </a>
             <a
               href={instagramLink}
@@ -294,152 +293,153 @@ const Navbar = () => {
       {/* Mobile menu — full-screen overlay, portaled to escape the blurred sticky header */}
       {createPortal(
         <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            className="lg:hidden fixed inset-0 z-[100] bg-white flex flex-col"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-          >
-            <div className="flex items-center justify-between px-6 py-5 shrink-0">
-              <a
-                href="/"
-                className="flex items-center gap-2"
-                onClick={() => setIsOpen(false)}
-              >
-                <img
-                  src={logo}
-                  alt="Fitness Zone"
-                  className="h-10 w-10 object-contain"
-                />
-                <span className="font-display text-brand-blue text-sm tracking-wide">
-                  FITNESS <span className="text-brand-orange">ZONE</span>
-                </span>
-              </a>
-              <button
-                className="text-brand-blue"
-                onClick={() => setIsOpen(false)}
-              >
-                <X size={26} />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-6 pb-10 flex flex-col">
-              <div className="flex flex-col mt-2">
-                {navLinks.map((link, i) => (
-                  <motion.a
-                    key={link.href}
-                    href={link.href}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.05 * i }}
-                    className="text-brand-blue text-2xl font-display py-3 border-b border-brand-blue-pale/60"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {link.label}
-                  </motion.a>
-                ))}
-
-                <button
-                  onClick={() => setIsMobilePackagesOpen(!isMobilePackagesOpen)}
-                  className="flex items-center justify-between text-brand-blue text-2xl font-display py-3 border-b border-brand-blue-pale/60"
+          {isOpen && (
+            <motion.div
+              className="lg:hidden fixed inset-0 z-[100] bg-white flex flex-col"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              <div className="flex items-center justify-between px-6 py-5 shrink-0">
+                <a
+                  href="/"
+                  className="flex items-center gap-2.5"
+                  onClick={() => setIsOpen(false)}
                 >
-                  Packages
-                  <ChevronDown
-                    size={20}
-                    className={`transition-transform ${isMobilePackagesOpen ? "rotate-180" : ""}`}
+                  <img
+                    src={logo}
+                    alt="Fitness Zone"
+                    className="h-14 w-14 object-contain"
                   />
+                  <span className="font-display text-brand-blue text-lg tracking-wide">
+                    FITNESS <span className="text-brand-orange">ZONE</span>
+                  </span>
+                </a>
+                <button
+                  className="text-brand-blue"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <X size={26} />
                 </button>
-                <AnimatePresence>
-                  {isMobilePackagesOpen && (
-                    <motion.div
-                      className="flex flex-col pl-2 overflow-hidden"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25 }}
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-6 pb-10 flex flex-col">
+                <div className="flex flex-col mt-2">
+                  {navLinks.map((link, i) => (
+                    <motion.a
+                      key={link.href}
+                      href={link.href}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.05 * i }}
+                      className="text-brand-blue text-2xl font-display py-3 border-b border-brand-blue-pale/60"
+                      onClick={() => setIsOpen(false)}
                     >
-                      {packageOptions.map((opt) => (
-                        <a
-                          key={opt.type}
-                          href={`/plans?type=${opt.type}`}
-                          className="text-brand-blue/70 text-base py-2.5"
-                          onClick={() => setIsOpen(false)}
-                        >
-                          {opt.label}
-                        </a>
-                      ))}
-                    </motion.div>
+                      {link.label}
+                    </motion.a>
+                  ))}
+
+                  <button
+                    onClick={() =>
+                      setIsMobilePackagesOpen(!isMobilePackagesOpen)
+                    }
+                    className="flex items-center justify-between text-brand-blue text-2xl font-display py-3 border-b border-brand-blue-pale/60"
+                  >
+                    Packages
+                    <ChevronDown
+                      size={20}
+                      className={`transition-transform ${isMobilePackagesOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  <AnimatePresence>
+                    {isMobilePackagesOpen && (
+                      <motion.div
+                        className="flex flex-col pl-2 overflow-hidden"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25 }}
+                      >
+                        {packageOptions.map((opt) => (
+                          <a
+                            key={opt.type}
+                            href={`/plans?type=${opt.type}`}
+                            className="text-brand-blue/70 text-base py-2.5"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            {opt.label}
+                          </a>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <div className="flex items-center gap-6 mt-6">
+                  <a
+                    href={whatsappLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-brand-blue/70 text-sm"
+                  >
+                    <WhatsAppIcon size={19} />
+                    WhatsApp
+                  </a>
+                  <a
+                    href={instagramLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-brand-blue/70 text-sm"
+                  >
+                    <InstagramIcon size={19} />
+                    Instagram
+                  </a>
+                </div>
+
+                <div className="mt-auto pt-8">
+                  {isClient ? (
+                    <div className="flex flex-col gap-4">
+                      <a
+                        href="/client"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-2 text-brand-blue font-medium text-lg"
+                      >
+                        <User size={20} />
+                        My Profile
+                      </a>
+                      <button
+                        onClick={() => {
+                          logout();
+                          setIsOpen(false);
+                        }}
+                        className="flex items-center gap-2 text-brand-blue/60 font-medium text-lg text-left"
+                      >
+                        <LogOut size={20} />
+                        Logout
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-4">
+                      <a
+                        href="/login"
+                        onClick={() => setIsOpen(false)}
+                        className="text-brand-blue font-medium text-lg"
+                      >
+                        Login
+                      </a>
+                      <Button
+                        onClick={() => (window.location.href = "/signup")}
+                        className="w-full"
+                      >
+                        Join Now
+                      </Button>
+                    </div>
                   )}
-                </AnimatePresence>
+                </div>
               </div>
-
-              <div className="flex items-center gap-6 mt-6">
-                <CurrencySwitcher />
-                <a
-                  href={whatsappLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-brand-blue/70 text-sm"
-                >
-                  <MessageCircle size={19} />
-                  WhatsApp
-                </a>
-                <a
-                  href={instagramLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-brand-blue/70 text-sm"
-                >
-                  <InstagramIcon size={19} />
-                  Instagram
-                </a>
-              </div>
-
-              <div className="mt-auto pt-8">
-                {isClient ? (
-                  <div className="flex flex-col gap-4">
-                    <a
-                      href="/client"
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-2 text-brand-blue font-medium text-lg"
-                    >
-                      <User size={20} />
-                      My Profile
-                    </a>
-                    <button
-                      onClick={() => {
-                        logout();
-                        setIsOpen(false);
-                      }}
-                      className="flex items-center gap-2 text-brand-blue/60 font-medium text-lg text-left"
-                    >
-                      <LogOut size={20} />
-                      Logout
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-4">
-                    <a
-                      href="/login"
-                      onClick={() => setIsOpen(false)}
-                      className="text-brand-blue font-medium text-lg"
-                    >
-                      Login
-                    </a>
-                    <Button
-                      onClick={() => (window.location.href = "/signup")}
-                      className="w-full"
-                    >
-                      Join Now
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          )}
         </AnimatePresence>,
         document.body,
       )}

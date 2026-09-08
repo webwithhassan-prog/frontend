@@ -94,8 +94,9 @@ const Careers = () => {
         PROFESSIONAL PARTNER ONBOARDING
       </motion.h1>
       <p className="text-brand-blue/70 text-center mb-10">
-        Are you a dietician, gynecologist, psychiatrist, or personal trainer
-        interested in offering online consultancy to our members? Apply below.
+        Are you a dietician, gynecologist, psychiatrist, physiotherapist, or
+        personal trainer interested in offering online consultancy to our
+        members? Apply below.
       </p>
 
       <Card>

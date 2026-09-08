@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
+import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import Modal from "../../components/admin/Modal";
 
@@ -86,7 +87,7 @@ const EBooks = () => {
       </div>
 
       {loading ? (
-        <p className="text-brand-blue-light">Loading...</p>
+        <Loader />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {ebooks.map((ebook) => (

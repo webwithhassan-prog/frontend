@@ -7,8 +7,10 @@ import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
+import Loader from "../../components/common/Loader";
 import { trackEvent } from "../../utils/analytics";
 import { useCurrency } from "../../context/CurrencyContext";
+import CurrencySwitcher from "../../components/common/CurrencySwitcher";
 
 const durations = [30, 90, 180];
 
@@ -56,7 +58,7 @@ const Plans = () => {
   const navigate = useNavigate();
   const { role } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { format } = useCurrency();
+  const { format, currency } = useCurrency();
 
   const [couponInput, setCouponInput] = useState("");
   const [couponChecking, setCouponChecking] = useState(false);
@@ -108,8 +110,8 @@ const Plans = () => {
       const res = await api.post("/payments/stripe/checkout", {
         client_id: clientId,
         plan_ids: planIds,
-        include_premium: false,
         coupon_code: appliedCoupon?.code,
+        currency_code: currency.code,
       });
       window.location.href = res.data.url;
     } catch (err) {
@@ -191,7 +193,6 @@ const Plans = () => {
 
     if (role !== "client") {
       localStorage.setItem("pending_plan_ids", JSON.stringify(planIds));
-      localStorage.setItem("pending_include_premium", "false");
       if (appliedCoupon?.code) {
         localStorage.setItem("pending_coupon_code", appliedCoupon.code);
       }
@@ -212,9 +213,12 @@ const Plans = () => {
       >
         {packageLabels[selectedType]?.toUpperCase() || "PACKAGES"}
       </motion.h1>
-      <p className="text-brand-blue/70 text-center mb-6">
+      <p className="text-brand-blue/70 text-center mb-4">
         Choose the duration that works for you.
       </p>
+      <div className="flex justify-center mb-6">
+        <CurrencySwitcher />
+      </div>
 
       <div className="flex justify-center gap-2 mb-8 flex-wrap">
         {packageTabs.map((tab) => (
@@ -280,7 +284,7 @@ const Plans = () => {
       )}
 
       {loading ? (
-        <p className="text-center text-brand-blue/70">Loading packages...</p>
+        <Loader />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {durations.map((duration, i) => {
@@ -299,6 +303,16 @@ const Plans = () => {
               : 0;
             const dietplan = selection.find(
               (p) => p.product_type === "dietplan",
+            );
+            // Looked up independently of `selection` because once a
+            // dedicated combo plan exists, selection is just [combo] — but
+            // the combo card should still show both plans' real feature
+            // lists side by side, not only the combo's own summary.
+            const dietplanForDuration = plans.find(
+              (p) => p.product_type === "dietplan" && p.duration_days === duration,
+            );
+            const workoutForDuration = plans.find(
+              (p) => p.product_type === "workout" && p.duration_days === duration,
             );
             const isDedicatedCombo =
               selectedType === "combo" &&
@@ -364,14 +378,17 @@ const Plans = () => {
                     </p>
                   )}
 
-                  {selectedType === "combo" && !isDedicatedCombo ? (
+                  {selectedType === "combo" ? (
                     <div className="grid grid-cols-2 gap-4 my-4 flex-1">
                       <div className="pr-4 border-r border-brand-blue-pale">
                         <p className="text-[11px] font-bold text-brand-blue uppercase tracking-wide mb-2.5">
                           Dietplan
                         </p>
                         <ul className="space-y-2">
-                          {featuresByType.dietplan.map((f) => (
+                          {(dietplanForDuration?.features?.length
+                            ? dietplanForDuration.features
+                            : featuresByType.dietplan
+                          ).map((f) => (
                             <li
                               key={f}
                               className="flex items-start gap-1.5 text-xs text-brand-blue/70"
@@ -390,7 +407,10 @@ const Plans = () => {
                           Live Sessions
                         </p>
                         <ul className="space-y-2">
-                          {featuresByType.workout.map((f) => (
+                          {(workoutForDuration?.features?.length
+                            ? workoutForDuration.features
+                            : featuresByType.workout
+                          ).map((f) => (
                             <li
                               key={f}
                               className="flex items-start gap-1.5 text-xs text-brand-blue/70"
@@ -443,8 +463,8 @@ const Plans = () => {
       )}
 
       <p className="text-center text-brand-blue/60 text-sm mt-12">
-        Looking for a 1-on-1 consultation with a dietician, gynecologist, or
-        psychiatrist?{" "}
+        Looking for a 1-on-1 consultation with a dietician, gynecologist,
+        psychiatrist, physiotherapist, or personal trainer?{" "}
         <a
           href="/consultation"
           className="text-brand-orange font-semibold underline"
