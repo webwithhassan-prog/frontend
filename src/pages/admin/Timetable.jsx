@@ -67,6 +67,9 @@ const Timetable = () => {
   const [cancelReason, setCancelReason] = useState("");
   const [customReason, setCustomReason] = useState("");
 
+  const [zoomLink, setZoomLink] = useState(null);
+  const [zoomCopied, setZoomCopied] = useState(false);
+
   const fetchData = async () => {
     try {
       const startOfToday = new Date();
@@ -75,7 +78,7 @@ const Timetable = () => {
       endOfTomorrow.setDate(endOfTomorrow.getDate() + 2);
       endOfTomorrow.setMilliseconds(-1); // 23:59:59.999 tomorrow
 
-      const [dayPlansRes, timeSlotsRes, classesRes, trainersRes] =
+      const [dayPlansRes, timeSlotsRes, classesRes, trainersRes, zoomRes] =
         await Promise.all([
           api.get("/day-plans"),
           api.get("/time-slots"),
@@ -86,10 +89,12 @@ const Timetable = () => {
             },
           }),
           api.get("/trainers"),
+          api.get("/timetable/zoom-link"),
         ]);
       setDayPlans(dayPlansRes.data);
       setTimeSlots(timeSlotsRes.data);
       setTrainers(trainersRes.data);
+      setZoomLink(zoomRes.data);
 
       const upcoming = [...classesRes.data].sort(
         (a, b) => new Date(a.datetime) - new Date(b.datetime),
@@ -99,6 +104,35 @@ const Timetable = () => {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCopyZoomLink = () => {
+    if (!zoomLink?.zoom_join_url) return;
+    navigator.clipboard.writeText(zoomLink.zoom_join_url);
+    setZoomCopied(true);
+    toast.success("Zoom link copied");
+    setTimeout(() => setZoomCopied(false), 2000);
+  };
+
+  const [rotatingZoom, setRotatingZoom] = useState(false);
+  const handleRotateZoomLink = async () => {
+    if (
+      !window.confirm(
+        "Generate a new Zoom link now? The old link will stop working immediately.",
+      )
+    ) {
+      return;
+    }
+    setRotatingZoom(true);
+    try {
+      const res = await api.post("/timetable/zoom-link/rotate");
+      setZoomLink(res.data);
+      toast.success("Zoom link rotated");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Could not rotate the link");
+    } finally {
+      setRotatingZoom(false);
     }
   };
 
@@ -161,15 +195,6 @@ const Timetable = () => {
   const handleDeleteSlot = async (id) => {
     await api.delete(`/time-slots/${id}`);
     fetchData();
-  };
-
-  const [copiedSlotId, setCopiedSlotId] = useState(null);
-  const handleCopyZoomLink = (slot) => {
-    if (!slot.zoom_join_url) return;
-    navigator.clipboard.writeText(slot.zoom_join_url);
-    setCopiedSlotId(slot._id);
-    toast.success("Zoom link copied");
-    setTimeout(() => setCopiedSlotId((id) => (id === slot._id ? null : id)), 2000);
   };
 
   const handleRegenerate = async () => {
@@ -277,6 +302,55 @@ const Timetable = () => {
         <Loader />
       ) : (
         <>
+          {/* One shared Zoom link for every class — same link for every
+              trainer/time, rotated weekly. Copy it once and forward to the
+              trainers' group, same as before. */}
+          <StaticCard className="mb-8 flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-brand-blue-pale flex items-center justify-center shrink-0">
+                <Video className="text-brand-blue" size={16} />
+              </div>
+              <div>
+                <p className="text-brand-blue text-sm font-semibold">
+                  Class Zoom Link
+                </p>
+                <p className="text-brand-blue-light text-xs">
+                  {zoomLink?.zoom_join_url
+                    ? zoomLink.zoom_rotated_at
+                      ? `Rotates weekly — last updated ${new Date(zoomLink.zoom_rotated_at).toLocaleDateString()}`
+                      : "Same link for every class — forward it to the trainers' group"
+                    : "Provisioning..."}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              {zoomLink?.zoom_join_url && (
+                <button
+                  onClick={handleCopyZoomLink}
+                  className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full bg-brand-blue-pale text-brand-blue hover:bg-brand-blue-pale/70 transition-colors"
+                >
+                  {zoomCopied ? (
+                    <>
+                      <Check size={14} /> Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={14} /> Copy Link
+                    </>
+                  )}
+                </button>
+              )}
+              <button
+                onClick={handleRotateZoomLink}
+                disabled={rotatingZoom}
+                className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full border border-brand-blue-pale text-brand-blue-light hover:bg-brand-blue-pale/40 transition-colors disabled:opacity-50"
+              >
+                <RefreshCw size={14} className={rotatingZoom ? "animate-spin" : ""} />
+                {rotatingZoom ? "Rotating..." : "Rotate Now"}
+              </button>
+            </div>
+          </StaticCard>
+
           {/* Upcoming Sessions — real instances, cancel/restore per session */}
           <h2 className="text-lg font-bold text-brand-blue mb-2">
             Today &amp; Tomorrow's Sessions
@@ -439,9 +513,7 @@ const Timetable = () => {
             </Button>
           </div>
           <p className="text-brand-blue-light text-sm mb-4">
-            The fixed trainer & time pattern, repeated every day. Each slot's
-            Zoom link is reused for every day's class and rotates
-            automatically once a week — copy it to send to the trainer.
+            The fixed trainer & time pattern, repeated every day.
           </p>
           <div className="mb-12">
             <StaticCard>
@@ -455,7 +527,6 @@ const Timetable = () => {
                     <tr className="text-left text-brand-blue border-b border-brand-blue-pale">
                       <th className="py-3 px-2">Trainer</th>
                       <th className="py-3 px-2">Time</th>
-                      <th className="py-3 px-2">Zoom Link</th>
                       <th className="py-3 px-2">Actions</th>
                     </tr>
                   </thead>
@@ -470,33 +541,6 @@ const Timetable = () => {
                         </td>
                         <td className="py-3 px-2 text-brand-blue-light">
                           {formatTime(slot.hour, slot.minute)}
-                        </td>
-                        <td className="py-3 px-2">
-                          {slot.zoom_join_url ? (
-                            <button
-                              onClick={() => handleCopyZoomLink(slot)}
-                              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-brand-blue-pale text-brand-blue hover:bg-brand-blue-pale/70 transition-colors"
-                              title={
-                                slot.zoom_rotated_at
-                                  ? `Last rotated ${new Date(slot.zoom_rotated_at).toLocaleDateString()}`
-                                  : ""
-                              }
-                            >
-                              {copiedSlotId === slot._id ? (
-                                <>
-                                  <Check size={13} /> Copied
-                                </>
-                              ) : (
-                                <>
-                                  <Copy size={13} /> Copy Link
-                                </>
-                              )}
-                            </button>
-                          ) : (
-                            <span className="flex items-center gap-1.5 text-xs text-brand-blue-light/60 italic">
-                              <Video size={13} /> Provisioning...
-                            </span>
-                          )}
                         </td>
                         <td className="py-3 px-2">
                           <div className="flex gap-3">
