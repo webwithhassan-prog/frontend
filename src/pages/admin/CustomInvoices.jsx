@@ -16,6 +16,7 @@ import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import Modal from "../../components/admin/Modal";
+import PhoneInput from "../../components/common/PhoneInput";
 
 const emptyForm = {
   description: "",
@@ -40,6 +41,9 @@ const CustomInvoices = () => {
   const [verifyForm, setVerifyForm] = useState({ invoice_number: "", code: "" });
   const [verifyResult, setVerifyResult] = useState(null);
   const [verifying, setVerifying] = useState(false);
+  // Bumped whenever formData resets to empty, forcing PhoneInput to remount
+  // back to its default country instead of keeping the last-picked one.
+  const [phoneResetKey, setPhoneResetKey] = useState(0);
 
   const fetchInvoices = async () => {
     try {
@@ -60,6 +64,7 @@ const CustomInvoices = () => {
     setFormData(emptyForm);
     setGeneratedLink(null);
     setIsModalOpen(true);
+    setPhoneResetKey((k) => k + 1);
   };
 
   const handleChange = (e) => {
@@ -376,13 +381,11 @@ const CustomInvoices = () => {
               onChange={handleChange}
               className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
             />
-            <input
-              type="text"
-              name="client_phone"
-              placeholder="Client Phone (optional)"
+            <PhoneInput
+              key={phoneResetKey}
               value={formData.client_phone}
-              onChange={handleChange}
-              className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+              onChange={(v) => setFormData({ ...formData, client_phone: v })}
+              placeholder="Client Phone (optional)"
             />
             <Button type="submit" className="w-full" disabled={creating}>
               {creating ? "Creating..." : "Generate Payment Link"}

@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
+import PhoneInput from "../../components/common/PhoneInput";
 
 const ZoomAccess = () => {
   const [classes, setClasses] = useState([]);
@@ -99,14 +100,10 @@ const ZoomAccess = () => {
             required
             className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
           />
-          <input
-            type="text"
-            name="phone_number"
-            placeholder="Phone Number"
+          <PhoneInput
             value={formData.phone_number}
-            onChange={handleChange}
+            onChange={(v) => setFormData({ ...formData, phone_number: v })}
             required
-            className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
           />
 
           {error && <p className="text-red-500 text-sm">{error}</p>}

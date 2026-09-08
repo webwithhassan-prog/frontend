@@ -5,6 +5,7 @@ import api from "../../services/api";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import CurrencySwitcher from "../../components/common/CurrencySwitcher";
+import PhoneInput from "../../components/common/PhoneInput";
 import { useCurrency } from "../../context/CurrencyContext";
 
 const emptyForm = {
@@ -125,13 +126,10 @@ const PayNow = () => {
               onChange={handleChange}
               className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
             />
-            <input
-              type="text"
-              name="client_phone"
-              placeholder="Phone (optional)"
+            <PhoneInput
               value={formData.client_phone}
-              onChange={handleChange}
-              className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue-light"
+              onChange={(v) => setFormData({ ...formData, client_phone: v })}
+              placeholder="Phone (optional)"
             />
 
             {error && <p className="text-red-500 text-sm">{error}</p>}

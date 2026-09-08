@@ -20,6 +20,7 @@ import api from "../../services/api";
 import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
+import PhoneInput from "../../components/common/PhoneInput";
 
 const statusColors = {
   active: "bg-green-100 text-green-700",
@@ -61,6 +62,9 @@ const Enrollments = () => {
   });
   const [adding, setAdding] = useState(false);
   const [generatedCreds, setGeneratedCreds] = useState(null);
+  // Bumped whenever addForm resets to empty, forcing PhoneInput to remount
+  // back to its default country instead of keeping the last-picked one.
+  const [phoneResetKey, setPhoneResetKey] = useState(0);
 
   const filteredClients = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -260,6 +264,7 @@ const Enrollments = () => {
       } else {
         setShowAddModal(false);
         setAddForm({ name: "", phone_number: "", email: "", password: "" });
+        setPhoneResetKey((k) => k + 1);
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to add client");
@@ -272,6 +277,7 @@ const Enrollments = () => {
     setShowAddModal(false);
     setGeneratedCreds(null);
     setAddForm({ name: "", phone_number: "", email: "", password: "" });
+    setPhoneResetKey((k) => k + 1);
   };
 
   return (
@@ -651,17 +657,13 @@ const Enrollments = () => {
                       }
                       className="w-full border border-brand-blue-pale rounded-lg px-3 py-2.5 text-sm text-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-orange"
                     />
-                    <input
-                      type="text"
-                      placeholder="Phone number"
+                    <PhoneInput
+                      key={phoneResetKey}
                       value={addForm.phone_number}
-                      onChange={(e) =>
-                        setAddForm({
-                          ...addForm,
-                          phone_number: e.target.value,
-                        })
+                      onChange={(v) =>
+                        setAddForm({ ...addForm, phone_number: v })
                       }
-                      className="w-full border border-brand-blue-pale rounded-lg px-3 py-2.5 text-sm text-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                      placeholder="Phone number"
                     />
                     <input
                       type="email"

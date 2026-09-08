@@ -8,6 +8,7 @@ import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
+import PhoneInput from "../../components/common/PhoneInput";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -180,14 +181,10 @@ const Signup = () => {
             required
             className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
           />
-          <input
-            type="text"
-            name="phone_number"
-            placeholder="Phone Number"
+          <PhoneInput
             value={formData.phone_number}
-            onChange={handleChange}
+            onChange={(v) => setFormData({ ...formData, phone_number: v })}
             required
-            className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
           />
           <input
             type="email"
