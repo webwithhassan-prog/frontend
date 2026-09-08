@@ -116,6 +116,7 @@ const Home = () => {
   const [transformationSlide, setTransformationSlide] = useState(0);
   const [heroSlide, setHeroSlide] = useState(0);
   const [heroSlides, setHeroSlides] = useState([]);
+  const [heroLoading, setHeroLoading] = useState(true);
   const navigate = useNavigate();
   const { role } = useAuth();
   const { format, currency } = useCurrency();
@@ -136,6 +137,8 @@ const Home = () => {
         );
       } catch (err) {
         console.error(err);
+      } finally {
+        setHeroLoading(false);
       }
     };
     fetchHeroBanners();
@@ -253,6 +256,11 @@ const Home = () => {
           clicks racing the 5s auto-advance), leaving the slide frozen with
           stale content while the dots kept advancing underneath — instant
           swap has none of that risk. */}
+      {heroLoading && (
+        <section className="relative bg-brand-blue overflow-hidden min-h-[420px] sm:min-h-[480px] lg:min-h-[560px] flex items-center justify-center">
+          <Loader size={28} />
+        </section>
+      )}
       {heroSlides.length > 0 && (
       <section className="relative bg-brand-blue overflow-hidden">
         {/* Mobile + tablet — heading comes first (full-width, readable).
