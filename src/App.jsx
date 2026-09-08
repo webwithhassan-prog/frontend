@@ -283,7 +283,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         >
-          <Route path="dashboard" element={<Enrollments />} />
+          <Route path="dashboard" element={<Analytics />} />
           <Route path="enrollments" element={<Enrollments />} />
           <Route path="trainers" element={<AdminTrainers />} />
           <Route path="consultants" element={<AdminConsultants />} />
