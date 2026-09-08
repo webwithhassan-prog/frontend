@@ -13,15 +13,22 @@ export const CurrencyProvider = ({ children }) => {
   useEffect(() => {
     const init = async () => {
       let fetchedCurrencies = [DEFAULT_CURRENCY];
-      let fetchedRates = { INR: 1 };
-      try {
-        const res = await api.get("/currency/rates");
-        fetchedCurrencies = res.data.currencies;
-        fetchedRates = res.data.rates;
+
+      // Both requests fire together — run sequentially, a visitor sees the
+      // INR default for the combined round-trip time of both calls (visibly
+      // long right after a cold start); in parallel it's just the slower of
+      // the two.
+      const [ratesResult, detectResult] = await Promise.allSettled([
+        api.get("/currency/rates"),
+        api.get("/currency/detect"),
+      ]);
+
+      if (ratesResult.status === "fulfilled") {
+        fetchedCurrencies = ratesResult.value.data.currencies;
         setCurrencies(fetchedCurrencies);
-        setRates(fetchedRates);
-      } catch (err) {
-        console.error(err);
+        setRates(ratesResult.value.data.rates);
+      } else {
+        console.error(ratesResult.reason);
       }
 
       // A saved manual choice always wins over auto-detection.
@@ -34,16 +41,11 @@ export const CurrencyProvider = ({ children }) => {
         }
       }
 
-      try {
-        const res = await api.get("/currency/detect");
-        if (res.data.show_conversion) {
-          const match = fetchedCurrencies.find(
-            (c) => c.code === res.data.currency_code,
-          );
-          if (match) setCurrencyState(match);
-        }
-      } catch (err) {
-        // Stay on the INR default
+      if (detectResult.status === "fulfilled" && detectResult.value.data.show_conversion) {
+        const match = fetchedCurrencies.find(
+          (c) => c.code === detectResult.value.data.currency_code,
+        );
+        if (match) setCurrencyState(match);
       }
     };
     init();
