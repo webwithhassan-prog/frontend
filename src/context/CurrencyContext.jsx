@@ -31,20 +31,25 @@ export const CurrencyProvider = ({ children }) => {
         console.error(ratesResult.reason);
       }
 
-      // A saved manual choice always wins over auto-detection.
-      const saved = localStorage.getItem("selected_currency");
-      if (saved) {
-        const match = fetchedCurrencies.find((c) => c.code === saved);
+      // Location-detected currency takes priority on each fresh visit — a
+      // manual pick from the switcher still works immediately for that
+      // browsing session, but reverts to the visitor's real location on
+      // their next visit rather than sticking forever. The saved choice is
+      // kept only as a fallback for when detection itself fails (lookup
+      // error, or a country with no supported currency).
+      if (detectResult.status === "fulfilled" && detectResult.value.data.show_conversion) {
+        const match = fetchedCurrencies.find(
+          (c) => c.code === detectResult.value.data.currency_code,
+        );
         if (match) {
           setCurrencyState(match);
           return;
         }
       }
 
-      if (detectResult.status === "fulfilled" && detectResult.value.data.show_conversion) {
-        const match = fetchedCurrencies.find(
-          (c) => c.code === detectResult.value.data.currency_code,
-        );
+      const saved = localStorage.getItem("selected_currency");
+      if (saved) {
+        const match = fetchedCurrencies.find((c) => c.code === saved);
         if (match) setCurrencyState(match);
       }
     };
