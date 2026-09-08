@@ -7,7 +7,11 @@ import {
   Trash2,
   XCircle,
   RotateCcw,
+  Copy,
+  Check,
+  Video,
 } from "lucide-react";
+import toast from "react-hot-toast";
 import api from "../../services/api";
 import Button from "../../components/common/Button";
 import Loader from "../../components/common/Loader";
@@ -157,6 +161,15 @@ const Timetable = () => {
   const handleDeleteSlot = async (id) => {
     await api.delete(`/time-slots/${id}`);
     fetchData();
+  };
+
+  const [copiedSlotId, setCopiedSlotId] = useState(null);
+  const handleCopyZoomLink = (slot) => {
+    if (!slot.zoom_join_url) return;
+    navigator.clipboard.writeText(slot.zoom_join_url);
+    setCopiedSlotId(slot._id);
+    toast.success("Zoom link copied");
+    setTimeout(() => setCopiedSlotId((id) => (id === slot._id ? null : id)), 2000);
   };
 
   const handleRegenerate = async () => {
@@ -426,7 +439,9 @@ const Timetable = () => {
             </Button>
           </div>
           <p className="text-brand-blue-light text-sm mb-4">
-            The fixed trainer & time pattern, repeated every day.
+            The fixed trainer & time pattern, repeated every day. Each slot's
+            Zoom link is reused for every day's class and rotates
+            automatically once a week — copy it to send to the trainer.
           </p>
           <div className="mb-12">
             <StaticCard>
@@ -440,6 +455,7 @@ const Timetable = () => {
                     <tr className="text-left text-brand-blue border-b border-brand-blue-pale">
                       <th className="py-3 px-2">Trainer</th>
                       <th className="py-3 px-2">Time</th>
+                      <th className="py-3 px-2">Zoom Link</th>
                       <th className="py-3 px-2">Actions</th>
                     </tr>
                   </thead>
@@ -454,6 +470,33 @@ const Timetable = () => {
                         </td>
                         <td className="py-3 px-2 text-brand-blue-light">
                           {formatTime(slot.hour, slot.minute)}
+                        </td>
+                        <td className="py-3 px-2">
+                          {slot.zoom_join_url ? (
+                            <button
+                              onClick={() => handleCopyZoomLink(slot)}
+                              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-brand-blue-pale text-brand-blue hover:bg-brand-blue-pale/70 transition-colors"
+                              title={
+                                slot.zoom_rotated_at
+                                  ? `Last rotated ${new Date(slot.zoom_rotated_at).toLocaleDateString()}`
+                                  : ""
+                              }
+                            >
+                              {copiedSlotId === slot._id ? (
+                                <>
+                                  <Check size={13} /> Copied
+                                </>
+                              ) : (
+                                <>
+                                  <Copy size={13} /> Copy Link
+                                </>
+                              )}
+                            </button>
+                          ) : (
+                            <span className="flex items-center gap-1.5 text-xs text-brand-blue-light/60 italic">
+                              <Video size={13} /> Provisioning...
+                            </span>
+                          )}
                         </td>
                         <td className="py-3 px-2">
                           <div className="flex gap-3">
