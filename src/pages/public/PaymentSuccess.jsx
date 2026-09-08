@@ -97,6 +97,11 @@ const PaymentSuccess = () => {
               {receipt.clientName}
             </p>
             <p className="text-brand-blue/50 text-xs mb-6">
+              {receipt.invoiceNumber && (
+                <span className="text-brand-blue font-medium mr-2">
+                  Invoice #{receipt.invoiceNumber}
+                </span>
+              )}
               {new Date(receipt.paidAt).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "long",
