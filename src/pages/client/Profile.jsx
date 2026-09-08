@@ -385,16 +385,26 @@ const Profile = () => {
     );
   });
 
+  // Classes run for an hour (matches the Zoom meeting duration) — a class
+  // is only "done" once that hour has actually elapsed, not the instant
+  // its start time passes, since it's still live and joinable until then.
+  const CLASS_DURATION_MS = 60 * 60 * 1000;
+
   const classesToShow = todayClasses;
   const allClassesDone =
     classesToShow.length > 0 &&
     classesToShow.every(
-      (c) => c.status === "cancelled" || new Date(c.datetime) < new Date(),
+      (c) =>
+        c.status === "cancelled" ||
+        new Date(c.datetime).getTime() + CLASS_DURATION_MS < Date.now(),
     );
 
   const renderClassCard = (c) => {
     const isCancelled = c.status === "cancelled";
-    const isConducted = !isCancelled && new Date(c.datetime) < new Date();
+    const startTime = new Date(c.datetime).getTime();
+    const hasStarted = !isCancelled && startTime <= Date.now();
+    const isConducted =
+      !isCancelled && startTime + CLASS_DURATION_MS < Date.now();
     return (
       <Card
         key={c._id}
@@ -424,7 +434,9 @@ const Profile = () => {
         ) : isConducted ? (
           <Button disabled>Class Done</Button>
         ) : (
-          <Button onClick={() => handleJoin(c._id)}>Join Class</Button>
+          <Button onClick={() => handleJoin(c._id)}>
+            {hasStarted ? "Join Now" : "Join Class"}
+          </Button>
         )}
       </Card>
     );
