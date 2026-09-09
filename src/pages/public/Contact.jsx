@@ -18,7 +18,7 @@ const Contact = () => {
         GET IN TOUCH
       </motion.h1>
       <p className="text-brand-blue/70 text-center mb-14">
-        Questions about packages, sessions, or consultations? Fitness Zone is a
+        Questions about packages or sessions? Fitness Zone is a
         message away.
       </p>
 

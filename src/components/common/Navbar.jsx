@@ -24,7 +24,6 @@ const packageOptions = [
 
 const navLinks = [
   { label: "Home", href: "/" },
-  { label: "1-on-1", href: "/consultation" },
   { label: "Time Slots", href: "/timetable" },
   { label: "Careers", href: "/careers" },
   { label: "E-Books & Courses", href: "/ebooks" },
@@ -33,7 +32,6 @@ const navLinks = [
 const searchablePages = [
   { label: "Home", href: "/" },
   { label: "Packages & Pricing", href: "/plans" },
-  { label: "1-on-1 Consultation", href: "/consultation" },
   { label: "Time Slots", href: "/timetable" },
   { label: "Careers", href: "/careers" },
   { label: "E-Books & Courses", href: "/ebooks" },

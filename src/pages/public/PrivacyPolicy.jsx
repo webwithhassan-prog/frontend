@@ -19,7 +19,7 @@ const PrivacyPolicy = () => {
           <h2 className="font-display text-brand-blue text-base mb-2">1. Information We Collect</h2>
           <p>
             When you create an account, we collect your name, phone number, and email
-            address. When you purchase a package, e-book, or consultation, payment is
+            address. When you purchase a package or e-book, payment is
             processed by our payment provider (Stripe) — we do not store your card
             details ourselves.
           </p>
@@ -40,7 +40,7 @@ const PrivacyPolicy = () => {
           <h2 className="font-display text-brand-blue text-base mb-2">3. How We Use Your Information</h2>
           <p>
             We use your information to manage your account, activate and track your
-            packages, schedule classes and consultations, process payments, and
+            packages, schedule classes, process payments, and
             communicate with you about your membership.
           </p>
         </div>

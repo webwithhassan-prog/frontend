@@ -461,18 +461,6 @@ const Plans = () => {
           })}
         </div>
       )}
-
-      <p className="text-center text-brand-blue/60 text-sm mt-12">
-        Looking for a 1-on-1 consultation with a dietician, gynecologist,
-        psychiatrist, physiotherapist, or personal trainer?{" "}
-        <a
-          href="/consultation"
-          className="text-brand-orange font-semibold underline"
-        >
-          Book it here
-        </a>
-        .
-      </p>
     </section>
   );
 };

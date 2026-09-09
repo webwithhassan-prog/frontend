@@ -170,8 +170,6 @@ const Profile = () => {
     fetchData();
   }, []);
 
-  // Prompt for a review of the most recent completed, unreviewed 1-on-1
-  // session — once per page load, not re-shown if dismissed.
   const handleChangePassword = async (e) => {
     e.preventDefault();
     setPasswordMessage("");

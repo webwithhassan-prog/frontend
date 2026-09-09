@@ -21,7 +21,7 @@ const Footer = () => {
             </span>
           </div>
           <p className="text-brand-blue-pale/70 text-sm">
-            Dietplans, live workouts, and consultations — built for women.
+            Dietplans and live workouts — built for women.
           </p>
           <p className="text-brand-blue-pale/50 text-xs mt-4 leading-relaxed">
             Director / Founder: M Abu Bakar Siddique

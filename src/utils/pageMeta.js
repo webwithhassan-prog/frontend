@@ -1,14 +1,14 @@
 const siteName = "Fitness Zone";
 const defaultDescription =
-  "Fitness Zone is a fitness platform built for women — customized dietplans, live workout sessions with female trainers, and private 1-on-1 consultations with a dietician, gynecologist, psychiatrist, physiotherapist, or personal trainer.";
+  "Fitness Zone is a fitness platform built for women — customized dietplans and live workout sessions with female trainers.";
 
 // Path -> { title, description }. Falls back to the defaults below for any
 // route not listed here (e.g. dynamic ones like /reset-password/:token).
 const pageMeta = {
   "/": {
-    title: `${siteName} — Dietplans, Live Workouts & Consultations for Women`,
+    title: `${siteName} — Dietplans & Live Workouts for Women`,
     description:
-      "Customized dietplans, live workout sessions, and private 1-on-1 consultations — one platform, no WhatsApp groups, no missed links.",
+      "Customized dietplans and live workout sessions — one platform, no WhatsApp groups, no missed links.",
   },
   "/plans": {
     title: `Packages & Pricing | ${siteName}`,
@@ -16,14 +16,9 @@ const pageMeta = {
       "Choose a Dietplan, Live Workout Sessions, or both — 30, 90, or 180-day packages with transparent pricing.",
   },
   "/trainers": {
-    title: `Meet Our Trainers & Consultants | ${siteName}`,
+    title: `Meet Our Trainers | ${siteName}`,
     description:
-      "Meet the female trainers and consultants behind Fitness Zone's live sessions and 1-on-1 consultations.",
-  },
-  "/consultation": {
-    title: `Book a 1-on-1 Consultation | ${siteName}`,
-    description:
-      "Book a private consultation with a dietician, gynecologist, psychiatrist, physiotherapist, or personal trainer — no package required.",
+      "Meet the female trainers behind Fitness Zone's live sessions.",
   },
   "/timetable": {
     title: `Time Slots | ${siteName}`,
@@ -40,14 +35,14 @@ const pageMeta = {
     description: "Real check-ins, real progress, from real Fitness Zone members.",
   },
   "/careers": {
-    title: `Careers — Professional Partner Onboarding | ${siteName}`,
+    title: `Careers — Join Our Trainer Team | ${siteName}`,
     description:
-      "Are you a dietician, gynecologist, psychiatrist, physiotherapist, or personal trainer? Apply to offer 1-on-1 consultations through Fitness Zone.",
+      "Are you a fitness trainer interested in leading live group classes? Apply to join Fitness Zone.",
   },
   "/contact": {
     title: `Contact Us | ${siteName}`,
     description:
-      "Questions about packages, sessions, or consultations? Reach Fitness Zone by WhatsApp, Instagram, or email.",
+      "Questions about packages or sessions? Reach Fitness Zone by WhatsApp, Instagram, or email.",
   },
   "/join": {
     title: `Join Your Class | ${siteName}`,
