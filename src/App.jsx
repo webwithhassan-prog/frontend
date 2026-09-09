@@ -13,7 +13,6 @@ import usePageMeta from "./hooks/usePageMeta";
 import Home from "./pages/public/Home";
 import Plans from "./pages/public/Plans";
 import Trainers from "./pages/public/Trainers";
-import Consultation from "./pages/public/Consultation";
 import TimetableSchedule from "./pages/public/TimetableSchedule";
 import EBooks from "./pages/public/EBooks";
 import SuccessStories from "./pages/public/SuccessStories";
@@ -36,10 +35,9 @@ import TermsOfService from "./pages/public/TermsOfService";
 import AdminLayout from "./components/admin/AdminLayout";
 import Enrollments from "./pages/admin/Enrollments";
 import AdminTrainers from "./pages/admin/Trainers";
-import AdminConsultants from "./pages/admin/Consultants";
 import Packages from "./pages/admin/Packages";
 import Timetable from "./pages/admin/Timetable";
-import Professionals from "./pages/admin/Professionals";
+import TrainerApplications from "./pages/admin/TrainerApplications";
 import Sales from "./pages/admin/Sales";
 import CustomInvoices from "./pages/admin/CustomInvoices";
 import HomeContent from "./pages/admin/HomeContent";
@@ -48,7 +46,6 @@ import Promotions from "./pages/admin/Promotions";
 import AdminSettings from "./pages/admin/Settings";
 import AdminCourses from "./pages/admin/Courses";
 import RecordedGallery from "./pages/admin/RecordedGallery";
-import Reviews from "./pages/admin/Reviews";
 import Analytics from "./pages/admin/Analytics";
 
 import ClientLayout from "./components/client/ClientLayout";
@@ -136,14 +133,6 @@ function AppRoutes() {
           element={
             <PublicLayout>
               <Trainers />
-            </PublicLayout>
-          }
-        />
-        <Route
-          path="/consultation"
-          element={
-            <PublicLayout>
-              <Consultation />
             </PublicLayout>
           }
         />
@@ -286,10 +275,9 @@ function AppRoutes() {
           <Route path="dashboard" element={<Analytics />} />
           <Route path="enrollments" element={<Enrollments />} />
           <Route path="trainers" element={<AdminTrainers />} />
-          <Route path="consultants" element={<AdminConsultants />} />
           <Route path="packages" element={<Packages />} />
           <Route path="timetable" element={<Timetable />} />
-          <Route path="professionals" element={<Professionals />} />
+          <Route path="trainer-applications" element={<TrainerApplications />} />
           <Route path="sales" element={<Sales />} />
           <Route path="custom-invoices" element={<CustomInvoices />} />
           <Route path="home-content" element={<HomeContent />} />
@@ -297,7 +285,6 @@ function AppRoutes() {
           <Route path="promotions" element={<Promotions />} />
           <Route path="courses" element={<AdminCourses />} />
           <Route path="recorded-gallery" element={<RecordedGallery />} />
-          <Route path="reviews" element={<Reviews />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="analytics" element={<Analytics />} />
         </Route>

@@ -1,14 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 import {
   Star,
   ArrowRight,
-  Stethoscope,
-  Heart,
-  Brain,
-  Apple,
   CalendarDays,
   Users,
   TrendingUp,
@@ -18,15 +12,8 @@ import {
   Route,
   CalendarCheck,
   Video,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Activity,
-  Briefcase,
-  Clock,
-  Wallet,
-  UserRound,
-  MoreHorizontal,
 } from "lucide-react";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
@@ -34,8 +21,6 @@ import Loader from "../../components/common/Loader";
 import TestimonialsSlider from "../../components/common/TestimonialsSlider";
 import AchievementMarquee from "../../components/common/AchievementMarquee";
 import api from "../../services/api";
-import { useAuth } from "../../context/AuthContext";
-import { useCurrency } from "../../context/CurrencyContext";
 
 const pillars = [
   {
@@ -50,12 +35,6 @@ const pillars = [
     title: "Live Workout Sessions",
     desc: "50–55 minutes, six days a week, a different workout every day — led by female trainers. (recordings are also available)",
   },
-  {
-    icon: Stethoscope,
-    label: "Premium",
-    title: "One-on-One Consultations",
-    desc: "Direct access to a dietician, gynecologist, psychiatrist, physiotherapist, or personal trainer — the questions you don\u2019t ask in group chat.",
-  },
 ];
 
 const stats = [
@@ -63,15 +42,6 @@ const stats = [
   { icon: Users, value: "50,000+", label: "Clients Served" },
   { icon: TrendingUp, value: "10,000+", label: "Success Stories" },
   { icon: Headset, value: "24/7", label: "Support" },
-];
-
-const consultationSpecialties = [
-  { value: "dietician", label: "Dietician", icon: Apple },
-  { value: "gynecologist", label: "Gynecologist", icon: Heart },
-  { value: "psychiatrist", label: "Psychiatrist", icon: Brain },
-  { value: "physiotherapist", label: "Physiotherapist", icon: Activity },
-  { value: "personal_trainer", label: "Fitness Trainer", icon: Dumbbell },
-  { value: "other", label: "Other", icon: MoreHorizontal },
 ];
 
 const getYoutubeEmbedSrc = (link) => {
@@ -105,11 +75,6 @@ const steps = [
 ];
 
 const Home = () => {
-  const [isSpecialtyOpen, setIsSpecialtyOpen] = useState(false);
-  const [selectedSpecialty, setSelectedSpecialty] = useState(null);
-  const [consultants, setConsultants] = useState([]);
-  const [loadingConsultants, setLoadingConsultants] = useState(false);
-  const [bookingId, setBookingId] = useState(null);
   const [demoVideos, setDemoVideos] = useState([]);
   const [transformationVideos, setTransformationVideos] = useState([]);
   const [demoSlide, setDemoSlide] = useState(0);
@@ -117,9 +82,6 @@ const Home = () => {
   const [heroSlide, setHeroSlide] = useState(0);
   const [heroSlides, setHeroSlides] = useState([]);
   const [heroLoading, setHeroLoading] = useState(true);
-  const navigate = useNavigate();
-  const { role } = useAuth();
-  const { format, currency } = useCurrency();
 
   useEffect(() => {
     const fetchHeroBanners = async () => {
@@ -208,45 +170,6 @@ const Home = () => {
   const goNextHero = () =>
     setHeroSlide((prev) => (prev + 1) % heroSlides.length);
 
-  const handleSelectSpecialty = async (specialty) => {
-    setSelectedSpecialty(specialty);
-    setIsSpecialtyOpen(false);
-    setLoadingConsultants(true);
-    try {
-      const res = await api.get("/consultants/public");
-      setConsultants(res.data.filter((c) => c.specialty === specialty.value));
-    } catch (err) {
-      console.error(err);
-      setConsultants([]);
-    } finally {
-      setLoadingConsultants(false);
-    }
-  };
-
-  const handleBook = async (consultant) => {
-    if (role !== "client") {
-      localStorage.setItem(
-        "pending_consultation_consultant_id",
-        consultant._id,
-      );
-      navigate("/signup");
-      return;
-    }
-
-    setBookingId(consultant._id);
-    try {
-      const clientId = localStorage.getItem("client_id");
-      const res = await api.post("/payments/stripe/consultation-checkout", {
-        client_id: clientId,
-        consultant_id: consultant._id,
-        currency_code: currency.code,
-      });
-      window.location.href = res.data.url;
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Could not start checkout");
-      setBookingId(null);
-    }
-  };
 
   return (
     <div className="overflow-hidden">
@@ -750,162 +673,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 1-on-1 Consultation — expanded */}
-      <section className="bg-white py-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <motion.div
-            className="text-center max-w-2xl mx-auto mb-14"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="inline-flex bg-brand-orange/10 rounded-full p-4 mb-5">
-              <Stethoscope className="text-brand-orange" size={28} />
-            </div>
-            <h2 className="font-display text-2xl md:text-3xl text-brand-blue mb-4">
-              NEED TO TALK TO SOMEONE?
-            </h2>
-            <p className="text-brand-blue/70 leading-relaxed">
-              Group classes cover a lot — but some questions need a private
-              room. Book a 1-on-1 with a real professional.
-            </p>
-          </motion.div>
-
-          <div className="max-w-4xl mx-auto">
-            <div className="relative flex justify-center mb-8">
-              <button
-                onClick={() => setIsSpecialtyOpen(!isSpecialtyOpen)}
-                className="flex items-center gap-2 bg-brand-orange text-white font-semibold px-8 py-3.5 rounded-full shadow-lg hover:bg-brand-orange-dark transition-colors"
-              >
-                Book a Consultation
-                <ChevronDown
-                  size={18}
-                  className={`transition-transform ${isSpecialtyOpen ? "rotate-180" : ""}`}
-                />
-              </button>
-
-              <AnimatePresence>
-                {isSpecialtyOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-10"
-                      onClick={() => setIsSpecialtyOpen(false)}
-                    />
-                    <motion.div
-                      initial={{ opacity: 0, y: -8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute top-full mt-3 w-72 bg-white rounded-2xl shadow-lg border border-brand-blue-pale py-2 z-20"
-                    >
-                      {consultationSpecialties.map((s) => (
-                        <button
-                          key={s.value}
-                          onClick={() => handleSelectSpecialty(s)}
-                          className="flex items-center gap-3 w-full text-left px-5 py-3 text-sm text-brand-blue hover:bg-brand-blue-pale transition-colors"
-                        >
-                          <s.icon size={16} className="text-brand-orange" />
-                          {s.label}
-                        </button>
-                      ))}
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {selectedSpecialty && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-              >
-                <p className="text-brand-blue/60 text-xs uppercase tracking-wide text-center mb-4">
-                  Available {selectedSpecialty.label}s
-                </p>
-                {loadingConsultants ? (
-                  <Loader size={18} />
-                ) : consultants.length === 0 ? (
-                  <p className="text-brand-blue/60 text-sm text-center">
-                    No {selectedSpecialty.label.toLowerCase()}s available right
-                    now — check back soon.
-                  </p>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {consultants.map((c) => (
-                      <Card
-                        key={c._id}
-                        className="h-full flex flex-col text-center"
-                      >
-                        <div className="w-20 h-20 rounded-full bg-brand-blue-pale overflow-hidden flex items-center justify-center mx-auto mb-4">
-                          {c.photo_url ? (
-                            <img
-                              src={c.photo_url}
-                              alt={c.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <selectedSpecialty.icon
-                              className="text-brand-blue"
-                              size={28}
-                            />
-                          )}
-                        </div>
-                        <h3 className="font-display text-brand-blue text-base mb-2">
-                          {c.name}
-                        </h3>
-                        <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-brand-blue/60 mb-3">
-                          {c.years_experience && (
-                            <span className="flex items-center gap-1">
-                              <Briefcase size={12} /> {c.years_experience} yrs
-                            </span>
-                          )}
-                          {c.session_duration && (
-                            <span className="flex items-center gap-1">
-                              <Clock size={12} /> {c.session_duration}
-                            </span>
-                          )}
-                          {c.fee && (
-                            <span className="flex items-center gap-1">
-                              <Wallet size={12} /> {format(c.fee)}
-                            </span>
-                          )}
-                          {c.max_clients_per_session && (
-                            <span className="flex items-center gap-1">
-                              <UserRound size={12} /> Max{" "}
-                              {c.max_clients_per_session} client
-                              {c.max_clients_per_session > 1 ? "s" : ""}
-                              /session
-                            </span>
-                          )}
-                        </div>
-                        {c.bio && (
-                          <p className="text-brand-blue/70 text-xs leading-relaxed mb-5 flex-1">
-                            {c.bio}
-                          </p>
-                        )}
-                        <Button
-                          size="sm"
-                          onClick={() => handleBook(c)}
-                          disabled={bookingId === c._id || !c.fee}
-                          className="w-full mt-auto"
-                        >
-                          {bookingId === c._id
-                            ? "Redirecting..."
-                            : !c.fee
-                              ? "Fee not set"
-                              : "Book"}
-                        </Button>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </div>
-        </div>
-      </section>
 
       {/* Testimonials */}
       <section className="bg-brand-blue py-20">

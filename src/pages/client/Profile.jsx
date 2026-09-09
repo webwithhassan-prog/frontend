@@ -8,7 +8,6 @@ import {
   Lock,
   Check,
   UtensilsCrossed,
-  Star,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
@@ -77,7 +76,6 @@ const Profile = () => {
   const [ebooks, setEbooks] = useState([]);
   const [courses, setCourses] = useState([]);
   const [recordedGallery, setRecordedGallery] = useState([]);
-  const [consultations, setConsultations] = useState([]);
   const [loading, setLoading] = useState(true);
   const { settings } = useSettings();
   const [currentPassword, setCurrentPassword] = useState("");
@@ -104,13 +102,6 @@ const Profile = () => {
   const [dailySteps, setDailySteps] = useState("");
   const [dailyWater, setDailyWater] = useState("");
   const [dailyLogMessage, setDailyLogMessage] = useState("");
-
-  const [reviewTarget, setReviewTarget] = useState(null);
-  const [reviewRating, setReviewRating] = useState(0);
-  const [reviewComment, setReviewComment] = useState("");
-  const [reviewSubmitting, setReviewSubmitting] = useState(false);
-  const [reviewError, setReviewError] = useState("");
-  const [reviewPromptDismissed, setReviewPromptDismissed] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -150,15 +141,6 @@ const Profile = () => {
         console.error(coursesErr);
       }
 
-      try {
-        const consultationsRes = await api.get(
-          `/consultations/client/${clientId}`,
-        );
-        setConsultations(consultationsRes.data);
-      } catch (consultationsErr) {
-        console.error(consultationsErr);
-      }
-
       if (clientRes.data.has_workout) {
         try {
           const galleryRes = await api.get(
@@ -190,51 +172,6 @@ const Profile = () => {
 
   // Prompt for a review of the most recent completed, unreviewed 1-on-1
   // session — once per page load, not re-shown if dismissed.
-  useEffect(() => {
-    if (reviewPromptDismissed || reviewTarget) return;
-    const now = new Date();
-    const dueForReview = consultations
-      .filter((c) => new Date(c.datetime) < now && !c.has_review)
-      .sort((a, b) => new Date(b.datetime) - new Date(a.datetime))[0];
-    if (dueForReview) setReviewTarget(dueForReview);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [consultations]);
-
-  const closeReviewPrompt = () => {
-    setReviewTarget(null);
-    setReviewPromptDismissed(true);
-    setReviewRating(0);
-    setReviewComment("");
-    setReviewError("");
-  };
-
-  const handleSubmitReview = async (e) => {
-    e.preventDefault();
-    if (!reviewRating) {
-      setReviewError("Please pick a star rating");
-      return;
-    }
-    setReviewSubmitting(true);
-    setReviewError("");
-    try {
-      await api.post("/reviews", {
-        consultation_id: reviewTarget._id,
-        rating: reviewRating,
-        comment: reviewComment,
-      });
-      setConsultations((prev) =>
-        prev.map((c) =>
-          c._id === reviewTarget._id ? { ...c, has_review: true } : c,
-        ),
-      );
-      closeReviewPrompt();
-    } catch (err) {
-      setReviewError(err.response?.data?.message || "Could not submit review");
-    } finally {
-      setReviewSubmitting(false);
-    }
-  };
-
   const handleChangePassword = async (e) => {
     e.preventDefault();
     setPasswordMessage("");
@@ -451,16 +388,6 @@ const Profile = () => {
     "Hi! I just saved my check-in image and I'm sending it here.",
   )}`;
 
-  const upcomingConsultation =
-    consultations
-      .filter((c) => new Date(c.datetime) >= new Date())
-      .sort((a, b) => new Date(a.datetime) - new Date(b.datetime))[0] || null;
-  const consultationWhatsappLink = upcomingConsultation
-    ? `https://wa.me/${settings.whatsapp_general}?text=${encodeURIComponent(
-        `Hi! I have a 1-on-1 consultation booked with ${upcomingConsultation.consultant_ref?.name || "a specialist"}${upcomingConsultation.consultant_ref?.specialty ? ` (${upcomingConsultation.consultant_ref.specialty})` : ""} on ${new Date(upcomingConsultation.datetime).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}. I'd like to confirm the details.`,
-      )}`
-    : "";
-
   const daysSinceCheckin = client?.last_progress_checkin
     ? Math.floor(
         (new Date() - new Date(client.last_progress_checkin)) /
@@ -492,14 +419,6 @@ const Profile = () => {
         : "Weekly check-in for dietplan clients",
       active: hasDietplan,
       upgradeType: "dietplan",
-    },
-    {
-      key: "premium",
-      label: "1-ON-1 CONSULTATIONS",
-      subtitle: upcomingConsultation
-        ? `Booked: ${upcomingConsultation.consultant_ref?.name || "Specialist"} on ${new Date(upcomingConsultation.datetime).toLocaleDateString()}`
-        : "Dietician, gyne, psychiatrist",
-      active: client?.status === "active" && !!upcomingConsultation,
     },
     {
       key: "ebooks",
@@ -937,12 +856,6 @@ const Profile = () => {
                         document
                           .getElementById("upcoming-classes")
                           ?.scrollIntoView({ behavior: "smooth" });
-                      if (s.key === "premium" && consultationWhatsappLink)
-                        window.open(
-                          consultationWhatsappLink,
-                          "_blank",
-                          "noopener,noreferrer",
-                        );
                       if (s.key === "ebooks")
                         document
                           .getElementById("my-ebooks")
@@ -961,7 +874,6 @@ const Profile = () => {
                     size="sm"
                     onClick={() => {
                       if (s.key === "ebooks") navigate("/ebooks");
-                      else if (s.key === "premium") navigate("/consultation");
                       else navigate(`/plans?type=${s.upgradeType}`);
                     }}
                     className="w-full mt-4"
@@ -1448,66 +1360,6 @@ const Profile = () => {
           <Button type="submit">Update Password</Button>
         </form>
       </Card>
-
-      <Modal
-        isOpen={!!reviewTarget}
-        onClose={closeReviewPrompt}
-        title="How was your session?"
-      >
-        {reviewTarget && (
-          <form onSubmit={handleSubmitReview} className="space-y-4">
-            <p className="text-sm text-brand-blue/70">
-              Your 1-on-1 with{" "}
-              <span className="font-semibold text-brand-blue">
-                {reviewTarget.consultant_ref?.name || "your consultant"}
-              </span>{" "}
-              on {new Date(reviewTarget.datetime).toLocaleDateString()} — how
-              did it go?
-            </p>
-            <div className="flex items-center justify-center gap-1">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  onClick={() => setReviewRating(n)}
-                  aria-label={`${n} star${n > 1 ? "s" : ""}`}
-                >
-                  <Star
-                    size={32}
-                    className={
-                      n <= reviewRating
-                        ? "fill-brand-orange text-brand-orange"
-                        : "text-brand-blue-pale"
-                    }
-                  />
-                </button>
-              ))}
-            </div>
-            <textarea
-              placeholder="Anything you'd like to share? (optional)"
-              value={reviewComment}
-              onChange={(e) => setReviewComment(e.target.value)}
-              rows={3}
-              className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-            />
-            {reviewError && (
-              <p className="text-red-500 text-sm">{reviewError}</p>
-            )}
-            <div className="flex gap-3">
-              <Button type="submit" className="flex-1" disabled={reviewSubmitting}>
-                {reviewSubmitting ? "Submitting..." : "Submit Review"}
-              </Button>
-              <button
-                type="button"
-                onClick={closeReviewPrompt}
-                className="text-sm text-brand-blue/60 hover:text-brand-blue px-3"
-              >
-                Maybe Later
-              </button>
-            </div>
-          </form>
-        )}
-      </Modal>
     </div>
   );
 };

@@ -124,31 +124,6 @@ const Signup = () => {
         }
       }
 
-      // Resume a pending 1-on-1 consultation booking, if any
-      const pendingConsultantId = localStorage.getItem(
-        "pending_consultation_consultant_id",
-      );
-      if (pendingConsultantId) {
-        localStorage.removeItem("pending_consultation_consultant_id");
-        try {
-          const consultationCheckoutRes = await api.post(
-            "/payments/stripe/consultation-checkout",
-            {
-              client_id: res.data.client_id,
-              consultant_id: pendingConsultantId,
-              currency_code: localStorage.getItem("selected_currency") || "INR",
-            },
-          );
-          window.location.href = consultationCheckoutRes.data.url;
-          return;
-        } catch (checkoutErr) {
-          toast.error(
-            checkoutErr.response?.data?.message ||
-              "Your account was created, but we couldn't start checkout for your consultation. Please try booking again.",
-          );
-        }
-      }
-
       navigate("/client");
     } catch (err) {
       const msg = err.response?.data?.message || "Signup failed";

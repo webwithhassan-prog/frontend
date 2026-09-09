@@ -6,18 +6,13 @@ import Loader from '../../components/common/Loader';
 
 const Trainers = () => {
   const [trainers, setTrainers] = useState([]);
-  const [consultants, setConsultants] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [trainersRes, consultantsRes] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_API_URL}/trainers/public`),
-          axios.get(`${import.meta.env.VITE_API_URL}/consultants/public`),
-        ]);
-        setTrainers(trainersRes.data);
-        setConsultants(consultantsRes.data);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/trainers/public`);
+        setTrainers(res.data);
       } catch (err) {
         console.error(err);
       } finally {
@@ -44,31 +39,15 @@ const Trainers = () => {
         <>
           <h2 className="font-display text-lg text-brand-blue mb-6">TRAINERS</h2>
           {trainers.length === 0 ? (
-            <p className="text-brand-blue/60 text-sm mb-16">
+            <p className="text-brand-blue/60 text-sm">
               No trainers added yet — check back soon.
             </p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {trainers.map((t) => (
                 <Card key={t._id}>
                   <h3 className="font-display text-brand-blue text-base">{t.name}</h3>
                   <p className="text-brand-blue/70 text-sm mt-1">{t.specialty}</p>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          <h2 className="font-display text-lg text-brand-blue mb-6">CONSULTANTS</h2>
-          {consultants.length === 0 ? (
-            <p className="text-brand-blue/60 text-sm">
-              No consultants added yet — check back soon.
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {consultants.map((c) => (
-                <Card key={c._id}>
-                  <h3 className="font-display text-brand-blue text-base">{c.name}</h3>
-                  <p className="text-brand-blue/70 text-sm mt-1 capitalize">{c.specialty}</p>
                 </Card>
               ))}
             </div>

@@ -5,15 +5,6 @@ import { Upload, Check } from "lucide-react";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 
-const specialties = [
-  { value: "dietician", label: "Dietician" },
-  { value: "gynecologist", label: "Gynecologist" },
-  { value: "psychiatrist", label: "Psychiatrist" },
-  { value: "physiotherapist", label: "Physiotherapist" },
-  { value: "personal_trainer", label: "Personal Trainer" },
-  { value: "other", label: "Other" },
-];
-
 const CLOUDINARY_CLOUD_NAME = "zyfxigcj";
 const CLOUDINARY_UPLOAD_PRESET = "FitnessZone";
 
@@ -91,12 +82,11 @@ const Careers = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        PROFESSIONAL PARTNER ONBOARDING
+        JOIN OUR TRAINER TEAM
       </motion.h1>
       <p className="text-brand-blue/70 text-center mb-10">
-        Are you a dietician, gynecologist, psychiatrist, physiotherapist, or
-        personal trainer interested in offering online consultancy to our
-        members? Apply below.
+        Are you a fitness trainer interested in leading live group classes for
+        our members? Apply below.
       </p>
 
       <Card>
@@ -157,20 +147,15 @@ const Careers = () => {
               className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
             />
 
-            <select
+            <input
+              type="text"
               name="specialty"
+              placeholder="Specialty (e.g. Yoga, Strength Training, Zumba)"
               value={formData.specialty}
               onChange={handleChange}
               required
               className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-            >
-              <option value="">Profession / Specialty</option>
-              {specialties.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
+            />
 
             <input
               type="number"
@@ -221,10 +206,6 @@ const Careers = () => {
               required
               className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
             />
-
-            <p className="text-xs text-brand-blue/50">
-              Note: consultations are 1-on-1 only.
-            </p>
 
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
