@@ -58,7 +58,7 @@ const steps = [
     icon: Route,
     n: "01",
     title: "Choose your path",
-    desc: "Pick a Dietplan, Live Sessions, or both. Add Premium if you want a professional in your corner.",
+    desc: "Pick a Dietplan, Live Sessions, or both — combine them for full support.",
   },
   {
     icon: CalendarCheck,

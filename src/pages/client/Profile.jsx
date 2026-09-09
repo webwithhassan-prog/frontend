@@ -819,7 +819,7 @@ const Profile = () => {
             </motion.div>
           )}
 
-          {/* Premium Services grid */}
+          {/* Services grid */}
           <h2 className="font-display text-sm text-brand-blue/60 tracking-wide mb-4">
             YOUR SERVICES
           </h2>
