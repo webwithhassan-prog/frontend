@@ -17,7 +17,7 @@ const BRAND_BLUE_LIGHT = [44, 68, 209];
 const BRAND_ORANGE = [247, 107, 28];
 const BRAND_BLUE_PALE = [234, 241, 255];
 
-const categories = ["plan", "consultation", "package", "ebook", "course", "custom"];
+const categories = ["plan", "package", "ebook", "course", "custom"];
 
 // Escapes a value for a CSV cell — wraps in quotes and doubles any embedded
 // quotes whenever the value itself could contain a comma, quote, or newline.
