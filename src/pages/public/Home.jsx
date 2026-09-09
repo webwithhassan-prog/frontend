@@ -64,7 +64,7 @@ const steps = [
     icon: CalendarCheck,
     n: "02",
     title: "Get matched & scheduled",
-    desc: "We assign your trainer or consultant and set your timetable around your week, not the other way round.",
+    desc: "We assign your trainer and set your timetable around your week, not the other way round.",
   },
   {
     icon: Video,

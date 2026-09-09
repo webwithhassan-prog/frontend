@@ -823,7 +823,7 @@ const Profile = () => {
           <h2 className="font-display text-sm text-brand-blue/60 tracking-wide mb-4">
             YOUR SERVICES
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
             {services.map((s) => (
               <Card
                 key={s.key}
