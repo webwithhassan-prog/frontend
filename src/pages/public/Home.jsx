@@ -344,7 +344,7 @@ const Home = () => {
 
       {/* Stats bar */}
       <section className="bg-brand-blue">
-        <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="max-w-6xl mx-auto px-6 py-7 md:py-10 grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-5 md:gap-8">
           {stats.map((stat, i) => (
             <motion.div
               key={stat.label}
