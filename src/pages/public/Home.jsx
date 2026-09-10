@@ -174,41 +174,42 @@ const Home = () => {
   return (
     <div className="overflow-hidden">
       <AchievementMarquee />
-      {/* Hero — plain, un-animated slide swap. AnimatePresence's mode="wait"
-          proved unreliable here across rapid/overlapping triggers (manual
-          clicks racing the 5s auto-advance), leaving the slide frozen with
-          stale content while the dots kept advancing underneath — instant
-          swap has none of that risk. */}
-      {/* Static fallback — shown until the real (admin-editable) hero
-          banners finish fetching. Mirrors the loaded hero's exact markup
-          and classes (mobile heading block, image-box aspect ratio, text
-          overlay, CTA row) so swapping in real content causes no layout
-          shift — the only difference is a CSS gradient here instead of an
-          <img>, so this paints instantly with zero network dependency,
-          rather than leaving the page blank while the hero-banners API
-          call is in flight. */}
+
       {heroLoading && (
         <section className="relative bg-brand-blue overflow-hidden">
-          <div className="lg:hidden px-6 sm:px-10 pt-9 pb-4">
-            <div className="text-center">
-              <p className="font-display text-brand-orange text-sm sm:text-base tracking-[0.15em] mb-2">
-                HOME WORKOUTS
-              </p>
-              <h1 className="font-display text-3xl sm:text-4xl text-white leading-[1.2]">
-                Dietplans &amp; Home Workouts — Built For You
-              </h1>
-            </div>
-          </div>
-
-          <div className="relative w-full aspect-[2/1] sm:max-h-[440px] md:max-h-[520px] lg:max-h-[560px]">
+          <div className="relative w-full aspect-[4/5] sm:aspect-[3/2] lg:aspect-[2/1] lg:max-h-[560px]">
             <div className="absolute inset-0">
               <div className="absolute inset-0 bg-gradient-to-br from-brand-blue via-brand-blue-light to-brand-blue-light-dark" />
 
-              <div className="lg:hidden absolute inset-0 flex items-center justify-center text-center px-10 sm:px-16">
-                <p className="text-white font-medium text-base sm:text-lg leading-relaxed max-w-[260px] sm:max-w-[320px]">
+              <div className="lg:hidden absolute inset-0 flex flex-col items-center justify-end text-center px-8 sm:px-16 pb-8 sm:pb-10 pt-16">
+                <p className="font-display text-brand-orange text-sm sm:text-base tracking-[0.15em] mb-2">
+                  HOME WORKOUTS
+                </p>
+                <h1 className="font-display text-3xl sm:text-4xl text-white leading-[1.2] mb-3">
+                  Dietplans &amp; Home Workouts — Built For You
+                </h1>
+                <p className="text-white font-medium text-base sm:text-lg leading-relaxed max-w-[300px] sm:max-w-[380px] mb-5">
                   Customized dietplans and home workouts — all on one
                   platform, wherever you are.
                 </p>
+                <div className="flex items-center gap-3">
+                  <Button size="sm" onClick={() => (window.location.href = "/plans")}>
+                    Explore Packages
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() =>
+                      document
+                        .getElementById("how-it-works")
+                        ?.scrollIntoView({ behavior: "smooth" })
+                    }
+                  >
+                    <span className="flex items-center gap-2">
+                      How it works <ArrowRight size={16} />
+                    </span>
+                  </Button>
+                </div>
               </div>
 
               <div className="hidden lg:flex absolute inset-0 items-center">
@@ -252,47 +253,19 @@ const Home = () => {
               </div>
             </div>
           </div>
-
-          <div className="lg:hidden flex items-center justify-center gap-4 px-6 sm:px-10 py-5">
-            <Button size="sm" onClick={() => (window.location.href = "/plans")}>
-              Explore Packages
-            </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() =>
-                document
-                  .getElementById("how-it-works")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
-            >
-              <span className="flex items-center gap-2">
-                How it works <ArrowRight size={16} />
-              </span>
-            </Button>
-          </div>
         </section>
       )}
       {heroSlides.length > 0 && (
       <section className="relative bg-brand-blue overflow-hidden">
-        {/* Mobile + tablet — heading comes first (full-width, readable).
-            The inline text-over-image overlay below needs real desktop
-            width to avoid colliding with the photo, so this stacked layout
-            covers everything under lg: (not just phones). */}
-        <div className="lg:hidden px-6 sm:px-10 pt-9 pb-4">
-          <div className="text-center">
-            <p className="font-display text-brand-orange text-sm sm:text-base tracking-[0.15em] mb-2">
-              {heroSlides[heroSlide].eyebrow}
-            </p>
-            <h1 className="font-display text-3xl sm:text-4xl text-white leading-[1.2]">
-              {heroSlides[heroSlide].title}
-            </h1>
-          </div>
-        </div>
-
         {/* Image box — content swaps instantly with the current slide;
-            arrows/dots below are stable siblings */}
-        <div className="relative w-full aspect-[2/1] sm:max-h-[440px] md:max-h-[520px] lg:max-h-[560px]">
+            arrows/dots below are stable siblings. Mobile/tablet uses a
+            taller portrait-ish ratio with everything (eyebrow, heading,
+            description, buttons) overlaid as one bottom-anchored block —
+            previously these were three separate stacked sections (heading
+            above the photo, description overlaid on it, buttons below),
+            which read as disconnected chunks rather than one hero. Desktop
+            keeps its own wide ratio and left-column layout, unchanged. */}
+        <div className="relative w-full aspect-[4/5] sm:aspect-[3/2] lg:aspect-[2/1] lg:max-h-[560px]">
           <div className="absolute inset-0">
             <img
               src={heroSlides[heroSlide].image}
@@ -301,21 +274,57 @@ const Home = () => {
             />
 
             {/* Scrim — these are real photos with no built-in blank panel.
-                  Mobile centers its text over the whole image, so it gets a
-                  flat tint that reads well anywhere; desktop keeps its text
-                  in a left column, so it gets a left-side gradient instead.
-                  Darker than a typical scrim on purpose — legibility over
-                  photo fidelity for the overlaid text. */}
-            <div className="absolute inset-0 bg-black/55 lg:bg-gradient-to-r lg:from-black/85 lg:via-black/50 lg:to-transparent" />
+                  Mobile anchors its text to the bottom, so it gets a
+                  bottom-heavy gradient; desktop keeps its text in a left
+                  column, so it gets a left-side gradient instead. Darker
+                  than a typical scrim on purpose — legibility over photo
+                  fidelity for the overlaid text. */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10 lg:bg-gradient-to-r lg:from-black/85 lg:via-black/50 lg:to-transparent" />
 
-            {/* Description overlay — mobile + tablet, centered over the photo */}
-            <div className="lg:hidden absolute inset-0 flex items-center justify-center text-center px-10 sm:px-16">
+            {/* Text + CTA overlay — mobile + tablet, anchored to the bottom
+                of the photo as one block */}
+            <div className="lg:hidden absolute inset-0 flex flex-col items-center justify-end text-center px-8 sm:px-16 pb-8 sm:pb-10 pt-16">
               <p
-                className="text-white font-medium text-base sm:text-lg leading-relaxed max-w-[260px] sm:max-w-[320px]"
+                className="font-display text-brand-orange text-sm sm:text-base tracking-[0.15em] mb-2"
+                style={{ textShadow: "0 1px 8px rgba(0,0,0,0.7)" }}
+              >
+                {heroSlides[heroSlide].eyebrow}
+              </p>
+              <h1
+                className="font-display text-3xl sm:text-4xl text-white leading-[1.2] mb-3"
+                style={{ textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}
+              >
+                {heroSlides[heroSlide].title}
+              </h1>
+              <p
+                className="text-white font-medium text-base sm:text-lg leading-relaxed max-w-[300px] sm:max-w-[380px] mb-5"
                 style={{ textShadow: "0 1px 8px rgba(0,0,0,0.7)" }}
               >
                 {heroSlides[heroSlide].desc}
               </p>
+              <div className="flex items-center gap-3">
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    (window.location.href = heroSlides[heroSlide].href)
+                  }
+                >
+                  {heroSlides[heroSlide].cta}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() =>
+                    document
+                      .getElementById("how-it-works")
+                      ?.scrollIntoView({ behavior: "smooth" })
+                  }
+                >
+                  <span className="flex items-center gap-2">
+                    How it works <ArrowRight size={16} />
+                  </span>
+                </Button>
+              </div>
             </div>
 
             {/* Text overlay — desktop only, where the image is wide enough
@@ -391,7 +400,7 @@ const Home = () => {
           </button>
 
           {/* Dot indicators — stable, outside the crossfade */}
-          <div className="absolute bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
+          <div className="absolute bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 lg:bottom-5">
             {heroSlides.map((_, i) => (
               <button
                 key={i}
@@ -403,30 +412,6 @@ const Home = () => {
               />
             ))}
           </div>
-        </div>
-
-        {/* CTAs — mobile + tablet, below the banner, centered as a pair to
-            match the now-centered heading/description above */}
-        <div className="lg:hidden flex items-center justify-center gap-4 px-6 sm:px-10 py-5">
-          <Button
-            size="sm"
-            onClick={() => (window.location.href = heroSlides[heroSlide].href)}
-          >
-            {heroSlides[heroSlide].cta}
-          </Button>
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() =>
-              document
-                .getElementById("how-it-works")
-                ?.scrollIntoView({ behavior: "smooth" })
-            }
-          >
-            <span className="flex items-center gap-2">
-              How it works <ArrowRight size={16} />
-            </span>
-          </Button>
         </div>
       </section>
       )}
