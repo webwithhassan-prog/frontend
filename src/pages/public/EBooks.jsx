@@ -128,7 +128,17 @@ const EBooks = () => {
                     transition={{ duration: 0.4, delay: i * 0.08 }}
                   >
                     <Card className="h-full flex flex-col">
-                      <BookOpen className="text-brand-orange mb-3" size={28} />
+                      {ebook.banner_url ? (
+                        <div className="aspect-video -mt-1 mb-3 rounded-lg overflow-hidden bg-brand-blue-pale">
+                          <img
+                            src={optimizeCloudinaryUrl(ebook.banner_url, 500)}
+                            alt={ebook.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <BookOpen className="text-brand-orange mb-3" size={28} />
+                      )}
                       <h3 className="font-display text-brand-blue text-base mb-2">
                         {ebook.title}
                       </h3>
