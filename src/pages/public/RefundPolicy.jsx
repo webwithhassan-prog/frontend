@@ -38,18 +38,17 @@ const RefundPolicy = () => {
           <ul className="list-disc pl-5 space-y-3">
             <li>
               <strong>Customized Diet Plans:</strong> Upon submission of
-              your health data, our specialist will deliver your
-              personalized 15-day plan within 24 hours. Members receive a
-              direct contact number for their dietitian and will participate
-              in group meal tracking. Plans are valid strictly for 15 days.
+              your health data, your personalized 15-day plan is delivered
+              within 24 hours. Members participate in group meal tracking to
+              stay on track. Plans are valid strictly for 15 days.
             </li>
             <li>
-              <strong>Home Workouts:</strong> Interactive classes are
-              conducted by certified female trainers with flexible time
-              slots. Memberships operate on a strict "date-to-date" monthly
-              cycle (e.g., from the 10th of one month to the 10th of the
-              next). This is a group fitness model; individual personal
-              trainer support outside these classes is not included.
+              <strong>Home Workouts:</strong> Interactive classes run on
+              flexible time slots throughout the week. Memberships operate
+              on a strict "date-to-date" monthly cycle (e.g., from the 10th
+              of one month to the 10th of the next). This is a group fitness
+              model; one-on-one support outside these classes is not
+              included.
             </li>
             <li>
               <strong>E-Books &amp; Courses:</strong> Access is granted
@@ -59,8 +58,7 @@ const RefundPolicy = () => {
             </li>
             <li>
               <strong>Custom Payment Links &amp; Invoices:</strong> One-off
-              services or deliverables agreed directly with our team (e.g.
-              a negotiated custom dietplan) are billed through a dedicated
+              deliverables agreed in advance are billed through a dedicated
               invoice or payment link and are subject to the same no-refund
               terms once payment is confirmed.
             </li>
@@ -127,7 +125,7 @@ const RefundPolicy = () => {
             </li>
             <li>
               <strong>Unnotified Absences:</strong> If you stop attending
-              home workouts or fail to follow up with your dietitian
+              home workouts or fail to complete your scheduled check-ins
               without prior notice, those days will be counted as fully
               consumed.
             </li>
