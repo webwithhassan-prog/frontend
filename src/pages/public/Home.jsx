@@ -21,6 +21,7 @@ import Loader from "../../components/common/Loader";
 import TestimonialsSlider from "../../components/common/TestimonialsSlider";
 import AchievementMarquee from "../../components/common/AchievementMarquee";
 import api from "../../services/api";
+import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
 
 const pillars = [
   {
@@ -89,7 +90,7 @@ const Home = () => {
         const res = await api.get("/hero-banners/public");
         setHeroSlides(
           res.data.map((b) => ({
-            image: b.image_url,
+            image: optimizeCloudinaryUrl(b.image_url, 1200),
             eyebrow: b.eyebrow,
             title: b.title,
             desc: b.desc,

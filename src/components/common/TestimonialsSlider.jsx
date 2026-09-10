@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import api from "../../services/api";
+import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
 
 const TestimonialsSlider = () => {
   const [images, setImages] = useState([]);
@@ -12,7 +13,9 @@ const TestimonialsSlider = () => {
     const fetchTestimonials = async () => {
       try {
         const res = await api.get("/testimonials/public");
-        setImages(res.data.map((t) => t.image_url));
+        setImages(
+          res.data.map((t) => optimizeCloudinaryUrl(t.image_url, 500)),
+        );
       } catch (err) {
         console.error(err);
       } finally {
