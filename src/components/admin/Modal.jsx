@@ -17,7 +17,16 @@ const Modal = ({ isOpen, onClose, title, children }) => {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ duration: 0.25 }}
+            transition={{
+              // Same reasoning as Button/Card: scale+y are physical motion
+              // (popping in/out), so a well-damped spring reads as more
+              // tactile than a flat tween. Higher damping than Button's
+              // press — a bouncy modal feels silly, not premium. Opacity
+              // stays a smooth tween.
+              default: { duration: 0.25 },
+              scale: { type: "spring", stiffness: 350, damping: 24 },
+              y: { type: "spring", stiffness: 350, damping: 24 },
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
