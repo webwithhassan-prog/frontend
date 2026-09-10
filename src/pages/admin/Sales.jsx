@@ -5,7 +5,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
-import Loader from "../../components/common/Loader";
+import SkeletonTable from "../../components/common/SkeletonTable";
 import Button from "../../components/common/Button";
 import { useCurrency } from "../../context/CurrencyContext";
 import logo from "../../assets/logo.jpeg";
@@ -221,9 +221,11 @@ const Sales = () => {
         <Card>
           <p className="text-brand-blue-light text-sm mb-1">Today's Sales</p>
           <p className="text-3xl font-bold text-brand-blue">
-            {loading
-              ? "—"
-              : `£${summary.daily_total_settled.toLocaleString("en-GB", { maximumFractionDigits: 2 })}`}
+            {loading ? (
+              <span className="inline-block h-8 w-32 rounded bg-brand-blue-pale animate-pulse" />
+            ) : (
+              `£${summary.daily_total_settled.toLocaleString("en-GB", { maximumFractionDigits: 2 })}`
+            )}
           </p>
           {!loading && (
             <p className="text-brand-blue-light text-xs mt-1">
@@ -236,9 +238,11 @@ const Sales = () => {
             This Month's Sales
           </p>
           <p className="text-3xl font-bold text-brand-blue">
-            {loading
-              ? "—"
-              : `£${summary.monthly_total_settled.toLocaleString("en-GB", { maximumFractionDigits: 2 })}`}
+            {loading ? (
+              <span className="inline-block h-8 w-32 rounded bg-brand-blue-pale animate-pulse" />
+            ) : (
+              `£${summary.monthly_total_settled.toLocaleString("en-GB", { maximumFractionDigits: 2 })}`
+            )}
           </p>
           {!loading && (
             <p className="text-brand-blue-light text-xs mt-1">
@@ -274,7 +278,7 @@ const Sales = () => {
         </div>
       </Card>
 
-      {searching && <Loader size={18} />}
+      {searching && <SkeletonTable columns={4} rows={5} />}
 
       {searchResults && !searching && (
         <Card className="overflow-x-auto">

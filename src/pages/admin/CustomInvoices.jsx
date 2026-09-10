@@ -20,7 +20,7 @@ import {
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
-import Loader from "../../components/common/Loader";
+import SkeletonTable from "../../components/common/SkeletonTable";
 import Button from "../../components/common/Button";
 import Modal from "../../components/admin/Modal";
 import PhoneInput from "../../components/common/PhoneInput";
@@ -357,7 +357,7 @@ const CustomInvoices = () => {
       )}
 
       {loading ? (
-        <Loader />
+        <SkeletonTable columns={6} rows={8} actionsColumn />
       ) : invoices.length === 0 ? (
         <p className="text-brand-blue-light">No custom invoices yet.</p>
       ) : filteredInvoices.length === 0 ? (

@@ -18,7 +18,7 @@ import {
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
-import Loader from "../../components/common/Loader";
+import SkeletonTable from "../../components/common/SkeletonTable";
 import Button from "../../components/common/Button";
 import PhoneInput from "../../components/common/PhoneInput";
 import { getErrorMessage } from "../../utils/errors";
@@ -321,7 +321,7 @@ const Enrollments = () => {
       </div>
 
       {loading ? (
-        <Loader />
+        <SkeletonTable columns={7} rows={8} actionsColumn />
       ) : filteredClients.length === 0 ? (
         <p className="text-brand-blue-light text-sm">
           {searchQuery
