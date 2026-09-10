@@ -190,13 +190,20 @@ const Courses = () => {
           {courses.map((course) => (
             <Card key={course._id}>
               {course.banner_url && (
-                <div className="aspect-video mb-3 -mt-1 rounded-lg overflow-hidden bg-brand-blue-pale">
+                <a
+                  href={course.banner_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Tap to view full image"
+                  aria-label={`View full banner image for ${course.title}`}
+                  className="aspect-video mb-3 -mt-1 rounded-lg overflow-hidden bg-brand-blue-pale block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                >
                   <img
                     src={optimizeCloudinaryUrl(course.banner_url, 500)}
                     alt={course.title}
                     className="w-full h-full object-cover"
                   />
-                </div>
+                </a>
               )}
               <h3 className="text-brand-blue font-bold text-lg mb-1">
                 {course.title}
@@ -239,17 +246,26 @@ const Courses = () => {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex items-center gap-4">
-            <div className="w-20 h-14 rounded-lg bg-brand-blue-pale overflow-hidden flex items-center justify-center flex-shrink-0">
-              {bannerPreview ? (
+            {bannerPreview ? (
+              <a
+                href={bannerPreview}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Tap to view full image"
+                aria-label="View full banner image"
+                className="w-20 h-14 rounded-lg bg-brand-blue-pale overflow-hidden flex items-center justify-center flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+              >
                 <img
                   src={bannerPreview}
                   alt="Preview"
                   className="w-full h-full object-cover"
                 />
-              ) : (
+              </a>
+            ) : (
+              <div className="w-20 h-14 rounded-lg bg-brand-blue-pale overflow-hidden flex items-center justify-center flex-shrink-0">
                 <Upload size={18} className="text-brand-blue/40" />
-              )}
-            </div>
+              </div>
+            )}
             <label className="cursor-pointer text-sm font-semibold text-brand-orange">
               {bannerFile ? "Change Banner" : "Upload Banner (optional)"}
               <input

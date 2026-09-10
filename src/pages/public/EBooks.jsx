@@ -184,13 +184,20 @@ const EBooks = () => {
                   >
                     <Card className="h-full flex flex-col">
                       {course.banner_url ? (
-                        <div className="aspect-video -mt-1 mb-3 rounded-lg overflow-hidden bg-brand-blue-pale">
+                        <a
+                          href={course.banner_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Tap to view full image"
+                          aria-label={`View full cover image for ${course.title}`}
+                          className="aspect-video -mt-1 mb-3 rounded-lg overflow-hidden bg-brand-blue-pale block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                        >
                           <img
                             src={optimizeCloudinaryUrl(course.banner_url, 500)}
                             alt={course.title}
                             className="w-full h-full object-cover"
                           />
-                        </div>
+                        </a>
                       ) : (
                         <GraduationCap className="text-brand-blue-light mb-3" size={28} />
                       )}
