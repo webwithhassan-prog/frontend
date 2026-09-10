@@ -25,11 +25,13 @@ const TermsOfService = () => {
             1. Nature of Services
           </h3>
           <p>
-            All plans (Customized Diet Plans, Home Workouts, and the
-            Ultimate Fitness Combo) are digital, intangible, time-bound
-            services managed directly by our platform. Unlike physical
-            merchandise, these digital assets and access credits cannot be
-            "returned" or "undone" once initiated.
+            Everything sold on this platform — Customized Diet Plans, Home
+            Workouts, the Ultimate Fitness Combo, E-Books, Courses, and any
+            custom payment arrangement made through a one-off invoice or
+            payment link — is a digital, intangible service or asset managed
+            directly by our platform. Unlike physical merchandise, these
+            digital assets and access credits cannot be "returned" or
+            "undone" once initiated.
           </p>
         </div>
 
@@ -52,6 +54,19 @@ const TermsOfService = () => {
               cycle (e.g., from the 10th of one month to the 10th of the
               next). This is a group fitness model; individual personal
               trainer support outside these classes is not included.
+            </li>
+            <li>
+              <strong>E-Books &amp; Courses:</strong> Access is granted
+              instantly upon successful payment. E-Books and course video
+              lessons remain available in your account indefinitely once
+              purchased.
+            </li>
+            <li>
+              <strong>Custom Payment Links &amp; Invoices:</strong> One-off
+              services or deliverables agreed directly with our team (e.g.
+              a negotiated custom dietplan) are billed through a dedicated
+              invoice or payment link and are subject to the same no-refund
+              terms once payment is confirmed.
             </li>
           </ul>
         </div>
@@ -77,6 +92,16 @@ const TermsOfService = () => {
                 <li>
                   For Home Workouts: No refunds once class access links are
                   issued or the monthly cycle begins.
+                </li>
+                <li>
+                  For E-Books &amp; Courses: No refunds once purchased and
+                  access has been granted, as digital content cannot be
+                  "returned."
+                </li>
+                <li>
+                  For Custom Payment Links &amp; Invoices: No refunds once
+                  payment is confirmed and the agreed service or deliverable
+                  has been provided or initiated.
                 </li>
               </ul>
             </li>
