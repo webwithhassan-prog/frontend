@@ -20,7 +20,7 @@ import { useSettings } from "../../context/SettingsContext";
 
 const packageOptions = [
   { label: "Customized Dietplan", type: "dietplan" },
-  { label: "Live Workout Sessions", type: "workout" },
+  { label: "Home Workouts", type: "workout" },
   { label: "Both Combined", type: "combo" },
 ];
 

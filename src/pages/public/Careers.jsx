@@ -85,8 +85,8 @@ const Careers = () => {
         JOIN OUR TRAINER TEAM
       </motion.h1>
       <p className="text-brand-blue/70 text-center mb-10">
-        Are you a fitness trainer interested in leading live group classes for
-        our members? Apply below.
+        Are you a fitness trainer interested in leading home workout classes
+        for our members? Apply below.
       </p>
 
       <Card>

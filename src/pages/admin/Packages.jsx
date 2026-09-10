@@ -17,7 +17,7 @@ const emptyForm = {
 
 const productTypes = [
   { value: "dietplan", label: "Customized Dietplan" },
-  { value: "workout", label: "Live Workout Sessions" },
+  { value: "workout", label: "Home Workouts" },
   { value: "combo", label: "Both Combined" },
 ];
 
@@ -163,7 +163,7 @@ const Packages = () => {
           </div>
 
           <h2 className="text-lg font-bold text-brand-blue mb-4">
-            Live Workout Sessions
+            Home Workouts
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             {workoutPlans.map((plan) => (

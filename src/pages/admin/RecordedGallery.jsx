@@ -96,7 +96,7 @@ const RecordedGallery = () => {
 
       <p className="text-brand-blue-light text-sm mb-6">
         Weekly session recordings (unlisted YouTube links) for clients with
-        live classes. Shown newest first, separate from Recorded Content.
+        home workouts. Shown newest first, separate from Recorded Content.
       </p>
 
       {loading ? (

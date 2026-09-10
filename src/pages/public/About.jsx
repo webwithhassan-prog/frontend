@@ -20,16 +20,15 @@ const About = () => {
           <p>
             Since 2023, FITNESSZONE OFFICIAL LIMITED has been dedicated to
             helping women take control of their health and well-being. We
-            specialize in addressing root-cause health challenges brought on
-            by modern, sedentary lifestyles — including PCOS/PCOD, Thyroid
-            imbalances, Fertility challenges, Insulin Resistance, Type-2
-            Diabetes, and other metabolic conditions.
+            focus on the everyday effects of modern, sedentary lifestyles —
+            low energy, stubborn weight, and inconsistent routines — through
+            sustainable nutrition and movement, not quick fixes.
           </p>
           <p>
-            We believe that managing hormonal and lifestyle disorders
-            shouldn't require harsh starvation diets, shortcuts, or long
-            lists of supplements. True, sustainable healing begins right in
-            your kitchen and through consistent movement.
+            We believe lasting change shouldn't require harsh starvation
+            diets, shortcuts, or long lists of supplements. Real, sustainable
+            results begin right in your kitchen and through consistent
+            movement.
           </p>
         </div>
 
@@ -52,22 +51,22 @@ const About = () => {
             </div>
             <div>
               <h3 className="font-semibold text-brand-blue mb-1">
-                Interactive Live Workout Sessions
+                Interactive Home Workouts
               </h3>
               <p>
                 Stay active, energized, and accountable from the comfort of
-                your home with our guided, live workout sessions tailored to
+                your home with our guided home workouts tailored to
                 fit varying fitness levels and health conditions.
               </p>
             </div>
             <div>
               <h3 className="font-semibold text-brand-blue mb-1">
-                Targeted Hormonal &amp; Metabolic Care
+                Sustainable Energy &amp; Balance
               </h3>
               <p>
-                We focus on internal balance and root-cause healing rather
-                than just quick weight loss, helping you rebuild your
-                energy, balance your hormones, and restore your confidence.
+                We focus on steady, whole-body wellness rather than quick
+                weight loss — helping you build energy, feel more balanced,
+                and move through your day with confidence.
               </p>
             </div>
           </div>
@@ -83,7 +82,7 @@ const About = () => {
           </blockquote>
           <p>
             Every woman's body is unique. Our mission is to guide you toward
-            a healthier, disease-free lifestyle through a personalized
+            a healthier, more active lifestyle through a personalized
             approach that seamlessly integrates into your daily routine
             without feeling like a burden.
           </p>

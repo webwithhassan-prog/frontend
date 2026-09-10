@@ -25,7 +25,7 @@ const TermsOfService = () => {
             1. Nature of Services
           </h3>
           <p>
-            All plans (Customized Diet Plans, Live Workout Sessions, and the
+            All plans (Customized Diet Plans, Home Workouts, and the
             Ultimate Fitness Combo) are digital, intangible, time-bound
             services managed directly by our platform. Unlike physical
             merchandise, these digital assets and access credits cannot be
@@ -46,13 +46,12 @@ const TermsOfService = () => {
               in group meal tracking. Plans are valid strictly for 15 days.
             </li>
             <li>
-              <strong>Live Workout Sessions:</strong> Interactive live
-              classes are conducted by certified female trainers with
-              flexible time slots. Memberships operate on a strict
-              "date-to-date" monthly cycle (e.g., from the 10th of one month
-              to the 10th of the next). This is a group fitness model;
-              individual personal trainer support outside live classes is
-              not included.
+              <strong>Home Workouts:</strong> Interactive classes are
+              conducted by certified female trainers with flexible time
+              slots. Memberships operate on a strict "date-to-date" monthly
+              cycle (e.g., from the 10th of one month to the 10th of the
+              next). This is a group fitness model; individual personal
+              trainer support outside these classes is not included.
             </li>
           </ul>
         </div>
@@ -65,7 +64,7 @@ const TermsOfService = () => {
             <li>
               Following the traditional "Gym Membership" legal framework,
               fees paid for plans are for temporary access
-              to our live coaches, tracking networks, and digital resources
+              to our coaches, tracking networks, and digital resources
               for a designated period.
             </li>
             <li>
@@ -76,7 +75,7 @@ const TermsOfService = () => {
                   been generated or shared.
                 </li>
                 <li>
-                  For Live Workouts: No refunds once class access links are
+                  For Home Workouts: No refunds once class access links are
                   issued or the monthly cycle begins.
                 </li>
               </ul>
@@ -107,7 +106,7 @@ const TermsOfService = () => {
             </li>
             <li>
               <strong>Unnotified Absences:</strong> If you stop attending
-              live workout sessions or fail to follow up with your dietitian
+              home workouts or fail to follow up with your dietitian
               without prior notice, those days will be counted as fully
               consumed.
             </li>

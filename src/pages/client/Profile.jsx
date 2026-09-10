@@ -958,7 +958,7 @@ const Profile = () => {
                 <Card className="mb-12 border-brand-orange border-2 text-center max-w-lg">
                   <p className="text-brand-blue font-semibold mb-4">
                     Your Workout package isn't active — reactivate it to see
-                    and join live classes.
+                    and join your home workouts.
                   </p>
                   <Button onClick={() => navigate("/plans?type=workout")}>
                     View Workout Packages

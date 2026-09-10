@@ -17,13 +17,13 @@ const durations = [30, 90, 180];
 
 const packageLabels = {
   dietplan: "Customized Dietplan",
-  workout: "Live Workout Sessions",
+  workout: "Home Workouts",
   combo: "Both Combined",
 };
 
 const packageTabs = [
   { type: "dietplan", label: "Dietplan" },
-  { type: "workout", label: "Live Sessions" },
+  { type: "workout", label: "Home Workouts" },
   { type: "combo", label: "Both Combined" },
 ];
 
@@ -46,7 +46,7 @@ const featuresByType = {
   ],
   combo: [
     "Everything in Customized Dietplan",
-    "Everything in Live Workout Sessions",
+    "Everything in Home Workouts",
     "One package, one price",
   ],
 };
@@ -404,7 +404,7 @@ const Plans = () => {
                       </div>
                       <div className="pl-1">
                         <p className="text-[11px] font-bold text-brand-blue uppercase tracking-wide mb-2.5">
-                          Live Sessions
+                          Home Workouts
                         </p>
                         <ul className="space-y-2">
                           {(workoutForDuration?.features?.length

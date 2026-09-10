@@ -97,7 +97,7 @@ const NotFound = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.85, duration: 0.5 }}
         >
-          It's not here — but your Dietplan and live sessions
+          It's not here — but your Dietplan and home workouts
           are. Let's get you back on track.
         </motion.p>
 

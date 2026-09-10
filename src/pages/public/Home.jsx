@@ -31,8 +31,8 @@ const pillars = [
   },
   {
     icon: Dumbbell,
-    label: "Live Sessions",
-    title: "Live Workout Sessions",
+    label: "Home Workouts",
+    title: "Home Workouts",
     desc: "50–55 minutes, six days a week, a different workout every day — led by female trainers. (recordings are also available)",
   },
 ];
@@ -58,7 +58,7 @@ const steps = [
     icon: Route,
     n: "01",
     title: "Choose your path",
-    desc: "Pick a Dietplan, Live Sessions, or both — combine them for full support.",
+    desc: "Pick a Dietplan, Home Workouts, or both — combine them for full support.",
   },
   {
     icon: CalendarCheck,
@@ -69,7 +69,7 @@ const steps = [
   {
     icon: Video,
     n: "03",
-    title: "Show up live",
+    title: "Join your workout",
     desc: "Join from your dashboard — no links to hunt for, no groups to scroll through.",
   },
 ];
@@ -192,10 +192,10 @@ const Home = () => {
           <div className="lg:hidden px-6 sm:px-10 pt-9 pb-4">
             <div className="text-center">
               <p className="font-display text-brand-orange text-sm sm:text-base tracking-[0.15em] mb-2">
-                LIVE GROUP WORKOUTS
+                HOME WORKOUTS
               </p>
               <h1 className="font-display text-3xl sm:text-4xl text-white leading-[1.2]">
-                Dietplans &amp; Live Workouts — Built For You
+                Dietplans &amp; Home Workouts — Built For You
               </h1>
             </div>
           </div>
@@ -206,7 +206,7 @@ const Home = () => {
 
               <div className="lg:hidden absolute inset-0 flex items-center justify-center text-center px-10 sm:px-16">
                 <p className="text-white font-medium text-base sm:text-lg leading-relaxed max-w-[260px] sm:max-w-[320px]">
-                  Customized dietplans and live workout sessions — all on one
+                  Customized dietplans and home workouts — all on one
                   platform, wherever you are.
                 </p>
               </div>
@@ -215,13 +215,13 @@ const Home = () => {
                 <div className="max-w-6xl mx-auto px-8 w-full">
                   <div className="max-w-sm md:max-w-md">
                     <p className="font-display text-brand-orange text-sm tracking-[0.2em] mb-3">
-                      LIVE GROUP WORKOUTS
+                      HOME WORKOUTS
                     </p>
                     <h1 className="font-display text-3xl md:text-5xl text-white leading-[1.15] mb-4">
-                      Dietplans &amp; Live Workouts — Built For You
+                      Dietplans &amp; Home Workouts — Built For You
                     </h1>
                     <p className="text-white font-medium text-base md:text-lg mb-5 leading-relaxed">
-                      Customized dietplans and live workout sessions — all on
+                      Customized dietplans and home workouts — all on
                       one platform, wherever you are.
                     </p>
                     <div className="flex flex-wrap gap-4">
@@ -623,7 +623,7 @@ const Home = () => {
               SESSION DEMOS
             </motion.h2>
             <p className="text-white/80 text-center max-w-xl mx-auto mb-14">
-              Live sessions in action, exactly as our members experience them.
+              Home workouts in action, exactly as our members experience them.
             </p>
 
             <div className="relative flex items-center justify-center gap-4 sm:gap-6">
@@ -804,7 +804,7 @@ const Home = () => {
             Ready to Transform
           </h2>
           <p className="text-white/70 mb-8">
-            Pick your package — Dietplan, Live Sessions, or both — and start
+            Pick your package — Dietplan, Home Workouts, or both — and start
             this week.
           </p>
           <Button onClick={() => (window.location.href = "/plans")}>
@@ -843,17 +843,16 @@ const Home = () => {
             <p>
               Since 2023, FITNESSZONE OFFICIAL LIMITED has been dedicated to
               helping women take control of their health and well-being. We
-              specialize in addressing root-cause health challenges brought on
-              by modern, sedentary lifestyles — including PCOS/PCOD, thyroid
-              imbalances, fertility challenges, insulin resistance, and other
-              metabolic conditions.
+              focus on the everyday effects of modern, sedentary lifestyles —
+              low energy, stubborn weight, and inconsistent routines — through
+              sustainable nutrition and movement, not quick fixes.
             </p>
             <p>
-              We believe that managing hormonal and lifestyle disorders
-              shouldn't require harsh starvation diets, shortcuts, or long lists
-              of supplements — true, sustainable healing begins in your kitchen
-              and through consistent movement. No powders, pills, or artificial
-              products, ever.
+              We believe lasting change shouldn't require harsh starvation
+              diets, shortcuts, or long lists of supplements — real,
+              sustainable results begin in your kitchen and through
+              consistent movement. No powders, pills, or artificial products,
+              ever.
             </p>
             <a
               href="/about"

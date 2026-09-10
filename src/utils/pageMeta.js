@@ -1,24 +1,24 @@
 const siteName = "Fitness Zone";
 const defaultDescription =
-  "Fitness Zone is a fitness platform built for women — customized dietplans and live workout sessions with female trainers.";
+  "Fitness Zone is a fitness platform built for women — customized dietplans and home workouts with female trainers.";
 
 // Path -> { title, description }. Falls back to the defaults below for any
 // route not listed here (e.g. dynamic ones like /reset-password/:token).
 const pageMeta = {
   "/": {
-    title: `${siteName} — Dietplans & Live Workouts for Women`,
+    title: `${siteName} — Dietplans & Home Workouts for Women`,
     description:
-      "Customized dietplans and live workout sessions — one platform, no WhatsApp groups, no missed links.",
+      "Customized dietplans and home workouts — one platform, no WhatsApp groups, no missed links.",
   },
   "/plans": {
     title: `Packages & Pricing | ${siteName}`,
     description:
-      "Choose a Dietplan, Live Workout Sessions, or both — 30, 90, or 180-day packages with transparent pricing.",
+      "Choose a Dietplan, Home Workouts, or both — 30, 90, or 180-day packages with transparent pricing.",
   },
   "/trainers": {
     title: `Meet Our Trainers | ${siteName}`,
     description:
-      "Meet the female trainers behind Fitness Zone's live sessions.",
+      "Meet the female trainers behind Fitness Zone's home workouts.",
   },
   "/timetable": {
     title: `Time Slots | ${siteName}`,
@@ -37,7 +37,7 @@ const pageMeta = {
   "/careers": {
     title: `Careers — Join Our Trainer Team | ${siteName}`,
     description:
-      "Are you a fitness trainer interested in leading live group classes? Apply to join Fitness Zone.",
+      "Are you a fitness trainer interested in leading home workout classes? Apply to join Fitness Zone.",
   },
   "/contact": {
     title: `Contact Us | ${siteName}`,
@@ -46,7 +46,7 @@ const pageMeta = {
   },
   "/join": {
     title: `Join Your Class | ${siteName}`,
-    description: "Enter your name and phone number to join your live class — no login needed.",
+    description: "Enter your name and phone number to join your class — no login needed.",
   },
   "/login": {
     title: `Login | ${siteName}`,

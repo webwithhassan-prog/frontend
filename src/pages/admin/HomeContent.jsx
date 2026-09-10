@@ -258,7 +258,7 @@ const HeroBannersManager = ({ onCountChange }) => {
           <input
             type="text"
             name="eyebrow"
-            placeholder="Eyebrow tag (e.g. LIVE GROUP WORKOUTS)"
+            placeholder="Eyebrow tag (e.g. HOME WORKOUTS)"
             value={formData.eyebrow}
             onChange={handleChange}
             required
