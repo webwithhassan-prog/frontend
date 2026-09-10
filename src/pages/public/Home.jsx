@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
-import Loader from "../../components/common/Loader";
 import TestimonialsSlider from "../../components/common/TestimonialsSlider";
 import AchievementMarquee from "../../components/common/AchievementMarquee";
 import api from "../../services/api";
@@ -180,9 +179,98 @@ const Home = () => {
           clicks racing the 5s auto-advance), leaving the slide frozen with
           stale content while the dots kept advancing underneath — instant
           swap has none of that risk. */}
+      {/* Static fallback — shown until the real (admin-editable) hero
+          banners finish fetching. Mirrors the loaded hero's exact markup
+          and classes (mobile heading block, image-box aspect ratio, text
+          overlay, CTA row) so swapping in real content causes no layout
+          shift — the only difference is a CSS gradient here instead of an
+          <img>, so this paints instantly with zero network dependency,
+          rather than leaving the page blank while the hero-banners API
+          call is in flight. */}
       {heroLoading && (
-        <section className="relative bg-brand-blue overflow-hidden min-h-[420px] sm:min-h-[480px] lg:min-h-[560px] flex items-center justify-center">
-          <Loader size={96} />
+        <section className="relative bg-brand-blue overflow-hidden">
+          <div className="lg:hidden px-6 sm:px-10 pt-9 pb-4">
+            <div className="text-center">
+              <p className="font-display text-brand-orange text-sm sm:text-base tracking-[0.15em] mb-2">
+                LIVE GROUP WORKOUTS
+              </p>
+              <h1 className="font-display text-3xl sm:text-4xl text-white leading-[1.2]">
+                Dietplans &amp; Live Workouts — Built For You
+              </h1>
+            </div>
+          </div>
+
+          <div className="relative w-full aspect-[2/1] sm:max-h-[440px] md:max-h-[520px] lg:max-h-[560px]">
+            <div className="absolute inset-0">
+              <div className="absolute inset-0 bg-gradient-to-br from-brand-blue via-brand-blue-light to-brand-blue-light-dark" />
+
+              <div className="lg:hidden absolute inset-0 flex items-center justify-center text-center px-10 sm:px-16">
+                <p className="text-white font-medium text-base sm:text-lg leading-relaxed max-w-[260px] sm:max-w-[320px]">
+                  Customized dietplans and live workout sessions — all on one
+                  platform, wherever you are.
+                </p>
+              </div>
+
+              <div className="hidden lg:flex absolute inset-0 items-center">
+                <div className="max-w-6xl mx-auto px-8 w-full">
+                  <div className="max-w-sm md:max-w-md">
+                    <p className="font-display text-brand-orange text-sm tracking-[0.2em] mb-3">
+                      LIVE GROUP WORKOUTS
+                    </p>
+                    <h1 className="font-display text-3xl md:text-5xl text-white leading-[1.15] mb-4">
+                      Dietplans &amp; Live Workouts — Built For You
+                    </h1>
+                    <p className="text-white font-medium text-base md:text-lg mb-5 leading-relaxed">
+                      Customized dietplans and live workout sessions — all on
+                      one platform, wherever you are.
+                    </p>
+                    <div className="flex flex-wrap gap-4">
+                      <Button
+                        size="sm"
+                        className="!px-6 !py-3 text-sm"
+                        onClick={() => (window.location.href = "/plans")}
+                      >
+                        Explore Packages
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="!px-6 !py-3 text-sm"
+                        onClick={() =>
+                          document
+                            .getElementById("how-it-works")
+                            ?.scrollIntoView({ behavior: "smooth" })
+                        }
+                      >
+                        <span className="flex items-center gap-2">
+                          How it works <ArrowRight size={16} />
+                        </span>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:hidden flex items-center justify-center gap-4 px-6 sm:px-10 py-5">
+            <Button size="sm" onClick={() => (window.location.href = "/plans")}>
+              Explore Packages
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() =>
+                document
+                  .getElementById("how-it-works")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
+            >
+              <span className="flex items-center gap-2">
+                How it works <ArrowRight size={16} />
+              </span>
+            </Button>
+          </div>
         </section>
       )}
       {heroSlides.length > 0 && (
