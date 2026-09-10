@@ -1,18 +1,24 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Pencil, Trash2, Plus, X, Video } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Video, Upload } from "lucide-react";
 import toast from "react-hot-toast";
+import axios from "axios";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import Modal from "../../components/admin/Modal";
 import { getErrorMessage } from "../../utils/errors";
+import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
+
+const CLOUDINARY_CLOUD_NAME = "zyfxigcj";
+const CLOUDINARY_UPLOAD_PRESET = "FitnessZone";
 
 const emptyForm = {
   title: "",
   description: "",
   price: "",
+  banner_url: null,
   lessons: [{ title: "", youtube_link: "" }],
 };
 
@@ -22,6 +28,9 @@ const Courses = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState(emptyForm);
+  const [bannerFile, setBannerFile] = useState(null);
+  const [bannerPreview, setBannerPreview] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   const fetchCourses = async () => {
     try {
@@ -41,6 +50,8 @@ const Courses = () => {
   const openAddModal = () => {
     setFormData(emptyForm);
     setEditingId(null);
+    setBannerFile(null);
+    setBannerPreview(null);
     setIsModalOpen(true);
   };
 
@@ -49,17 +60,38 @@ const Courses = () => {
       title: course.title,
       description: course.description || "",
       price: course.price,
+      banner_url: course.banner_url || null,
       lessons:
         course.lessons.length > 0
           ? course.lessons.map((l) => ({ title: l.title, youtube_link: l.youtube_link }))
           : [{ title: "", youtube_link: "" }],
     });
     setEditingId(course._id);
+    setBannerFile(null);
+    setBannerPreview(course.banner_url || null);
     setIsModalOpen(true);
   };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleBannerSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setBannerFile(file);
+    setBannerPreview(URL.createObjectURL(file));
+  };
+
+  const uploadBannerToCloudinary = async () => {
+    const uploadData = new FormData();
+    uploadData.append("file", bannerFile);
+    uploadData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    const res = await axios.post(
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+      uploadData,
+    );
+    return res.data.secure_url;
   };
 
   const handleLessonChange = (index, field, value) => {
@@ -93,7 +125,11 @@ const Courses = () => {
       toast.error("Add at least one lesson with a title and video link");
       return;
     }
+    setSaving(true);
     try {
+      if (bannerFile) {
+        payload.banner_url = await uploadBannerToCloudinary();
+      }
       if (editingId) {
         await api.put(`/courses/${editingId}`, payload);
         toast.success("Course updated");
@@ -105,6 +141,8 @@ const Courses = () => {
       fetchCourses();
     } catch (err) {
       toast.error(getErrorMessage(err, "Something went wrong"));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -151,6 +189,15 @@ const Courses = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {courses.map((course) => (
             <Card key={course._id}>
+              {course.banner_url && (
+                <div className="aspect-video mb-3 -mt-1 rounded-lg overflow-hidden bg-brand-blue-pale">
+                  <img
+                    src={optimizeCloudinaryUrl(course.banner_url, 500)}
+                    alt={course.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
               <h3 className="text-brand-blue font-bold text-lg mb-1">
                 {course.title}
               </h3>
@@ -189,6 +236,28 @@ const Courses = () => {
         title={editingId ? "Edit Course" : "Add Course"}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-14 rounded-lg bg-brand-blue-pale overflow-hidden flex items-center justify-center flex-shrink-0">
+              {bannerPreview ? (
+                <img
+                  src={bannerPreview}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Upload size={18} className="text-brand-blue/40" />
+              )}
+            </div>
+            <label className="cursor-pointer text-sm font-semibold text-brand-orange">
+              {bannerFile ? "Change Banner" : "Upload Banner (optional)"}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleBannerSelect}
+                className="hidden"
+              />
+            </label>
+          </div>
           <input
             type="text"
             name="title"
@@ -265,8 +334,8 @@ const Courses = () => {
             </button>
           </div>
 
-          <Button type="submit" className="w-full">
-            {editingId ? "Save Changes" : "Add Course"}
+          <Button type="submit" className="w-full" disabled={saving}>
+            {saving ? "Saving..." : editingId ? "Save Changes" : "Add Course"}
           </Button>
         </form>
       </Modal>
