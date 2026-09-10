@@ -33,6 +33,7 @@ const NotFound = lazy(() => import("./pages/public/NotFound"));
 const About = lazy(() => import("./pages/public/About"));
 const PrivacyPolicy = lazy(() => import("./pages/public/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/public/TermsOfService"));
+const RefundPolicy = lazy(() => import("./pages/public/RefundPolicy"));
 
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
 const Enrollments = lazy(() => import("./pages/admin/Enrollments"));
@@ -128,6 +129,14 @@ function AppRoutes() {
           element={
             <PublicLayout>
               <TermsOfService />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/refund-policy"
+          element={
+            <PublicLayout>
+              <RefundPolicy />
             </PublicLayout>
           }
         />

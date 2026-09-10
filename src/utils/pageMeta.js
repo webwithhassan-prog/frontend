@@ -66,7 +66,11 @@ const pageMeta = {
   },
   "/terms": {
     title: `Terms of Service | ${siteName}`,
-    description: "Fitness Zone's terms of service and refund policy.",
+    description: "Fitness Zone's terms of service.",
+  },
+  "/refund-policy": {
+    title: `Refund Policy | ${siteName}`,
+    description: "Fitness Zone's refund and membership pause policy.",
   },
 };
 

@@ -12,137 +12,133 @@ const TermsOfService = () => {
         TERMS OF SERVICE
       </motion.h1>
       <p className="text-brand-blue/60 text-sm mb-8">
-        Last updated: August 2026
+        Last updated: September 2026
       </p>
 
       <div className="space-y-8 text-brand-blue/80 text-sm leading-relaxed">
-        <h2 className="font-display text-brand-blue text-lg">
-          Terms of Service & Refund Policy
-        </h2>
-
         <div>
           <h3 className="font-display text-brand-blue text-base mb-2">
-            1. Nature of Services
+            1. Acceptance of Terms
           </h3>
           <p>
-            Everything sold on this platform — Customized Diet Plans, Home
-            Workouts, the Ultimate Fitness Combo, E-Books, Courses, and any
-            custom payment arrangement made through a one-off invoice or
-            payment link — is a digital, intangible service or asset managed
-            directly by our platform. Unlike physical merchandise, these
-            digital assets and access credits cannot be "returned" or
-            "undone" once initiated.
+            By creating an account or purchasing any package, e-book, course,
+            or other service on this platform, you agree to be bound by
+            these Terms of Service. If you do not agree, please do not use
+            the platform.
           </p>
         </div>
 
         <div>
           <h3 className="font-display text-brand-blue text-base mb-2">
-            2. Plan Specific Rules & Deliverables
+            2. Your Account
           </h3>
-          <ul className="list-disc pl-5 space-y-3">
-            <li>
-              <strong>Customized Diet Plans:</strong> Upon submission of
-              your health data, our specialist will deliver your
-              personalized 15-day plan within 24 hours. Members receive a
-              direct contact number for their dietitian and will participate
-              in group meal tracking. Plans are valid strictly for 15 days.
-            </li>
-            <li>
-              <strong>Home Workouts:</strong> Interactive classes are
-              conducted by certified female trainers with flexible time
-              slots. Memberships operate on a strict "date-to-date" monthly
-              cycle (e.g., from the 10th of one month to the 10th of the
-              next). This is a group fitness model; individual personal
-              trainer support outside these classes is not included.
-            </li>
-            <li>
-              <strong>E-Books &amp; Courses:</strong> Access is granted
-              instantly upon successful payment. E-Books and course video
-              lessons remain available in your account indefinitely once
-              purchased.
-            </li>
-            <li>
-              <strong>Custom Payment Links &amp; Invoices:</strong> One-off
-              services or deliverables agreed directly with our team (e.g.
-              a negotiated custom dietplan) are billed through a dedicated
-              invoice or payment link and are subject to the same no-refund
-              terms once payment is confirmed.
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="font-display text-brand-blue text-base mb-2">
-            3. Strict No-Refund Policy (Gym Membership Framework)
-          </h3>
-          <ul className="list-disc pl-5 space-y-2">
-            <li>
-              Following the traditional "Gym Membership" legal framework,
-              fees paid for plans are for temporary access
-              to our coaches, tracking networks, and digital resources
-              for a designated period.
-            </li>
-            <li>
-              <strong>Instant Disqualification for Refunds:</strong>
-              <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li>
-                  For Diet Plans: No refunds once the customized plan has
-                  been generated or shared.
-                </li>
-                <li>
-                  For Home Workouts: No refunds once class access links are
-                  issued or the monthly cycle begins.
-                </li>
-                <li>
-                  For E-Books &amp; Courses: No refunds once purchased and
-                  access has been granted, as digital content cannot be
-                  "returned."
-                </li>
-                <li>
-                  For Custom Payment Links &amp; Invoices: No refunds once
-                  payment is confirmed and the agreed service or deliverable
-                  has been provided or initiated.
-                </li>
-              </ul>
-            </li>
-            <li>
-              With an established 3-year track record of high-quality
-              fitness service delivery, refunds will not be issued due to
-              personal scheduling conflicts, lack of individual motivation,
-              or changes in personal preference.
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="font-display text-brand-blue text-base mb-2">
-            4. Membership Pause & Extension Policy
-          </h3>
-          <p className="mb-2">
-            We provide a complimentary membership "Pause/Hold" feature to
-            accommodate unexpected emergencies, governed by strict
-            compliance protocols:
+          <p>
+            You're responsible for keeping your login details confidential
+            and for all activity that happens under your account. Let us
+            know immediately if you suspect unauthorized access. You must
+            provide accurate information when signing up and keep it up to
+            date.
           </p>
-          <ul className="list-disc pl-5 space-y-2">
-            <li>
-              <strong>Advance Notice Required:</strong> If you need to pause
-              your plan, you must formally inform the support team before
-              your absence begins, stating the exact duration of the hold.
-            </li>
-            <li>
-              <strong>Unnotified Absences:</strong> If you stop attending
-              home workouts or fail to follow up with your dietitian
-              without prior notice, those days will be counted as fully
-              consumed.
-            </li>
-            <li>
-              <strong>Strict Exclusion:</strong> The platform will not grant
-              extensions retroactively for past unnotified absences under
-              any circumstances, including medical inconveniences or
-              unexpected personal events. Extensions are only valid if
-              approved in advance.
-            </li>
-          </ul>
+        </div>
+
+        <div>
+          <h3 className="font-display text-brand-blue text-base mb-2">
+            3. Acceptable Use
+          </h3>
+          <p>
+            Class access links, e-books, and course videos are for your
+            personal use only and may not be shared, resold, or redistributed.
+            You agree not to misuse the platform — including attempting to
+            disrupt our services, access accounts that aren't yours, or use
+            the platform for any unlawful purpose.
+          </p>
+        </div>
+
+        <div>
+          <h3 className="font-display text-brand-blue text-base mb-2">
+            4. Payments & Refunds
+          </h3>
+          <p>
+            Package pricing is shown at checkout before you pay. Our refund
+            and membership pause rules are covered separately in our{" "}
+            <a href="/refund-policy" className="text-brand-orange underline">
+              Refund Policy
+            </a>
+            , which forms part of these Terms.
+          </p>
+        </div>
+
+        <div>
+          <h3 className="font-display text-brand-blue text-base mb-2">
+            5. Intellectual Property
+          </h3>
+          <p>
+            All content on this platform — including diet plans, workout
+            videos, e-books, course material, and branding — belongs to
+            Fitnesszone Official Limited or our licensors. You may not copy,
+            reproduce, or distribute it outside of your own personal use.
+          </p>
+        </div>
+
+        <div>
+          <h3 className="font-display text-brand-blue text-base mb-2">
+            6. Service Availability
+          </h3>
+          <p>
+            We work to keep classes, e-books, and account access running
+            smoothly, but we don't guarantee uninterrupted availability —
+            occasional downtime for maintenance, technical issues, or
+            circumstances outside our control can happen. We'll do our best
+            to keep disruption to a minimum and notify you of significant
+            planned changes.
+          </p>
+        </div>
+
+        <div>
+          <h3 className="font-display text-brand-blue text-base mb-2">
+            7. Limitation of Liability
+          </h3>
+          <p>
+            Our diet plans and workout guidance are general fitness and
+            nutrition support, not medical advice — consult a doctor before
+            starting any new diet or exercise program, especially if you
+            have an existing health condition. To the fullest extent
+            permitted by law, we aren't liable for indirect or consequential
+            losses arising from your use of the platform.
+          </p>
+        </div>
+
+        <div>
+          <h3 className="font-display text-brand-blue text-base mb-2">
+            8. Changes to These Terms
+          </h3>
+          <p>
+            We may update these Terms from time to time to reflect changes
+            to our services or for legal reasons. We'll update the "Last
+            updated" date above when we do — continued use of the platform
+            after a change means you accept the updated Terms.
+          </p>
+        </div>
+
+        <div>
+          <h3 className="font-display text-brand-blue text-base mb-2">
+            9. Governing Law
+          </h3>
+          <p>
+            These Terms are governed by the laws of England and Wales.
+            Nothing here limits any statutory rights you have as a consumer
+            that can't be excluded under applicable law.
+          </p>
+        </div>
+
+        <div>
+          <h3 className="font-display text-brand-blue text-base mb-2">
+            10. Contact Us
+          </h3>
+          <p>
+            Questions about these Terms? Reach out via the Contact page or
+            WhatsApp.
+          </p>
         </div>
       </div>
     </section>

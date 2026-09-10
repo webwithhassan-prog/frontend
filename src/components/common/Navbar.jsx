@@ -42,6 +42,7 @@ const searchablePages = [
   { label: "Contact", href: "/contact" },
   { label: "Privacy Policy", href: "/privacy-policy" },
   { label: "Terms of Service", href: "/terms" },
+  { label: "Refund Policy", href: "/refund-policy" },
 ];
 
 const instagramLink = "https://www.instagram.com/fitness_zone5566";
