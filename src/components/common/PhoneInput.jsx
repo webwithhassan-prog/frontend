@@ -91,7 +91,8 @@ const PhoneInput = ({
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           title="Choose country"
-          className="flex items-center text-brand-blue/60 hover:text-brand-orange transition-colors"
+          aria-label={`Choose country, current: ${matchedCountry ? matchedCountry.name : "unknown"}`}
+          className="flex items-center text-brand-blue/60 hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
         >
           {matchedCountry ? (
             <span className="text-base leading-none">
@@ -156,7 +157,7 @@ const PhoneInput = ({
                     key={c.iso}
                     type="button"
                     onClick={() => handleSelectCountry(c)}
-                    className={`flex items-center justify-between w-full text-left px-4 py-2 text-sm transition-colors ${
+                    className={`flex items-center justify-between w-full text-left px-4 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:bg-brand-blue-pale ${
                       dial === c.dial
                         ? "text-brand-orange font-semibold"
                         : "text-brand-blue hover:bg-brand-blue-pale"

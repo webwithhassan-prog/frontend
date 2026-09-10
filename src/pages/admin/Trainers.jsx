@@ -95,13 +95,15 @@ const Trainers = () => {
               <div className="flex gap-3">
                 <button
                   onClick={() => openEditModal(trainer)}
-                  className="text-brand-blue-light hover:text-brand-blue"
+                  className="text-brand-blue-light hover:text-brand-blue rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                  aria-label={`Edit ${trainer.name}`}
                 >
                   <Pencil size={18} />
                 </button>
                 <button
                   onClick={() => handleDelete(trainer._id)}
-                  className="text-red-400 hover:text-red-600"
+                  className="text-red-400 hover:text-red-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                  aria-label={`Delete ${trainer.name}`}
                 >
                   <Trash2 size={18} />
                 </button>

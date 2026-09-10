@@ -210,13 +210,15 @@ const HeroBannersManager = ({ onCountChange }) => {
               <div className="flex gap-3">
                 <button
                   onClick={() => openEditModal(b)}
-                  className="text-brand-blue-light hover:text-brand-blue"
+                  className="text-brand-blue-light hover:text-brand-blue rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                  aria-label={`Edit ${b.title}`}
                 >
                   <Pencil size={18} />
                 </button>
                 <button
                   onClick={() => handleDelete(b._id)}
-                  className="text-red-400 hover:text-red-600"
+                  className="text-red-400 hover:text-red-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                  aria-label={`Delete ${b.title}`}
                 >
                   <Trash2 size={18} />
                 </button>
@@ -439,13 +441,15 @@ const VideoManager = ({ endpoint, title, description, aspect, onCountChange }) =
               <div className="flex gap-3">
                 <button
                   onClick={() => openEditModal(video)}
-                  className="text-brand-blue-light hover:text-brand-blue"
+                  className="text-brand-blue-light hover:text-brand-blue rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                  aria-label={`Edit ${video.title || "video"}`}
                 >
                   <Pencil size={18} />
                 </button>
                 <button
                   onClick={() => handleDelete(video._id)}
-                  className="text-red-400 hover:text-red-600"
+                  className="text-red-400 hover:text-red-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                  aria-label={`Delete ${video.title || "video"}`}
                 >
                   <Trash2 size={18} />
                 </button>
@@ -604,7 +608,7 @@ const TestimonialsManager = ({ onCountChange }) => {
               )}
               <button
                 onClick={() => handleDelete(t._id)}
-                className="w-full flex items-center justify-center gap-2 text-xs text-red-400 hover:text-red-600 py-1"
+                className="w-full flex items-center justify-center gap-2 text-xs text-red-400 hover:text-red-600 py-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
               >
                 <Trash2 size={14} /> Delete
               </button>
@@ -700,7 +704,7 @@ const HomeContent = () => {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
               activeTab === tab.key
                 ? "border-brand-orange text-brand-orange"
                 : "border-transparent text-brand-blue-light hover:text-brand-blue"

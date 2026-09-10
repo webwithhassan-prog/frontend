@@ -225,7 +225,7 @@ const Plans = () => {
           <button
             key={tab.type}
             onClick={() => setSearchParams({ type: tab.type })}
-            className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-colors ${
+            className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
               selectedType === tab.type
                 ? "bg-brand-blue text-white"
                 : "bg-brand-blue-pale text-brand-blue hover:bg-brand-blue-pale/70"
@@ -246,8 +246,9 @@ const Plans = () => {
             </span>
             <button
               onClick={handleRemoveCoupon}
-              className="text-brand-blue/50 hover:text-red-500 transition-colors"
+              className="text-brand-blue/50 hover:text-red-500 transition-colors rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
               title="Remove coupon"
+              aria-label="Remove coupon"
             >
               <X size={16} />
             </button>

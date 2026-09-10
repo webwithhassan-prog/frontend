@@ -147,13 +147,15 @@ const Packages = () => {
                 <div className="flex gap-3">
                   <button
                     onClick={() => openEditModal(plan)}
-                    className="text-brand-blue-light hover:text-brand-blue"
+                    className="text-brand-blue-light hover:text-brand-blue rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                    aria-label={`Edit ${plan.duration_days} Days Customized Dietplan package`}
                   >
                     <Pencil size={18} />
                   </button>
                   <button
                     onClick={() => handleDelete(plan._id)}
-                    className="text-red-400 hover:text-red-600"
+                    className="text-red-400 hover:text-red-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                    aria-label={`Delete ${plan.duration_days} Days Customized Dietplan package`}
                   >
                     <Trash2 size={18} />
                   </button>
@@ -184,13 +186,15 @@ const Packages = () => {
                 <div className="flex gap-3">
                   <button
                     onClick={() => openEditModal(plan)}
-                    className="text-brand-blue-light hover:text-brand-blue"
+                    className="text-brand-blue-light hover:text-brand-blue rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                    aria-label={`Edit ${plan.duration_days} Days Home Workouts package`}
                   >
                     <Pencil size={18} />
                   </button>
                   <button
                     onClick={() => handleDelete(plan._id)}
-                    className="text-red-400 hover:text-red-600"
+                    className="text-red-400 hover:text-red-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                    aria-label={`Delete ${plan.duration_days} Days Home Workouts package`}
                   >
                     <Trash2 size={18} />
                   </button>
@@ -236,13 +240,15 @@ const Packages = () => {
                   <div className="flex gap-3">
                     <button
                       onClick={() => openEditModal(plan)}
-                      className="text-brand-blue-light hover:text-brand-blue"
+                      className="text-brand-blue-light hover:text-brand-blue rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                      aria-label={`Edit ${plan.duration_days} Days Combo package`}
                     >
                       <Pencil size={18} />
                     </button>
                     <button
                       onClick={() => handleDelete(plan._id)}
-                      className="text-red-400 hover:text-red-600"
+                      className="text-red-400 hover:text-red-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                      aria-label={`Delete ${plan.duration_days} Days Combo package`}
                     >
                       <Trash2 size={18} />
                     </button>

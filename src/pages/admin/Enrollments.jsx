@@ -310,8 +310,9 @@ const Enrollments = () => {
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-blue-light hover:text-brand-blue"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-blue-light hover:text-brand-blue rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
               title="Clear search"
+              aria-label="Clear search"
             >
               <X size={15} />
             </button>
@@ -342,7 +343,7 @@ const Enrollments = () => {
                 <th className="py-3 px-2">
                   <button
                     onClick={() => toggleSort("name")}
-                    className="flex items-center gap-1.5 hover:text-brand-orange transition-colors"
+                    className="flex items-center gap-1.5 hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                   >
                     Name <SortIcon field="name" />
                   </button>
@@ -351,7 +352,7 @@ const Enrollments = () => {
                 <th className="py-3 px-2">
                   <button
                     onClick={() => toggleSort("status")}
-                    className="flex items-center gap-1.5 hover:text-brand-orange transition-colors"
+                    className="flex items-center gap-1.5 hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                   >
                     Status <SortIcon field="status" />
                   </button>
@@ -359,7 +360,7 @@ const Enrollments = () => {
                 <th className="py-3 px-2">
                   <button
                     onClick={() => toggleSort("days_remaining")}
-                    className="flex items-center gap-1.5 hover:text-brand-orange transition-colors"
+                    className="flex items-center gap-1.5 hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                   >
                     Days Remaining <SortIcon field="days_remaining" />
                   </button>
@@ -501,7 +502,8 @@ const Enrollments = () => {
                             )
                           }
                           title="More actions"
-                          className="w-7 h-7 flex items-center justify-center rounded-full text-brand-blue-light hover:bg-brand-blue-pale transition-colors"
+                          aria-label="More actions"
+                          className="w-7 h-7 flex items-center justify-center rounded-full text-brand-blue-light hover:bg-brand-blue-pale transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                         >
                           <MoreVertical size={16} />
                         </button>
@@ -563,14 +565,16 @@ const Enrollments = () => {
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="w-8 h-8 flex items-center justify-center rounded-full border border-brand-blue-pale text-brand-blue disabled:opacity-30 disabled:cursor-not-allowed hover:bg-brand-blue-pale transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-full border border-brand-blue-pale text-brand-blue disabled:opacity-30 disabled:cursor-not-allowed hover:bg-brand-blue-pale transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                aria-label="Previous page"
                 >
                   <ChevronLeft size={16} />
                 </button>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="w-8 h-8 flex items-center justify-center rounded-full border border-brand-blue-pale text-brand-blue disabled:opacity-30 disabled:cursor-not-allowed hover:bg-brand-blue-pale transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-full border border-brand-blue-pale text-brand-blue disabled:opacity-30 disabled:cursor-not-allowed hover:bg-brand-blue-pale transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                aria-label="Next page"
                 >
                   <ChevronRight size={16} />
                 </button>
@@ -630,7 +634,8 @@ const Enrollments = () => {
                             toast.success("Password copied");
                           }}
                           title="Copy password"
-                          className="text-brand-blue-light hover:text-brand-orange"
+                          aria-label="Copy password"
+                          className="text-brand-blue-light hover:text-brand-orange rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                         >
                           <Copy size={14} />
                         </button>

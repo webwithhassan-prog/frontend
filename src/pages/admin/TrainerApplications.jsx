@@ -149,7 +149,7 @@ const TrainerApplications = () => {
                   href={app.cv_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-brand-orange text-sm underline mb-3 inline-block"
+                  className="text-brand-orange text-sm underline mb-3 inline-block rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                 >
                   View CV
                 </a>
@@ -166,13 +166,13 @@ const TrainerApplications = () => {
                   <>
                     <button
                       onClick={() => openOfferModal(app)}
-                      className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+                      className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-green-100 text-green-700 hover:bg-green-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                     >
                       <Check size={14} /> Approve
                     </button>
                     <button
                       onClick={() => handleReject(app._id)}
-                      className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+                      className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                     >
                       <X size={14} /> Reject
                     </button>
@@ -180,7 +180,7 @@ const TrainerApplications = () => {
                 )}
                 <button
                   onClick={() => handleDeleteApplication(app)}
-                  className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-brand-blue-pale text-brand-blue-light hover:bg-red-100 hover:text-red-600 transition-colors"
+                  className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-brand-blue-pale text-brand-blue-light hover:bg-red-100 hover:text-red-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                 >
                   <Trash2 size={14} /> Delete
                 </button>

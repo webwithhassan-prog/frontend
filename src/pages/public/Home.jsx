@@ -389,15 +389,17 @@ const Home = () => {
           {/* Prev/next arrows — stable, outside the crossfade */}
           <button
             onClick={goPrevHero}
-            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur-sm text-white flex items-center justify-center transition-colors"
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur-sm text-white flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
             title="Previous"
+            aria-label="Previous"
           >
             <ChevronLeft size={18} />
           </button>
           <button
             onClick={goNextHero}
-            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur-sm text-white flex items-center justify-center transition-colors"
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur-sm text-white flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
             title="Next"
+            aria-label="Next"
           >
             <ChevronRight size={18} />
           </button>
@@ -408,10 +410,11 @@ const Home = () => {
               <button
                 key={i}
                 onClick={() => setHeroSlide(i)}
-                className={`h-1.5 rounded-full transition-all ${
+                className={`h-1.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
                   i === heroSlide ? "w-6 bg-brand-orange" : "w-1.5 bg-white/50"
                 }`}
                 title={`Slide ${i + 1}`}
+                aria-label={`Slide ${i + 1}`}
               />
             ))}
           </div>
@@ -465,7 +468,7 @@ const Home = () => {
                   {transformationVideos.length > 1 && (
                     <button
                       onClick={goPrevTransformation}
-                      className="hidden sm:flex shrink-0 bg-white shadow-md rounded-full p-2.5 text-brand-blue hover:text-brand-orange transition-colors"
+                      className="hidden sm:flex shrink-0 bg-white shadow-md rounded-full p-2.5 text-brand-blue hover:text-brand-orange transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                       aria-label="Previous video"
                     >
                       <ChevronLeft size={20} />
@@ -514,7 +517,7 @@ const Home = () => {
                             key={v._id}
                             onClick={() => setTransformationSlide(i)}
                             aria-label={`Go to video ${i + 1}`}
-                            className={`h-2 rounded-full transition-all ${
+                            className={`h-2 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
                               i === transformationSlide
                                 ? "w-6 bg-brand-orange"
                                 : "w-2 bg-brand-blue-pale"
@@ -528,7 +531,7 @@ const Home = () => {
                   {transformationVideos.length > 1 && (
                     <button
                       onClick={goNextTransformation}
-                      className="hidden sm:flex shrink-0 bg-white shadow-md rounded-full p-2.5 text-brand-blue hover:text-brand-orange transition-colors"
+                      className="hidden sm:flex shrink-0 bg-white shadow-md rounded-full p-2.5 text-brand-blue hover:text-brand-orange transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                       aria-label="Next video"
                     >
                       <ChevronRight size={20} />
@@ -540,14 +543,14 @@ const Home = () => {
                   <div className="flex sm:hidden justify-center gap-6 mt-6">
                     <button
                       onClick={goPrevTransformation}
-                      className="bg-white shadow-md rounded-full p-2.5 text-brand-blue"
+                      className="bg-white shadow-md rounded-full p-2.5 text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                       aria-label="Previous video"
                     >
                       <ChevronLeft size={20} />
                     </button>
                     <button
                       onClick={goNextTransformation}
-                      className="bg-white shadow-md rounded-full p-2.5 text-brand-blue"
+                      className="bg-white shadow-md rounded-full p-2.5 text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                       aria-label="Next video"
                     >
                       <ChevronRight size={20} />
@@ -620,7 +623,7 @@ const Home = () => {
               {demoVideos.length > 1 && (
                 <button
                   onClick={goPrevDemo}
-                  className="hidden sm:flex shrink-0 bg-white shadow-md rounded-full p-2.5 text-brand-blue hover:text-brand-orange transition-colors"
+                  className="hidden sm:flex shrink-0 bg-white shadow-md rounded-full p-2.5 text-brand-blue hover:text-brand-orange transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                   aria-label="Previous video"
                 >
                   <ChevronLeft size={20} />
@@ -665,7 +668,7 @@ const Home = () => {
                         key={v._id}
                         onClick={() => setDemoSlide(i)}
                         aria-label={`Go to video ${i + 1}`}
-                        className={`h-2 rounded-full transition-all ${
+                        className={`h-2 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
                           i === demoSlide
                             ? "w-6 bg-brand-orange"
                             : "w-2 bg-white/40"
@@ -679,7 +682,7 @@ const Home = () => {
               {demoVideos.length > 1 && (
                 <button
                   onClick={goNextDemo}
-                  className="hidden sm:flex shrink-0 bg-white shadow-md rounded-full p-2.5 text-brand-blue hover:text-brand-orange transition-colors"
+                  className="hidden sm:flex shrink-0 bg-white shadow-md rounded-full p-2.5 text-brand-blue hover:text-brand-orange transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                   aria-label="Next video"
                 >
                   <ChevronRight size={20} />
@@ -691,14 +694,14 @@ const Home = () => {
               <div className="flex sm:hidden justify-center gap-6 mt-6">
                 <button
                   onClick={goPrevDemo}
-                  className="bg-white shadow-md rounded-full p-2.5 text-brand-blue"
+                  className="bg-white shadow-md rounded-full p-2.5 text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                   aria-label="Previous video"
                 >
                   <ChevronLeft size={20} />
                 </button>
                 <button
                   onClick={goNextDemo}
-                  className="bg-white shadow-md rounded-full p-2.5 text-brand-blue"
+                  className="bg-white shadow-md rounded-full p-2.5 text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                   aria-label="Next video"
                 >
                   <ChevronRight size={20} />
@@ -846,7 +849,7 @@ const Home = () => {
             </p>
             <a
               href="/about"
-              className="inline-block text-brand-orange text-sm font-semibold hover:underline"
+              className="inline-block text-brand-orange text-sm font-semibold hover:underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
             >
               Read more about us →
             </a>

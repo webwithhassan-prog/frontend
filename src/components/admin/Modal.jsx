@@ -33,7 +33,8 @@ const Modal = ({ isOpen, onClose, title, children }) => {
               <h3 className="text-lg font-bold text-brand-blue">{title}</h3>
               <button
                 onClick={onClose}
-                className="text-brand-blue-light hover:text-brand-blue"
+                className="text-brand-blue-light hover:text-brand-blue rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                aria-label="Close"
               >
                 <X size={20} />
               </button>

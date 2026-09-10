@@ -10,7 +10,7 @@ const Button = ({
   className = "",
 }) => {
   const base =
-    "font-semibold rounded-full transition-colors duration-200 relative overflow-hidden";
+    "font-semibold rounded-full transition-colors duration-200 relative overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2";
 
   const sizes = {
     md: "px-6 py-3",

@@ -347,8 +347,9 @@ const CustomInvoices = () => {
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-blue-light hover:text-brand-blue"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-blue-light hover:text-brand-blue rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
               title="Clear search"
+              aria-label="Clear search"
             >
               <X size={15} />
             </button>
@@ -378,7 +379,7 @@ const CustomInvoices = () => {
                 <th className="py-3 px-2">
                   <button
                     onClick={() => toggleSort("invoice_number")}
-                    className="flex items-center gap-1.5 hover:text-brand-orange transition-colors"
+                    className="flex items-center gap-1.5 hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                   >
                     Invoice # <SortIcon field="invoice_number" />
                   </button>
@@ -386,7 +387,7 @@ const CustomInvoices = () => {
                 <th className="py-3 px-2">
                   <button
                     onClick={() => toggleSort("client_name")}
-                    className="flex items-center gap-1.5 hover:text-brand-orange transition-colors"
+                    className="flex items-center gap-1.5 hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                   >
                     Client <SortIcon field="client_name" />
                   </button>
@@ -395,7 +396,7 @@ const CustomInvoices = () => {
                 <th className="py-3 px-2">
                   <button
                     onClick={() => toggleSort("amount")}
-                    className="flex items-center gap-1.5 hover:text-brand-orange transition-colors"
+                    className="flex items-center gap-1.5 hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                   >
                     Amount <SortIcon field="amount" />
                   </button>
@@ -403,7 +404,7 @@ const CustomInvoices = () => {
                 <th className="py-3 px-2">
                   <button
                     onClick={() => toggleSort("status")}
-                    className="flex items-center gap-1.5 hover:text-brand-orange transition-colors"
+                    className="flex items-center gap-1.5 hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                   >
                     Status <SortIcon field="status" />
                   </button>
@@ -437,8 +438,9 @@ const CustomInvoices = () => {
                     {inv.status === "pending" && (
                       <button
                         onClick={() => handleDelete(inv)}
-                        className="text-red-400 hover:text-red-600"
+                        className="text-red-400 hover:text-red-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                         title="Delete"
+                        aria-label={`Delete invoice ${inv.invoice_number}`}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -459,14 +461,16 @@ const CustomInvoices = () => {
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="w-8 h-8 flex items-center justify-center rounded-full border border-brand-blue-pale text-brand-blue disabled:opacity-30 disabled:cursor-not-allowed hover:bg-brand-blue-pale transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-full border border-brand-blue-pale text-brand-blue disabled:opacity-30 disabled:cursor-not-allowed hover:bg-brand-blue-pale transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                  aria-label="Previous page"
                 >
                   <ChevronLeft size={16} />
                 </button>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="w-8 h-8 flex items-center justify-center rounded-full border border-brand-blue-pale text-brand-blue disabled:opacity-30 disabled:cursor-not-allowed hover:bg-brand-blue-pale transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-full border border-brand-blue-pale text-brand-blue disabled:opacity-30 disabled:cursor-not-allowed hover:bg-brand-blue-pale transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                  aria-label="Next page"
                 >
                   <ChevronRight size={16} />
                 </button>
@@ -495,8 +499,9 @@ const CustomInvoices = () => {
               />
               <button
                 onClick={() => handleCopyLink(generatedLink.url)}
-                className="text-brand-blue hover:text-brand-orange"
+                className="text-brand-blue hover:text-brand-orange rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                 title="Copy link"
+                aria-label="Copy link"
               >
                 <Copy size={16} />
               </button>
@@ -504,8 +509,9 @@ const CustomInvoices = () => {
                 href={generatedLink.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-brand-blue hover:text-brand-orange"
+                className="text-brand-blue hover:text-brand-orange rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                 title="Open link"
+                aria-label="Open link"
               >
                 <ExternalLink size={16} />
               </a>

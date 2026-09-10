@@ -126,13 +126,15 @@ const RecordedGallery = () => {
               <div className="flex gap-3">
                 <button
                   onClick={() => openEditModal(item)}
-                  className="text-brand-blue-light hover:text-brand-blue"
+                  className="text-brand-blue-light hover:text-brand-blue rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                  aria-label={`Edit ${item.title}`}
                 >
                   <Pencil size={18} />
                 </button>
                 <button
                   onClick={() => handleDelete(item._id)}
-                  className="text-red-400 hover:text-red-600"
+                  className="text-red-400 hover:text-red-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                  aria-label={`Delete ${item.title}`}
                 >
                   <Trash2 size={18} />
                 </button>

@@ -147,11 +147,13 @@ const Navbar = () => {
 
             {/* Mobile hamburger — next to the logo */}
             <button
-              className="lg:hidden w-9 h-9 flex items-center justify-center text-brand-blue"
+              className="lg:hidden w-9 h-9 flex items-center justify-center text-brand-blue rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
               onClick={() => {
                 setIsOpen(!isOpen);
                 setIsSearchOpen(false);
               }}
+              aria-label={isOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isOpen}
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -163,7 +165,7 @@ const Navbar = () => {
               <a
                 key={link.href}
                 href={link.href}
-                className="text-brand-blue/80 font-medium text-sm px-2 xl:px-3 py-2 whitespace-nowrap hover:text-brand-orange transition-colors"
+                className="text-brand-blue/80 font-medium text-sm px-2 xl:px-3 py-2 whitespace-nowrap hover:text-brand-orange transition-colors rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
               >
                 {link.label}
               </a>
@@ -174,8 +176,18 @@ const Navbar = () => {
               className="relative"
               onMouseEnter={() => setIsPackagesOpen(true)}
               onMouseLeave={() => setIsPackagesOpen(false)}
+              onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget)) {
+                  setIsPackagesOpen(false);
+                }
+              }}
             >
-              <button className="flex items-center gap-1 text-brand-blue/80 font-medium text-sm px-3 py-2 hover:text-brand-orange transition-colors">
+              <button
+                className="flex items-center gap-1 text-brand-blue/80 font-medium text-sm px-3 py-2 hover:text-brand-orange transition-colors rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
+                onClick={() => setIsPackagesOpen((open) => !open)}
+                aria-haspopup="true"
+                aria-expanded={isPackagesOpen}
+              >
                 Packages
                 <ChevronDown
                   size={14}
@@ -197,7 +209,7 @@ const Navbar = () => {
                         <a
                           key={opt.type}
                           href={`/plans?type=${opt.type}`}
-                          className="block px-4 py-2.5 text-sm text-brand-blue hover:bg-brand-blue-pale hover:text-brand-orange transition-colors"
+                          className="block px-4 py-2.5 text-sm text-brand-blue hover:bg-brand-blue-pale hover:text-brand-orange transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                         >
                           {opt.label}
                         </a>
@@ -246,7 +258,7 @@ const Navbar = () => {
                             <button
                               key={r.key}
                               onClick={() => goToResult(r)}
-                              className="block w-full text-left px-4 py-2.5 text-sm text-brand-blue hover:bg-brand-blue-pale hover:text-brand-orange transition-colors"
+                              className="block w-full text-left px-4 py-2.5 text-sm text-brand-blue hover:bg-brand-blue-pale hover:text-brand-orange transition-colors focus-visible:outline-none focus-visible:bg-brand-blue-pale"
                             >
                               {r.label}
                             </button>
@@ -287,15 +299,16 @@ const Navbar = () => {
               <>
                 <a
                   href="/client"
-                  className="flex items-center gap-1.5 text-brand-blue font-medium text-sm"
+                  className="flex items-center gap-1.5 text-brand-blue font-medium text-sm rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                 >
                   <User size={16} />
                   My Profile
                 </a>
                 <button
                   onClick={logout}
-                  className="flex items-center gap-1.5 text-brand-blue/70 hover:text-brand-orange text-sm transition-colors"
+                  className="flex items-center gap-1.5 text-brand-blue/70 hover:text-brand-orange text-sm transition-colors rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                   title="Logout"
+                  aria-label="Logout"
                 >
                   <LogOut size={16} />
                 </button>
@@ -304,7 +317,7 @@ const Navbar = () => {
               <>
                 <a
                   href="/login"
-                  className="text-brand-blue font-medium text-sm"
+                  className="text-brand-blue font-medium text-sm rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                 >
                   Login
                 </a>
@@ -319,9 +332,10 @@ const Navbar = () => {
           <div className="flex lg:hidden items-center gap-2">
             <div className="relative">
               <button
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-brand-blue-pale/60 text-brand-blue"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-brand-blue-pale/60 text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                 onClick={openSearch}
                 title="Search"
+                aria-label="Search"
               >
                 <Search size={17} />
               </button>
@@ -351,7 +365,7 @@ const Navbar = () => {
                             <button
                               key={r.key}
                               onClick={() => goToResult(r)}
-                              className="block w-full text-left px-4 py-2.5 text-sm text-brand-blue hover:bg-brand-blue-pale hover:text-brand-orange transition-colors"
+                              className="block w-full text-left px-4 py-2.5 text-sm text-brand-blue hover:bg-brand-blue-pale hover:text-brand-orange transition-colors focus-visible:outline-none focus-visible:bg-brand-blue-pale"
                             >
                               {r.label}
                             </button>
@@ -369,7 +383,12 @@ const Navbar = () => {
             </div>
 
             {isClient ? (
-              <a href="/client" className="text-brand-blue" title="My Profile">
+              <a
+                href="/client"
+                className="text-brand-blue rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
+                title="My Profile"
+                aria-label="My Profile"
+              >
                 <User size={20} />
               </a>
             ) : (
@@ -419,8 +438,9 @@ const Navbar = () => {
                   </span>
                 </a>
                 <button
-                  className="text-brand-blue"
+                  className="text-brand-blue rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                   onClick={() => setIsOpen(false)}
+                  aria-label="Close menu"
                 >
                   <X size={26} />
                 </button>
@@ -435,7 +455,7 @@ const Navbar = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.05 * i }}
-                      className="text-brand-blue text-2xl font-display py-3 border-b border-brand-blue-pale/60"
+                      className="text-brand-blue text-2xl font-display py-3 border-b border-brand-blue-pale/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded-lg"
                       onClick={() => setIsOpen(false)}
                     >
                       {link.label}
@@ -446,7 +466,8 @@ const Navbar = () => {
                     onClick={() =>
                       setIsMobilePackagesOpen(!isMobilePackagesOpen)
                     }
-                    className="flex items-center justify-between text-brand-blue text-2xl font-display py-3 border-b border-brand-blue-pale/60"
+                    className="flex items-center justify-between text-brand-blue text-2xl font-display py-3 border-b border-brand-blue-pale/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded-lg"
+                    aria-expanded={isMobilePackagesOpen}
                   >
                     Packages
                     <ChevronDown
@@ -467,7 +488,7 @@ const Navbar = () => {
                           <a
                             key={opt.type}
                             href={`/plans?type=${opt.type}`}
-                            className="text-brand-blue/70 text-base py-2.5"
+                            className="text-brand-blue/70 text-base py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded-lg"
                             onClick={() => setIsOpen(false)}
                           >
                             {opt.label}
@@ -483,7 +504,7 @@ const Navbar = () => {
                     href={whatsappLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-brand-blue/70 text-sm"
+                    className="flex items-center gap-2 text-brand-blue/70 text-sm rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                   >
                     <WhatsAppIcon size={19} />
                     WhatsApp
@@ -492,7 +513,7 @@ const Navbar = () => {
                     href={instagramLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-brand-blue/70 text-sm"
+                    className="flex items-center gap-2 text-brand-blue/70 text-sm rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                   >
                     <InstagramIcon size={19} />
                     Instagram
@@ -505,7 +526,7 @@ const Navbar = () => {
                       <a
                         href="/client"
                         onClick={() => setIsOpen(false)}
-                        className="flex items-center gap-2 text-brand-blue font-medium text-lg"
+                        className="flex items-center gap-2 text-brand-blue font-medium text-lg rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                       >
                         <User size={20} />
                         My Profile
@@ -515,7 +536,7 @@ const Navbar = () => {
                           logout();
                           setIsOpen(false);
                         }}
-                        className="flex items-center gap-2 text-brand-blue/60 font-medium text-lg text-left"
+                        className="flex items-center gap-2 text-brand-blue/60 font-medium text-lg text-left rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                       >
                         <LogOut size={20} />
                         Logout
@@ -526,7 +547,7 @@ const Navbar = () => {
                       <a
                         href="/login"
                         onClick={() => setIsOpen(false)}
-                        className="text-brand-blue font-medium text-lg"
+                        className="text-brand-blue font-medium text-lg rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                       >
                         Login
                       </a>

@@ -175,8 +175,9 @@ const Login = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-brand-blue/40 hover:text-brand-blue"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-brand-blue/40 hover:text-brand-blue rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
               tabIndex={-1}
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -184,7 +185,7 @@ const Login = () => {
           <div className="text-right">
             <a
               href="/forgot-password"
-              className="text-sm text-brand-orange font-semibold"
+              className="text-sm text-brand-orange font-semibold rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
             >
               Forgot password?
             </a>
@@ -199,7 +200,7 @@ const Login = () => {
 
         <p className="text-center text-sm text-brand-blue/70 mt-4">
           Don't have an account?{" "}
-          <a href="/signup" className="text-brand-orange font-semibold">
+          <a href="/signup" className="text-brand-orange font-semibold rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange">
             Sign up
           </a>
         </p>

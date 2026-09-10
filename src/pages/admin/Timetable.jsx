@@ -326,7 +326,7 @@ const Timetable = () => {
               {zoomLink?.zoom_join_url && (
                 <button
                   onClick={handleCopyZoomLink}
-                  className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full bg-brand-blue-pale text-brand-blue hover:bg-brand-blue-pale/70 transition-colors"
+                  className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full bg-brand-blue-pale text-brand-blue hover:bg-brand-blue-pale/70 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                 >
                   {zoomCopied ? (
                     <>
@@ -342,7 +342,7 @@ const Timetable = () => {
               <button
                 onClick={handleRotateZoomLink}
                 disabled={rotatingZoom}
-                className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full border border-brand-blue-pale text-brand-blue-light hover:bg-brand-blue-pale/40 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full border border-brand-blue-pale text-brand-blue-light hover:bg-brand-blue-pale/40 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
               >
                 <RefreshCw size={14} className={rotatingZoom ? "animate-spin" : ""} />
                 {rotatingZoom ? "Rotating..." : "Rotate Now"}
@@ -426,14 +426,14 @@ const Timetable = () => {
                             {c.status === "cancelled" ? (
                               <button
                                 onClick={() => handleRestore(c._id)}
-                                className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-green-100 text-green-700 hover:bg-green-200 transition-colors shrink-0"
+                                className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-green-100 text-green-700 hover:bg-green-200 transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                               >
                                 <RotateCcw size={14} /> Restore
                               </button>
                             ) : (
                               <button
                                 onClick={() => openCancelModal(c)}
-                                className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition-colors shrink-0"
+                                className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                               >
                                 <XCircle size={14} /> Cancel
                               </button>
@@ -488,7 +488,8 @@ const Timetable = () => {
                         <td className="py-3 px-2">
                           <button
                             onClick={() => openDayModal(dayIndex)}
-                            className="text-brand-blue-light hover:text-brand-blue"
+                            className="text-brand-blue-light hover:text-brand-blue rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                            aria-label={`Edit ${dayNames[dayIndex]}`}
                           >
                             <Pencil size={16} />
                           </button>
@@ -545,13 +546,15 @@ const Timetable = () => {
                           <div className="flex gap-3">
                             <button
                               onClick={() => openEditSlotModal(slot)}
-                              className="text-brand-blue-light hover:text-brand-blue"
+                              className="text-brand-blue-light hover:text-brand-blue rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                              aria-label={`Edit ${slot.trainer_ref?.name || "time slot"} slot`}
                             >
                               <Pencil size={16} />
                             </button>
                             <button
                               onClick={() => handleDeleteSlot(slot._id)}
-                              className="text-red-400 hover:text-red-600"
+                              className="text-red-400 hover:text-red-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                              aria-label={`Delete ${slot.trainer_ref?.name || "time slot"} slot`}
                             >
                               <Trash2 size={16} />
                             </button>

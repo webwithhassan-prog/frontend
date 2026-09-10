@@ -48,7 +48,7 @@ const Footer = () => {
               <li key={link.label}>
                 <motion.a
                   href={link.href}
-                  className="text-brand-blue-pale/70"
+                  className="text-brand-blue-pale/70 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                   whileHover={{ x: 4, color: "#F76B1C" }}
                   transition={{ duration: 0.2 }}
                 >
@@ -68,7 +68,7 @@ const Footer = () => {
               href={`https://wa.me/${settings.whatsapp_general}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-brand-orange px-5 py-2 rounded-full font-semibold text-sm"
+              className="inline-flex items-center gap-2 bg-brand-orange px-5 py-2 rounded-full font-semibold text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-blue"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -79,7 +79,7 @@ const Footer = () => {
               href="https://www.instagram.com/fitness_zone5566"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block border border-white/30 px-5 py-2 rounded-full font-semibold text-sm text-white/90"
+              className="inline-block border border-white/30 px-5 py-2 rounded-full font-semibold text-sm text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-blue"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -94,21 +94,21 @@ const Footer = () => {
         <div className="flex justify-center gap-4 mt-2 text-xs text-brand-blue-pale/50">
           <a
             href="/privacy-policy"
-            className="hover:text-brand-orange transition-colors"
+            className="hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
           >
             Privacy Policy
           </a>
           <span>·</span>
           <a
             href="/terms"
-            className="hover:text-brand-orange transition-colors"
+            className="hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
           >
             Terms of Service
           </a>
           <span>·</span>
           <a
             href="/refund-policy"
-            className="hover:text-brand-orange transition-colors"
+            className="hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
           >
             Refund Policy
           </a>

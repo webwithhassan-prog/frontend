@@ -172,19 +172,21 @@ const OffersTab = () => {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => toggleActive(offer)}
-                  className="text-xs font-semibold px-3 py-1.5 rounded-full bg-brand-blue-pale text-brand-blue hover:bg-brand-blue-pale/70 transition-colors"
+                  className="text-xs font-semibold px-3 py-1.5 rounded-full bg-brand-blue-pale text-brand-blue hover:bg-brand-blue-pale/70 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                 >
                   {offer.active ? "Turn Off" : "Turn On"}
                 </button>
                 <button
                   onClick={() => openEditModal(offer)}
-                  className="text-brand-blue-light hover:text-brand-blue"
+                  className="text-brand-blue-light hover:text-brand-blue rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                  aria-label={`Edit ${offer.title}`}
                 >
                   <Pencil size={18} />
                 </button>
                 <button
                   onClick={() => handleDelete(offer._id)}
-                  className="text-red-400 hover:text-red-600"
+                  className="text-red-400 hover:text-red-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                  aria-label={`Delete ${offer.title}`}
                 >
                   <Trash2 size={18} />
                 </button>
@@ -447,19 +449,21 @@ const CouponsTab = () => {
                 <div className="flex items-center gap-3 mt-4">
                   <button
                     onClick={() => toggleActive(coupon)}
-                    className="text-xs font-semibold px-3 py-1.5 rounded-full bg-brand-blue-pale text-brand-blue hover:bg-brand-blue-pale/70 transition-colors"
+                    className="text-xs font-semibold px-3 py-1.5 rounded-full bg-brand-blue-pale text-brand-blue hover:bg-brand-blue-pale/70 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                   >
                     {coupon.active ? "Turn Off" : "Turn On"}
                   </button>
                   <button
                     onClick={() => openEditModal(coupon)}
-                    className="text-brand-blue-light hover:text-brand-blue"
+                    className="text-brand-blue-light hover:text-brand-blue rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                    aria-label={`Edit ${coupon.code}`}
                   >
                     <Pencil size={18} />
                   </button>
                   <button
                     onClick={() => handleDelete(coupon._id)}
-                    className="text-red-400 hover:text-red-600"
+                    className="text-red-400 hover:text-red-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                    aria-label={`Delete ${coupon.code}`}
                   >
                     <Trash2 size={18} />
                   </button>
@@ -574,7 +578,7 @@ const Promotions = () => {
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`px-5 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
+            className={`px-5 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
               tab === t.key
                 ? "border-brand-orange text-brand-blue"
                 : "border-transparent text-brand-blue-light hover:text-brand-blue"

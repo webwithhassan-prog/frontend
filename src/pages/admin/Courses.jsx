@@ -214,13 +214,15 @@ const Courses = () => {
               <div className="flex gap-3">
                 <button
                   onClick={() => openEditModal(course)}
-                  className="text-brand-blue-light hover:text-brand-blue"
+                  className="text-brand-blue-light hover:text-brand-blue rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                  aria-label={`Edit ${course.title}`}
                 >
                   <Pencil size={18} />
                 </button>
                 <button
                   onClick={() => handleDelete(course._id)}
-                  className="text-red-400 hover:text-red-600"
+                  className="text-red-400 hover:text-red-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                  aria-label={`Delete ${course.title}`}
                 >
                   <Trash2 size={18} />
                 </button>
@@ -316,8 +318,9 @@ const Courses = () => {
                     <button
                       type="button"
                       onClick={() => removeLesson(i)}
-                      className="text-red-400 hover:text-red-600 mt-2"
+                      className="text-red-400 hover:text-red-600 mt-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                       title="Remove lesson"
+                      aria-label={`Remove lesson ${i + 1}`}
                     >
                       <X size={16} />
                     </button>

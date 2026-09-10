@@ -793,7 +793,7 @@ const Profile = () => {
                         href={dietWhatsappLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 bg-[#25D366] text-white font-semibold rounded-full px-6 py-3 hover:brightness-95 transition-all"
+                        className="flex items-center gap-2 bg-[#25D366] text-white font-semibold rounded-full px-6 py-3 hover:brightness-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                       >
                         <WhatsAppIcon size={16} />
                         Send to Dietician
@@ -1080,7 +1080,7 @@ const Profile = () => {
                     href={ebook.pdf_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full bg-brand-orange/10 text-brand-orange hover:bg-brand-orange/20 transition-colors"
+                    className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full bg-brand-orange/10 text-brand-orange hover:bg-brand-orange/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                   >
                     <Download size={14} /> Download
                   </a>
@@ -1361,14 +1361,14 @@ const Profile = () => {
                     href={dietWhatsappLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 bg-[#25D366] text-white font-semibold rounded-full px-6 py-3 hover:brightness-95 transition-all"
+                    className="flex items-center gap-2 bg-[#25D366] text-white font-semibold rounded-full px-6 py-3 hover:brightness-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                   >
                     <WhatsAppIcon size={16} />
                     Send to Dietician
                   </a>
                   <button
                     onClick={handleProgressReset}
-                    className="text-sm font-semibold text-brand-blue/60 hover:text-brand-blue"
+                    className="text-sm font-semibold text-brand-blue/60 hover:text-brand-blue rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                   >
                     Start Over
                   </button>

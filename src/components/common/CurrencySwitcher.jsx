@@ -18,7 +18,8 @@ const CurrencySwitcher = ({ className = "" }) => {
     <div className={`relative ${className}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 text-sm font-semibold text-brand-blue border border-brand-blue-pale rounded-full px-4 py-2 hover:border-brand-orange hover:text-brand-orange transition-colors"
+        className="flex items-center gap-1.5 text-sm font-semibold text-brand-blue border border-brand-blue-pale rounded-full px-4 py-2 hover:border-brand-orange hover:text-brand-orange transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
+        aria-label={`Currency: ${currency.code}. Click to change`}
       >
         <span>{currency.symbol.trim()}</span>
         {currency.code}
@@ -69,7 +70,7 @@ const CurrencySwitcher = ({ className = "" }) => {
                         setIsOpen(false);
                         setQuery("");
                       }}
-                      className={`flex items-center justify-between w-full text-left px-4 py-2 text-sm transition-colors ${
+                      className={`flex items-center justify-between w-full text-left px-4 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:bg-brand-blue-pale ${
                         currency.code === c.code
                           ? "text-brand-orange font-semibold"
                           : "text-brand-blue hover:bg-brand-blue-pale"

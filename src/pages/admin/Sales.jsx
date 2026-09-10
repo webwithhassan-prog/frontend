@@ -294,7 +294,7 @@ const Sales = () => {
               <button
                 onClick={handleExportCsv}
                 disabled={searchResults.logs.length === 0}
-                className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full bg-brand-orange/10 text-brand-orange hover:bg-brand-orange/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full bg-brand-orange/10 text-brand-orange hover:bg-brand-orange/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
               >
                 <Download size={14} />
                 Export CSV
@@ -302,7 +302,7 @@ const Sales = () => {
               <button
                 onClick={handleExportPdf}
                 disabled={searchResults.logs.length === 0}
-                className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full bg-brand-blue-light/10 text-brand-blue-light hover:bg-brand-blue-light/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full bg-brand-blue-light/10 text-brand-blue-light hover:bg-brand-blue-light/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
               >
                 <FileText size={14} />
                 Export PDF

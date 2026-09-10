@@ -193,7 +193,7 @@ const InvoiceSuccess = () => {
               href={whatsappShareLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full mt-3 bg-[#25D366] text-white font-semibold rounded-full px-6 py-3 hover:brightness-95 transition-all"
+              className="flex items-center justify-center gap-2 w-full mt-3 bg-[#25D366] text-white font-semibold rounded-full px-6 py-3 hover:brightness-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
             >
               <WhatsAppIcon size={18} />
               Share with Support on WhatsApp

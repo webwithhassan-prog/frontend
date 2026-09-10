@@ -30,8 +30,9 @@ const FloatingActions = () => {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
-            className="flex items-center justify-center w-12 h-12 rounded-full bg-brand-blue text-white shadow-lg hover:scale-105 transition-transform"
+            className="flex items-center justify-center w-12 h-12 rounded-full bg-brand-blue text-white shadow-lg hover:scale-105 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
             title="Back to top"
+            aria-label="Back to top"
           >
             <ArrowUp size={20} />
           </motion.button>
@@ -43,8 +44,9 @@ const FloatingActions = () => {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="flex items-center justify-center w-12 h-12 rounded-full bg-brand-blue text-white shadow-lg hover:scale-105 transition-transform"
+          className="flex items-center justify-center w-12 h-12 rounded-full bg-brand-blue text-white shadow-lg hover:scale-105 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
           title="My Profile"
+          aria-label="My Profile"
         >
           <User size={20} />
         </motion.a>
@@ -55,8 +57,9 @@ const FloatingActions = () => {
         rel="noopener noreferrer"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] text-white shadow-lg hover:scale-105 transition-transform"
+        className="flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] text-white shadow-lg hover:scale-105 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
         title="Chat on WhatsApp"
+        aria-label="Chat on WhatsApp"
       >
         <WhatsAppIcon size={26} />
       </motion.a>
