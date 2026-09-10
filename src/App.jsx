@@ -69,7 +69,12 @@ function PublicLayout({ children }) {
   return (
     <>
       <Navbar />
-      {children}
+      {/* Suspense lives here, not around the whole route tree, so a lazy
+          page load only swaps the content area — the navbar/footer chrome
+          stays mounted instead of flashing away on every navigation. */}
+      <Suspense fallback={<Loader size={40} className="py-32" />}>
+        {children}
+      </Suspense>
       <Footer />
       <OfferPopup />
       <FloatingActions />
@@ -80,6 +85,9 @@ function PublicLayout({ children }) {
 function AppRoutes() {
   return (
     <BrowserRouter>
+      {/* Outer boundary: only needed for the very first load of a lazy
+          layout itself (AdminLayout/ClientLayout), before it has mounted
+          its own inner Suspense around its <Outlet/>. */}
       <Suspense fallback={<Loader size={40} className="py-32" />}>
       <Routes>
         {/* Public routes */}

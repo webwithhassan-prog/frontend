@@ -210,9 +210,9 @@ const Navbar = () => {
 
           {/* Desktop actions */}
           <div className="hidden lg:flex items-center gap-4 pl-4 ml-2 border-l border-brand-blue-pale">
-            <div className="relative">
+            <div className="relative flex items-center">
               <button
-                className="text-brand-blue/70 hover:text-brand-orange transition-colors"
+                className="flex items-center text-brand-blue/70 hover:text-brand-orange transition-colors"
                 onClick={openSearch}
                 title="Search"
               >

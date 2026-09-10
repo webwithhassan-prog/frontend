@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import { Link, Outlet } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import logo from "../../assets/logo.jpeg";
+import Loader from "../common/Loader";
 
 const ClientLayout = () => {
   const { logout } = useAuth();
@@ -33,7 +35,9 @@ const ClientLayout = () => {
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-10">
-        <Outlet />
+        <Suspense fallback={<Loader size={40} className="py-20" />}>
+          <Outlet />
+        </Suspense>
       </main>
     </div>
   );
