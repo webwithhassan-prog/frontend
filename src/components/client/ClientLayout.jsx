@@ -35,7 +35,7 @@ const ClientLayout = () => {
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-10">
-        <Suspense fallback={<Loader size={40} className="py-20" />}>
+        <Suspense fallback={<Loader size={56} className="py-20" />}>
           <Outlet />
         </Suspense>
       </main>

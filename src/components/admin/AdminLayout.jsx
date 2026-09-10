@@ -139,7 +139,7 @@ const AdminLayout = () => {
       </AnimatePresence>
 
       <main className="flex-1 min-w-0 p-4 pt-20 sm:p-6 sm:pt-20 lg:p-8">
-        <Suspense fallback={<Loader size={40} className="py-20" />}>
+        <Suspense fallback={<Loader size={56} className="py-20" />}>
           <Outlet />
         </Suspense>
       </main>
