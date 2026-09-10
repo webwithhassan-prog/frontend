@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
+import AnimatedCounter from "../../components/common/AnimatedCounter";
 import TestimonialsSlider from "../../components/common/TestimonialsSlider";
 import AchievementMarquee from "../../components/common/AchievementMarquee";
 import api from "../../services/api";
@@ -37,11 +38,13 @@ const pillars = [
   },
 ];
 
+// `target`+`suffix` count up on scroll-into-view; "24/7" isn't a countable
+// number, so it just renders as-is via `display`.
 const stats = [
-  { icon: CalendarDays, value: "3+", label: "Years Running" },
-  { icon: Users, value: "50,000+", label: "Clients Served" },
-  { icon: TrendingUp, value: "10,000+", label: "Success Stories" },
-  { icon: Headset, value: "24/7", label: "Support" },
+  { icon: CalendarDays, target: 3, suffix: "+", label: "Years Running" },
+  { icon: Users, target: 50000, suffix: "+", label: "Clients Served" },
+  { icon: TrendingUp, target: 10000, suffix: "+", label: "Success Stories" },
+  { icon: Headset, display: "24/7", label: "Support" },
 ];
 
 const getYoutubeEmbedSrc = (link) => {
@@ -429,8 +432,10 @@ const Home = () => {
               transition={{ duration: 0.5, delay: i * 0.1 }}
             >
               <stat.icon className="mx-auto text-brand-orange mb-2" size={22} />
-              <p className="font-display text-2xl md:text-3xl text-brand-orange mb-1">
-                {stat.value}
+              <p className="font-display text-2xl md:text-3xl text-brand-orange mb-1 tabular-nums">
+                {stat.display ?? (
+                  <AnimatedCounter target={stat.target} suffix={stat.suffix} />
+                )}
               </p>
               <p className="text-white/70 text-xs md:text-sm tracking-wide">
                 {stat.label}
