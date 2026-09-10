@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu,
@@ -13,6 +14,7 @@ import Button from "./Button";
 import InstagramIcon from "./InstagramIcon";
 import WhatsAppIcon from "./WhatsAppIcon";
 import logo from "../../assets/logo.jpeg";
+import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import { useSettings } from "../../context/SettingsContext";
 
@@ -52,19 +54,71 @@ const Navbar = () => {
   const [isMobilePackagesOpen, setIsMobilePackagesOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [dynamicSearchItems, setDynamicSearchItems] = useState([]);
+  const [dynamicFetched, setDynamicFetched] = useState(false);
   const { role, logout } = useAuth();
+  const navigate = useNavigate();
   const isClient = role === "client";
 
+  // Fetched once, on first open — real trainer names and class types are
+  // admin-editable and shouldn't require a code change to stay searchable,
+  // unlike the static page list above.
+  const fetchDynamicSearchItems = async () => {
+    if (dynamicFetched) return;
+    setDynamicFetched(true);
+    try {
+      const [trainersRes, dayPlansRes] = await Promise.all([
+        api.get("/trainers/public"),
+        api.get("/day-plans/public"),
+      ]);
+      const trainerItems = trainersRes.data.map((t) => ({
+        key: `trainer-${t._id}`,
+        label: t.specialty ? `${t.name} — ${t.specialty}` : t.name,
+        href: "/trainers",
+      }));
+      const seenTypes = new Set();
+      const classTypeItems = [];
+      dayPlansRes.data.forEach((p) => {
+        if (p.type && !seenTypes.has(p.type)) {
+          seenTypes.add(p.type);
+          classTypeItems.push({
+            key: `class-${p.type}`,
+            label: p.type,
+            href: "/timetable",
+          });
+        }
+      });
+      setDynamicSearchItems([...trainerItems, ...classTypeItems]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const openSearch = () => {
+    setIsSearchOpen((open) => !open);
+    setIsOpen(false);
+    fetchDynamicSearchItems();
+  };
+
+  const allSearchItems = [
+    ...searchablePages.map((p) => ({ ...p, key: p.href })),
+    ...dynamicSearchItems,
+  ];
+
   const searchResults = searchQuery.trim()
-    ? searchablePages.filter((p) =>
+    ? allSearchItems.filter((p) =>
         p.label.toLowerCase().includes(searchQuery.trim().toLowerCase()),
       )
     : [];
 
+  const goToResult = (result) => {
+    setIsSearchOpen(false);
+    setSearchQuery("");
+    navigate(result.href);
+  };
+
   const goToTopResult = () => {
-    if (searchResults[0]) {
-      window.location.href = searchResults[0].href;
-    }
+    if (searchResults[0]) goToResult(searchResults[0]);
   };
 
   useEffect(() => {
@@ -156,6 +210,56 @@ const Navbar = () => {
 
           {/* Desktop actions */}
           <div className="hidden lg:flex items-center gap-4 pl-4 ml-2 border-l border-brand-blue-pale">
+            <div className="relative">
+              <button
+                className="text-brand-blue/70 hover:text-brand-orange transition-colors"
+                onClick={openSearch}
+                title="Search"
+              >
+                <Search size={19} />
+              </button>
+
+              <AnimatePresence>
+                {isSearchOpen && (
+                  <motion.div
+                    className="absolute top-full right-0 mt-3 w-80 bg-white rounded-2xl shadow-lg border border-brand-blue-pale overflow-hidden"
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <input
+                      autoFocus
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && goToTopResult()}
+                      placeholder="Search pages, trainers, classes..."
+                      className="w-full px-4 py-3 text-sm text-brand-blue outline-none border-b border-brand-blue-pale"
+                    />
+                    {searchQuery.trim() && (
+                      <div className="max-h-72 overflow-y-auto py-1">
+                        {searchResults.length > 0 ? (
+                          searchResults.map((r) => (
+                            <button
+                              key={r.key}
+                              onClick={() => goToResult(r)}
+                              className="block w-full text-left px-4 py-2.5 text-sm text-brand-blue hover:bg-brand-blue-pale hover:text-brand-orange transition-colors"
+                            >
+                              {r.label}
+                            </button>
+                          ))
+                        ) : (
+                          <p className="px-4 py-3 text-sm text-brand-blue/50">
+                            No results found.
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
             <a
               href={whatsappLink}
               target="_blank"
@@ -212,10 +316,7 @@ const Navbar = () => {
             <div className="relative">
               <button
                 className="w-9 h-9 flex items-center justify-center rounded-full bg-brand-blue-pale/60 text-brand-blue"
-                onClick={() => {
-                  setIsSearchOpen(!isSearchOpen);
-                  setIsOpen(false);
-                }}
+                onClick={openSearch}
                 title="Search"
               >
                 <Search size={17} />
@@ -236,25 +337,24 @@ const Navbar = () => {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && goToTopResult()}
-                      placeholder="Search pages..."
+                      placeholder="Search pages, trainers, classes..."
                       className="w-full px-4 py-3 text-sm text-brand-blue outline-none border-b border-brand-blue-pale"
                     />
                     {searchQuery.trim() && (
                       <div className="max-h-64 overflow-y-auto py-1">
                         {searchResults.length > 0 ? (
                           searchResults.map((r) => (
-                            <a
-                              key={r.href}
-                              href={r.href}
-                              className="block px-4 py-2.5 text-sm text-brand-blue hover:bg-brand-blue-pale hover:text-brand-orange transition-colors"
-                              onClick={() => setIsSearchOpen(false)}
+                            <button
+                              key={r.key}
+                              onClick={() => goToResult(r)}
+                              className="block w-full text-left px-4 py-2.5 text-sm text-brand-blue hover:bg-brand-blue-pale hover:text-brand-orange transition-colors"
                             >
                               {r.label}
-                            </a>
+                            </button>
                           ))
                         ) : (
                           <p className="px-4 py-3 text-sm text-brand-blue/50">
-                            No pages found.
+                            No results found.
                           </p>
                         )}
                       </div>
