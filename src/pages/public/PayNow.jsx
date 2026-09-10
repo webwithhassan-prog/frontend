@@ -7,6 +7,7 @@ import Button from "../../components/common/Button";
 import CurrencySwitcher from "../../components/common/CurrencySwitcher";
 import PhoneInput from "../../components/common/PhoneInput";
 import { useCurrency } from "../../context/CurrencyContext";
+import { getErrorMessage } from "../../utils/errors";
 
 const emptyForm = {
   client_name: "",
@@ -47,7 +48,7 @@ const PayNow = () => {
       });
       window.location.href = res.data.url;
     } catch (err) {
-      setError(err.response?.data?.message || "Could not start checkout");
+      setError(getErrorMessage(err, "Could not start checkout"));
       setSubmitting(false);
     }
   };

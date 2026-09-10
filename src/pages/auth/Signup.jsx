@@ -9,6 +9,7 @@ import api from "../../services/api";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 import PhoneInput from "../../components/common/PhoneInput";
+import { getErrorMessage } from "../../utils/errors";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -71,8 +72,10 @@ const Signup = () => {
             return;
           } catch (checkoutErr) {
             toast.error(
-              checkoutErr.response?.data?.message ||
-                "Your account was created, but we couldn't start checkout for your package. Please try again from the Packages page.",
+              getErrorMessage(
+                checkoutErr,
+                "Your account was created, but we couldn't start checkout for your package",
+              ),
             );
           }
         }
@@ -95,8 +98,10 @@ const Signup = () => {
           return;
         } catch (checkoutErr) {
           toast.error(
-            checkoutErr.response?.data?.message ||
-              "Your account was created, but we couldn't start checkout for your e-book. Please try again from the E-Books page.",
+            getErrorMessage(
+              checkoutErr,
+              "Your account was created, but we couldn't start checkout for your e-book",
+            ),
           );
         }
       }
@@ -118,15 +123,17 @@ const Signup = () => {
           return;
         } catch (checkoutErr) {
           toast.error(
-            checkoutErr.response?.data?.message ||
-              "Your account was created, but we couldn't start checkout for your course. Please try again from the E-Books & Courses page.",
+            getErrorMessage(
+              checkoutErr,
+              "Your account was created, but we couldn't start checkout for your course",
+            ),
           );
         }
       }
 
       navigate("/client");
     } catch (err) {
-      const msg = err.response?.data?.message || "Signup failed";
+      const msg = getErrorMessage(err, "Signup failed");
       setError(msg);
       toast.error(msg);
     }

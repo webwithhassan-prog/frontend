@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { useParams, useNavigate } from "react-router-dom";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
+import { getErrorMessage } from "../../utils/errors";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -36,7 +37,7 @@ const ResetPassword = () => {
       toast.success(res.data.message);
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
-      const msg = err.response?.data?.message || "Something went wrong";
+      const msg = getErrorMessage(err, "Something went wrong");
       setError(msg);
       toast.error(msg);
     } finally {

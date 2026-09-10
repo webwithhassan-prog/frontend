@@ -7,6 +7,7 @@ import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import Modal from "../../components/admin/Modal";
+import { getErrorMessage } from "../../utils/errors";
 
 const statusColors = {
   pending: "bg-yellow-100 text-yellow-700",
@@ -70,9 +71,7 @@ const TrainerApplications = () => {
       toast.success("Application deleted");
       fetchData();
     } catch (err) {
-      toast.error(
-        err.response?.data?.message || "Could not delete application",
-      );
+      toast.error(getErrorMessage(err, "Could not delete application"));
     }
   };
 

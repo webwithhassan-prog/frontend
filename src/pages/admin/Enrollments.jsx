@@ -21,6 +21,7 @@ import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import PhoneInput from "../../components/common/PhoneInput";
+import { getErrorMessage } from "../../utils/errors";
 
 const statusColors = {
   active: "bg-green-100 text-green-700",
@@ -147,7 +148,7 @@ const Enrollments = () => {
       toast.success("Client frozen");
       fetchClients();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to freeze client");
+      toast.error(getErrorMessage(err, "Failed to freeze client"));
     }
   };
 
@@ -157,7 +158,7 @@ const Enrollments = () => {
       toast.success("Client resumed");
       fetchClients();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to resume client");
+      toast.error(getErrorMessage(err, "Failed to resume client"));
     }
   };
 
@@ -170,7 +171,7 @@ const Enrollments = () => {
       setExtendDays({ ...extendDays, [id]: "" });
       fetchClients();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to extend access");
+      toast.error(getErrorMessage(err, "Failed to extend access"));
     }
   };
 
@@ -187,7 +188,7 @@ const Enrollments = () => {
       toast.success(`${client.name} banned`);
       fetchClients();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to ban client");
+      toast.error(getErrorMessage(err, "Failed to ban client"));
     }
   };
 
@@ -198,7 +199,7 @@ const Enrollments = () => {
       toast.success("Client unbanned");
       fetchClients();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to unban client");
+      toast.error(getErrorMessage(err, "Failed to unban client"));
     }
   };
 
@@ -213,7 +214,7 @@ const Enrollments = () => {
       toast.success(`${client.name} deleted`);
       fetchClients();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete client");
+      toast.error(getErrorMessage(err, "Failed to delete client"));
     }
   };
 
@@ -229,7 +230,7 @@ const Enrollments = () => {
       });
       fetchClients();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to update package");
+      toast.error(getErrorMessage(err, "Failed to update package"));
     }
   };
 
@@ -239,9 +240,7 @@ const Enrollments = () => {
       toast.success("Diet plan delivered");
       fetchClients();
     } catch (err) {
-      toast.error(
-        err.response?.data?.message || "Failed to mark diet plan delivered",
-      );
+      toast.error(getErrorMessage(err, "Failed to mark diet plan delivered"));
     }
   };
 
@@ -267,7 +266,7 @@ const Enrollments = () => {
         setPhoneResetKey((k) => k + 1);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to add client");
+      toast.error(getErrorMessage(err, "Failed to add client"));
     } finally {
       setAdding(false);
     }

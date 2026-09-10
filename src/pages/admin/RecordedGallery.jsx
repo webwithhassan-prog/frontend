@@ -7,6 +7,7 @@ import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import Modal from "../../components/admin/Modal";
+import { getErrorMessage } from "../../utils/errors";
 
 const emptyForm = { title: "", youtube_link: "" };
 
@@ -61,7 +62,7 @@ const RecordedGallery = () => {
       setIsModalOpen(false);
       fetchRecordings();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Something went wrong");
+      toast.error(getErrorMessage(err, "Something went wrong"));
     }
   };
 
@@ -72,7 +73,7 @@ const RecordedGallery = () => {
       toast.success("Recording removed");
       fetchRecordings();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to remove recording");
+      toast.error(getErrorMessage(err, "Failed to remove recording"));
     }
   };
 

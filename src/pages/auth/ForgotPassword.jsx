@@ -4,6 +4,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
+import { getErrorMessage } from "../../utils/errors";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -24,7 +25,7 @@ const ForgotPassword = () => {
       setMessage(res.data.message);
       toast.success(res.data.message);
     } catch (err) {
-      const msg = err.response?.data?.message || "Something went wrong";
+      const msg = getErrorMessage(err, "Something went wrong");
       setError(msg);
       toast.error(msg);
     } finally {

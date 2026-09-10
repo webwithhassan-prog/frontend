@@ -4,6 +4,7 @@ import axios from "axios";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import PhoneInput from "../../components/common/PhoneInput";
+import { getErrorMessage } from "../../utils/errors";
 
 const ZoomAccess = () => {
   const [classes, setClasses] = useState([]);
@@ -50,7 +51,7 @@ const ZoomAccess = () => {
       );
       window.location.href = res.data.join_url;
     } catch (err) {
-      setError(err.response?.data?.message || "Unable to verify your details");
+      setError(getErrorMessage(err, "Unable to verify your details"));
     } finally {
       setLoading(false);
     }

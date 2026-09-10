@@ -11,6 +11,7 @@ import Loader from "../../components/common/Loader";
 import { trackEvent } from "../../utils/analytics";
 import { useCurrency } from "../../context/CurrencyContext";
 import CurrencySwitcher from "../../components/common/CurrencySwitcher";
+import { getErrorMessage } from "../../utils/errors";
 
 const durations = [30, 90, 180];
 
@@ -115,8 +116,7 @@ const Plans = () => {
       });
       window.location.href = res.data.url;
     } catch (err) {
-      const msg =
-        err.response?.data?.message || "Checkout failed. Please try again.";
+      const msg = getErrorMessage(err, "Checkout failed");
       setError(msg);
       toast.error(msg);
       setCheckingOutDuration(null);
@@ -146,7 +146,7 @@ const Plans = () => {
       toast.success(`${code.toUpperCase()} applied — ${res.data.discount_percent}% off`);
     } catch (err) {
       setAppliedCoupon(null);
-      const msg = err.response?.data?.message || "Invalid coupon code";
+      const msg = getErrorMessage(err, "Invalid coupon code");
       setCouponError(msg);
       toast.error(msg);
     } finally {

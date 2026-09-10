@@ -8,6 +8,7 @@ import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import Modal from "../../components/admin/Modal";
+import { getErrorMessage } from "../../utils/errors";
 
 const CLOUDINARY_CLOUD_NAME = "zyfxigcj";
 const CLOUDINARY_UPLOAD_PRESET = "FitnessZone";
@@ -143,7 +144,7 @@ const HeroBannersManager = ({ onCountChange }) => {
       setIsModalOpen(false);
       fetchBanners();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Could not save banner");
+      toast.error(getErrorMessage(err, "Could not save banner"));
     } finally {
       setSaving(false);
     }
@@ -156,7 +157,7 @@ const HeroBannersManager = ({ onCountChange }) => {
       toast.success("Banner removed");
       fetchBanners();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Could not remove banner");
+      toast.error(getErrorMessage(err, "Could not remove banner"));
     }
   };
 
@@ -379,7 +380,7 @@ const VideoManager = ({ endpoint, title, description, aspect, onCountChange }) =
       setIsModalOpen(false);
       fetchVideos();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Could not save video");
+      toast.error(getErrorMessage(err, "Could not save video"));
     } finally {
       setSaving(false);
     }
@@ -391,7 +392,7 @@ const VideoManager = ({ endpoint, title, description, aspect, onCountChange }) =
       toast.success("Video removed");
       fetchVideos();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Could not remove video");
+      toast.error(getErrorMessage(err, "Could not remove video"));
     }
   };
 
@@ -549,7 +550,7 @@ const TestimonialsManager = ({ onCountChange }) => {
       setIsModalOpen(false);
       fetchTestimonials();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Could not add testimonial");
+      toast.error(getErrorMessage(err, "Could not add testimonial"));
     } finally {
       setUploading(false);
     }
@@ -561,7 +562,7 @@ const TestimonialsManager = ({ onCountChange }) => {
       toast.success("Testimonial removed");
       fetchTestimonials();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Could not remove testimonial");
+      toast.error(getErrorMessage(err, "Could not remove testimonial"));
     }
   };
 

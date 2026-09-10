@@ -7,6 +7,7 @@ import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import Modal from "../../components/admin/Modal";
+import { getErrorMessage } from "../../utils/errors";
 
 const emptyForm = {
   title: "",
@@ -103,7 +104,7 @@ const Courses = () => {
       setIsModalOpen(false);
       fetchCourses();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Something went wrong");
+      toast.error(getErrorMessage(err, "Something went wrong"));
     }
   };
 
@@ -114,7 +115,7 @@ const Courses = () => {
       toast.success("Course removed");
       fetchCourses();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete course");
+      toast.error(getErrorMessage(err, "Failed to delete course"));
     }
   };
 

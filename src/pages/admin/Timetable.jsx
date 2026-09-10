@@ -16,6 +16,7 @@ import api from "../../services/api";
 import Button from "../../components/common/Button";
 import Loader from "../../components/common/Loader";
 import Modal from "../../components/admin/Modal";
+import { getErrorMessage } from "../../utils/errors";
 
 const dayNames = [
   "Sunday",
@@ -130,7 +131,7 @@ const Timetable = () => {
       setZoomLink(res.data);
       toast.success("Zoom link rotated");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Could not rotate the link");
+      toast.error(getErrorMessage(err, "Could not rotate the link"));
     } finally {
       setRotatingZoom(false);
     }
@@ -207,9 +208,7 @@ const Timetable = () => {
       );
       fetchData();
     } catch (err) {
-      setRegenerateMessage(
-        err.response?.data?.message || "Regeneration failed.",
-      );
+      setRegenerateMessage(getErrorMessage(err, "Regeneration failed"));
     } finally {
       setRegenerating(false);
     }

@@ -24,6 +24,7 @@ import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import Modal from "../../components/admin/Modal";
 import PhoneInput from "../../components/common/PhoneInput";
+import { getErrorMessage } from "../../utils/errors";
 
 const emptyForm = {
   description: "",
@@ -168,7 +169,7 @@ const CustomInvoices = () => {
       toast.success(`${res.data.invoice.invoice_number} created`);
       fetchInvoices();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Could not create invoice");
+      toast.error(getErrorMessage(err, "Could not create invoice"));
     } finally {
       setCreating(false);
     }
@@ -192,7 +193,7 @@ const CustomInvoices = () => {
     } catch (err) {
       setVerifyResult({
         valid: false,
-        message: err.response?.data?.message || "Could not verify",
+        message: getErrorMessage(err, "Could not verify"),
       });
     } finally {
       setVerifying(false);
@@ -208,7 +209,7 @@ const CustomInvoices = () => {
       toast.success("Invoice removed");
       fetchInvoices();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Could not delete invoice");
+      toast.error(getErrorMessage(err, "Could not delete invoice"));
     }
   };
 

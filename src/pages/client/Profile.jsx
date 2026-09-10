@@ -17,6 +17,7 @@ import Button from "../../components/common/Button";
 import WhatsAppIcon from "../../components/common/WhatsAppIcon";
 import Modal from "../../components/admin/Modal";
 import { useSettings } from "../../context/SettingsContext";
+import { getErrorMessage } from "../../utils/errors";
 
 const statusColors = {
   active: "bg-green-100 text-green-700",
@@ -183,7 +184,7 @@ const Profile = () => {
       setCurrentPassword("");
       setNewPassword("");
     } catch (err) {
-      setPasswordError(err.response?.data?.message || "Something went wrong");
+      setPasswordError(getErrorMessage(err, "Something went wrong"));
     }
   };
 

@@ -8,6 +8,7 @@ import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
+import { getErrorMessage } from "../../utils/errors";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -70,8 +71,10 @@ const Login = () => {
             return;
           } catch (checkoutErr) {
             toast.error(
-              checkoutErr.response?.data?.message ||
-                "We couldn't start checkout for your package. Please try again from the Packages page.",
+              getErrorMessage(
+                checkoutErr,
+                "We couldn't start checkout for your package",
+              ),
             );
           }
         }
@@ -94,8 +97,10 @@ const Login = () => {
           return;
         } catch (checkoutErr) {
           toast.error(
-            checkoutErr.response?.data?.message ||
-              "We couldn't start checkout for your e-book. Please try again from the E-Books page.",
+            getErrorMessage(
+              checkoutErr,
+              "We couldn't start checkout for your e-book",
+            ),
           );
         }
       }
@@ -117,15 +122,17 @@ const Login = () => {
           return;
         } catch (checkoutErr) {
           toast.error(
-            checkoutErr.response?.data?.message ||
-              "We couldn't start checkout for your course. Please try again from the E-Books & Courses page.",
+            getErrorMessage(
+              checkoutErr,
+              "We couldn't start checkout for your course",
+            ),
           );
         }
       }
 
       navigate("/client");
     } catch (err) {
-      const msg = err.response?.data?.message || "Login failed";
+      const msg = getErrorMessage(err, "Login failed");
       setError(msg);
       toast.error(msg);
     }

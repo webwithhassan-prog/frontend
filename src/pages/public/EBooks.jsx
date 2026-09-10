@@ -9,6 +9,7 @@ import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import { useCurrency } from "../../context/CurrencyContext";
 import CurrencySwitcher from "../../components/common/CurrencySwitcher";
+import { getErrorMessage } from "../../utils/errors";
 
 const EBooks = () => {
   const [ebooks, setEbooks] = useState([]);
@@ -57,9 +58,7 @@ const EBooks = () => {
       });
       window.location.href = res.data.url;
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Checkout failed. Please try again.",
-      );
+      setError(getErrorMessage(err, "Checkout failed"));
       setBuyingId(null);
     }
   };
@@ -83,9 +82,7 @@ const EBooks = () => {
       });
       window.location.href = res.data.url;
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Checkout failed. Please try again.",
-      );
+      setError(getErrorMessage(err, "Checkout failed"));
       setBuyingId(null);
     }
   };

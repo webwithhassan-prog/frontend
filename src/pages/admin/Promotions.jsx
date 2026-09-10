@@ -7,6 +7,7 @@ import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import Modal from "../../components/admin/Modal";
+import { getErrorMessage } from "../../utils/errors";
 
 const appliesToLabels = {
   all: "All Packages",
@@ -97,7 +98,7 @@ const OffersTab = () => {
       setIsModalOpen(false);
       fetchData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Something went wrong.");
+      toast.error(getErrorMessage(err, "Something went wrong"));
     }
   };
 
@@ -107,7 +108,7 @@ const OffersTab = () => {
       toast.success("Offer deleted");
       fetchData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete offer");
+      toast.error(getErrorMessage(err, "Failed to delete offer"));
     }
   };
 
@@ -117,7 +118,7 @@ const OffersTab = () => {
       toast.success(offer.active ? "Offer turned off" : "Offer turned on");
       fetchData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to update offer");
+      toast.error(getErrorMessage(err, "Failed to update offer"));
     }
   };
 
@@ -351,7 +352,7 @@ const CouponsTab = () => {
       setIsModalOpen(false);
       fetchData();
     } catch (err) {
-      const msg = err.response?.data?.message || "Something went wrong.";
+      const msg = getErrorMessage(err, "Something went wrong");
       setFormError(msg);
       toast.error(msg);
     }
@@ -363,7 +364,7 @@ const CouponsTab = () => {
       toast.success("Coupon deleted");
       fetchData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete coupon");
+      toast.error(getErrorMessage(err, "Failed to delete coupon"));
     }
   };
 
@@ -373,7 +374,7 @@ const CouponsTab = () => {
       toast.success(coupon.active ? "Coupon turned off" : "Coupon turned on");
       fetchData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to update coupon");
+      toast.error(getErrorMessage(err, "Failed to update coupon"));
     }
   };
 

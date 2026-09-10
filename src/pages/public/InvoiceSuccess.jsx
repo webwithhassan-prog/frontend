@@ -10,6 +10,7 @@ import WhatsAppIcon from "../../components/common/WhatsAppIcon";
 import logo from "../../assets/logo.jpeg";
 import { useCurrency } from "../../context/CurrencyContext";
 import { useSettings } from "../../context/SettingsContext";
+import { getErrorMessage } from "../../utils/errors";
 
 const InvoiceSuccess = () => {
   const [searchParams] = useSearchParams();
@@ -42,7 +43,7 @@ const InvoiceSuccess = () => {
       .get(`/custom-invoices/session/${sessionId}`)
       .then((res) => setInvoice(res.data))
       .catch((err) =>
-        setError(err.response?.data?.message || "Could not load invoice"),
+        setError(getErrorMessage(err, "Could not load invoice")),
       )
       .finally(() => setLoading(false));
   }, [sessionId]);

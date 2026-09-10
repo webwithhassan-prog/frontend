@@ -6,6 +6,7 @@ import api from "../../services/api";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import { useSettings } from "../../context/SettingsContext";
+import { getErrorMessage } from "../../utils/errors";
 
 const Settings = () => {
   const { settings, refetchSettings } = useSettings();
@@ -35,7 +36,7 @@ const Settings = () => {
       await refetchSettings();
       toast.success("WhatsApp numbers updated");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to update");
+      toast.error(getErrorMessage(err, "Failed to update"));
     } finally {
       setSavingWhatsapp(false);
     }
@@ -56,7 +57,7 @@ const Settings = () => {
       setNewPassword("");
       toast.success("Password updated");
     } catch (err) {
-      const msg = err.response?.data?.message || "Something went wrong";
+      const msg = getErrorMessage(err, "Something went wrong");
       setPasswordError(msg);
       toast.error(msg);
     } finally {
