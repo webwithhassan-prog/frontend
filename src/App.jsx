@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -7,49 +8,50 @@ import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
 import OfferPopup from "./components/common/OfferPopup";
 import FloatingActions from "./components/common/FloatingActions";
+import Loader from "./components/common/Loader";
 import usePageTracking from "./hooks/usePageTracking";
 import usePageMeta from "./hooks/usePageMeta";
 
 import Home from "./pages/public/Home";
-import Plans from "./pages/public/Plans";
-import Trainers from "./pages/public/Trainers";
-import TimetableSchedule from "./pages/public/TimetableSchedule";
-import EBooks from "./pages/public/EBooks";
-import SuccessStories from "./pages/public/SuccessStories";
-import Careers from "./pages/public/Careers";
-import Contact from "./pages/public/Contact";
-import ZoomAccess from "./pages/public/ZoomAccess";
-import PaymentSuccess from "./pages/public/PaymentSuccess";
-import InvoiceSuccess from "./pages/public/InvoiceSuccess";
-import PayNow from "./pages/public/PayNow";
-import PaymentCancelled from "./pages/public/PaymentCancelled";
-import Login from "./pages/auth/Login";
-import Signup from "./pages/auth/Signup";
-import ForgotPassword from "./pages/auth/ForgotPassword";
-import ResetPassword from "./pages/auth/ResetPassword";
-import NotFound from "./pages/public/NotFound";
-import About from "./pages/public/About";
-import PrivacyPolicy from "./pages/public/PrivacyPolicy";
-import TermsOfService from "./pages/public/TermsOfService";
+const Plans = lazy(() => import("./pages/public/Plans"));
+const Trainers = lazy(() => import("./pages/public/Trainers"));
+const TimetableSchedule = lazy(() => import("./pages/public/TimetableSchedule"));
+const EBooks = lazy(() => import("./pages/public/EBooks"));
+const SuccessStories = lazy(() => import("./pages/public/SuccessStories"));
+const Careers = lazy(() => import("./pages/public/Careers"));
+const Contact = lazy(() => import("./pages/public/Contact"));
+const ZoomAccess = lazy(() => import("./pages/public/ZoomAccess"));
+const PaymentSuccess = lazy(() => import("./pages/public/PaymentSuccess"));
+const InvoiceSuccess = lazy(() => import("./pages/public/InvoiceSuccess"));
+const PayNow = lazy(() => import("./pages/public/PayNow"));
+const PaymentCancelled = lazy(() => import("./pages/public/PaymentCancelled"));
+const Login = lazy(() => import("./pages/auth/Login"));
+const Signup = lazy(() => import("./pages/auth/Signup"));
+const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/auth/ResetPassword"));
+const NotFound = lazy(() => import("./pages/public/NotFound"));
+const About = lazy(() => import("./pages/public/About"));
+const PrivacyPolicy = lazy(() => import("./pages/public/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/public/TermsOfService"));
 
-import AdminLayout from "./components/admin/AdminLayout";
-import Enrollments from "./pages/admin/Enrollments";
-import AdminTrainers from "./pages/admin/Trainers";
-import Packages from "./pages/admin/Packages";
-import Timetable from "./pages/admin/Timetable";
-import TrainerApplications from "./pages/admin/TrainerApplications";
-import Sales from "./pages/admin/Sales";
-import CustomInvoices from "./pages/admin/CustomInvoices";
-import HomeContent from "./pages/admin/HomeContent";
-import AdminEBooks from "./pages/admin/EBooks";
-import Promotions from "./pages/admin/Promotions";
-import AdminSettings from "./pages/admin/Settings";
-import AdminCourses from "./pages/admin/Courses";
-import RecordedGallery from "./pages/admin/RecordedGallery";
-import Analytics from "./pages/admin/Analytics";
+const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
+const Enrollments = lazy(() => import("./pages/admin/Enrollments"));
+const AdminTrainers = lazy(() => import("./pages/admin/Trainers"));
+const Packages = lazy(() => import("./pages/admin/Packages"));
+const Timetable = lazy(() => import("./pages/admin/Timetable"));
+const TrainerApplications = lazy(() => import("./pages/admin/TrainerApplications"));
+const Sales = lazy(() => import("./pages/admin/Sales"));
+const CustomInvoices = lazy(() => import("./pages/admin/CustomInvoices"));
+const HomeContent = lazy(() => import("./pages/admin/HomeContent"));
+const AdminEBooks = lazy(() => import("./pages/admin/EBooks"));
+const Promotions = lazy(() => import("./pages/admin/Promotions"));
+const AdminSettings = lazy(() => import("./pages/admin/Settings"));
+const AdminCourses = lazy(() => import("./pages/admin/Courses"));
+const RecordedGallery = lazy(() => import("./pages/admin/RecordedGallery"));
+const Analytics = lazy(() => import("./pages/admin/Analytics"));
 
-import ClientLayout from "./components/client/ClientLayout";
-import Profile from "./pages/client/Profile";
+const ClientLayout = lazy(() => import("./components/client/ClientLayout"));
+const Profile = lazy(() => import("./pages/client/Profile"));
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const { role, loading } = useAuth();
@@ -78,6 +80,7 @@ function PublicLayout({ children }) {
 function AppRoutes() {
   return (
     <BrowserRouter>
+      <Suspense fallback={<Loader size={40} className="py-32" />}>
       <Routes>
         {/* Public routes */}
         <Route
@@ -289,6 +292,7 @@ function AppRoutes() {
           <Route path="analytics" element={<Analytics />} />
         </Route>
       </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }
