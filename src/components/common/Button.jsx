@@ -42,7 +42,14 @@ const Button = ({
       }
       whileTap={disabled ? {} : { scale: 0.95 }}
       animate={{ opacity: disabled ? 0.5 : 1 }}
-      transition={{ duration: 0.2 }}
+      transition={{
+        // Scale gets a spring — snappier and more tactile on press than a
+        // flat tween. Opacity/shadow stay smooth tweens since a spring on
+        // those (rather than a physical motion) just looks like flicker.
+        scale: { type: "spring", stiffness: 400, damping: 17 },
+        opacity: { duration: 0.2 },
+        boxShadow: { duration: 0.2 },
+      }}
     >
       {children}
     </motion.button>
