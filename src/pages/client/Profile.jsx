@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toPng } from "html-to-image";
+import toast from "react-hot-toast";
 import {
   Download,
   Footprints,
@@ -8,6 +9,7 @@ import {
   Lock,
   Check,
   UtensilsCrossed,
+  Bell,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
@@ -18,6 +20,7 @@ import WhatsAppIcon from "../../components/common/WhatsAppIcon";
 import Modal from "../../components/admin/Modal";
 import { useSettings } from "../../context/SettingsContext";
 import { getErrorMessage } from "../../utils/errors";
+import { getPushStatus, subscribeToPush, unsubscribeFromPush } from "../../utils/push";
 
 const statusColors = {
   active: "bg-green-100 text-green-700",
@@ -103,6 +106,41 @@ const Profile = () => {
   const [dailySteps, setDailySteps] = useState("");
   const [dailyWater, setDailyWater] = useState("");
   const [dailyLogMessage, setDailyLogMessage] = useState("");
+
+  const [pushStatus, setPushStatus] = useState("unsupported");
+  const [pushBusy, setPushBusy] = useState(false);
+
+  useEffect(() => {
+    setPushStatus(getPushStatus());
+  }, []);
+
+  const handleEnableNotifications = async () => {
+    setPushBusy(true);
+    try {
+      const clientId = localStorage.getItem("client_id");
+      const result = await subscribeToPush(clientId);
+      setPushStatus(result);
+      if (result === "granted") toast.success("Notifications enabled");
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Couldn't enable notifications"));
+    } finally {
+      setPushBusy(false);
+    }
+  };
+
+  const handleDisableNotifications = async () => {
+    setPushBusy(true);
+    try {
+      const clientId = localStorage.getItem("client_id");
+      await unsubscribeFromPush(clientId);
+      setPushStatus("default");
+      toast.success("Notifications turned off");
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Couldn't turn off notifications"));
+    } finally {
+      setPushBusy(false);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -1345,6 +1383,52 @@ const Profile = () => {
           </AnimatePresence>
           </>
           )}
+        </>
+      )}
+
+      {pushStatus !== "unsupported" && (
+        <>
+          <h2 className="font-display text-lg text-brand-blue mb-2 mt-12">
+            NOTIFICATIONS
+          </h2>
+          <Card className="max-w-md">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="inline-flex shrink-0 bg-brand-blue-pale rounded-full p-2.5">
+                <Bell size={18} className="text-brand-blue" />
+              </div>
+              <div>
+                <p className="font-display text-brand-blue text-sm">
+                  Class &amp; check-in reminders
+                </p>
+                <p className="text-brand-blue/60 text-xs">
+                  {pushStatus === "granted"
+                    ? "Enabled on this device"
+                    : pushStatus === "denied"
+                      ? "Blocked in your browser settings"
+                      : "Get a nudge for today's classes and overdue check-ins"}
+                </p>
+              </div>
+            </div>
+            {pushStatus === "denied" ? (
+              <p className="text-brand-blue/60 text-xs">
+                Notifications are blocked for this site. Re-enable them from
+                your browser's site settings, then reload this page.
+              </p>
+            ) : pushStatus === "granted" ? (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleDisableNotifications}
+                disabled={pushBusy}
+              >
+                {pushBusy ? "Turning off..." : "Turn Off"}
+              </Button>
+            ) : (
+              <Button size="sm" onClick={handleEnableNotifications} disabled={pushBusy}>
+                {pushBusy ? "Enabling..." : "Enable Notifications"}
+              </Button>
+            )}
+          </Card>
         </>
       )}
 

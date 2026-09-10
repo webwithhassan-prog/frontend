@@ -11,6 +11,14 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
+      // generateSW (the default) auto-writes the whole service worker with
+      // no hook for custom event listeners — push notifications need
+      // `push`/`notificationclick` handlers, so this hands precaching
+      // control to our own src/sw.js instead (still gets the precache
+      // manifest injected via self.__WB_MANIFEST).
+      strategies: "injectManifest",
+      srcDir: "src",
+      filename: "sw.js",
       manifest: {
         name: "Fitness Zone",
         short_name: "Fitness Zone",
