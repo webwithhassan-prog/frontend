@@ -181,7 +181,7 @@ const Home = () => {
           swap has none of that risk. */}
       {heroLoading && (
         <section className="relative bg-brand-blue overflow-hidden min-h-[420px] sm:min-h-[480px] lg:min-h-[560px] flex items-center justify-center">
-          <Loader size={28} />
+          <Loader size={96} />
         </section>
       )}
       {heroSlides.length > 0 && (
