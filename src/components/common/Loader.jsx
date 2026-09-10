@@ -1,4 +1,4 @@
-import logo from "../../assets/logo.jpeg";
+import logoMark from "../../assets/logo-mark.png";
 
 const BRAND_BLUE = "#12224A";
 const BRAND_ORANGE = "#F76B1C";
@@ -19,16 +19,21 @@ const Loader = ({ size = 22, label, className = "" }) => {
       className={`flex flex-col items-center justify-center gap-3 py-10 ${className}`}
     >
       {isSplash ? (
-        // Wrapped in a white circle since the source logo file has a solid
-        // white background (no transparency) — without this it shows as a
-        // visible white box on any non-white surface, like the hero's dark
-        // blue loading section.
+        // logo-mark.png is logo.jpeg's mark trimmed and re-padded to fill
+        // ~92% of its own square (generated via
+        // scripts/generate-loader-logo.mjs) — the raw source file has so
+        // much built-in white margin that displaying it directly left the
+        // mark looking tiny and off-center inside the circle, especially
+        // at larger sizes on mobile. Still has a solid white background
+        // (no transparency), so it's wrapped in a white circle here too —
+        // without it, it'd show as a visible white box on any non-white
+        // surface, like the hero's dark blue loading section.
         <span
           className="inline-flex items-center justify-center rounded-full bg-white shadow-lg shrink-0"
           style={{ width: size * 1.4, height: size * 1.4 }}
         >
           <img
-            src={logo}
+            src={logoMark}
             alt="Fitness Zone"
             className="animate-brand-pulse object-contain rounded-full"
             style={{ width: size, height: size }}
