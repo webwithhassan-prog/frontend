@@ -213,9 +213,10 @@ const Navbar = () => {
           <div className="hidden lg:flex items-center gap-4 pl-4 ml-2 border-l border-brand-blue-pale">
             <div className="relative flex items-center">
               <button
-                className="flex items-center text-brand-blue/70 hover:text-brand-orange transition-colors"
+                className="flex items-center text-brand-blue/70 hover:text-brand-orange transition-colors rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                 onClick={openSearch}
                 title="Search"
+                aria-label="Search"
               >
                 <Search size={19} />
               </button>
@@ -265,8 +266,9 @@ const Navbar = () => {
               href={whatsappLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-brand-blue/70 hover:text-brand-orange transition-colors"
+              className="text-brand-blue/70 hover:text-brand-orange transition-colors rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
               title="Chat on WhatsApp"
+              aria-label="Chat on WhatsApp"
             >
               <WhatsAppIcon size={19} />
             </a>
@@ -274,8 +276,9 @@ const Navbar = () => {
               href={instagramLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-brand-blue/70 hover:text-brand-orange transition-colors"
+              className="text-brand-blue/70 hover:text-brand-orange transition-colors rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
               title="Follow us on Instagram"
+              aria-label="Follow us on Instagram"
             >
               <InstagramIcon size={19} />
             </a>
