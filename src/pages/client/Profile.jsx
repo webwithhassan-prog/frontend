@@ -428,6 +428,17 @@ const Profile = () => {
           : "Nothing purchased yet",
       active: ebooks.length + courses.length > 0,
     },
+    {
+      key: "dailylog",
+      label: "TODAY'S LOG",
+      subtitle: hasWorkout
+        ? dailySteps || dailyWater
+          ? `${dailySteps || 0} steps, ${dailyWater || 0} L water`
+          : "Not logged yet today"
+        : "Log steps & water for workout clients",
+      active: client?.status === "active" && client?.has_workout,
+      upgradeType: "workout",
+    },
   ];
 
   return (
@@ -824,11 +835,15 @@ const Profile = () => {
           <h2 className="font-display text-sm text-brand-blue/60 tracking-wide mb-4">
             YOUR SERVICES
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
             {services.map((s) => (
               <Card
                 key={s.key}
-                className={`flex flex-col h-full ${!s.active ? "opacity-70" : ""}`}
+                className={`flex flex-col h-full ${!s.active ? "opacity-70" : ""} ${
+                  s.key === "followup" && hasDietplan && checkinDue
+                    ? "border-brand-orange border-2"
+                    : ""
+                }`}
               >
                 <div className="flex-1">
                   {s.active ? (
@@ -862,6 +877,10 @@ const Profile = () => {
                       if (s.key === "followup")
                         document
                           .getElementById("weekly-progress")
+                          ?.scrollIntoView({ behavior: "smooth" });
+                      if (s.key === "dailylog")
+                        document
+                          .getElementById("daily-log")
                           ?.scrollIntoView({ behavior: "smooth" });
                     }}
                     className="w-full mt-4"
@@ -926,7 +945,7 @@ const Profile = () => {
               )}
 
               {/* Today's Log */}
-              <h2 className="font-display text-lg text-brand-blue mb-4">
+              <h2 id="daily-log" className="font-display text-lg text-brand-blue mb-4">
                 TODAY'S LOG
               </h2>
               <Card className="max-w-md mb-12">
