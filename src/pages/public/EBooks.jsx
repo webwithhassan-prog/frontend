@@ -129,13 +129,20 @@ const EBooks = () => {
                   >
                     <Card className="h-full flex flex-col">
                       {ebook.banner_url ? (
-                        <div className="aspect-video -mt-1 mb-3 rounded-lg overflow-hidden bg-brand-blue-pale">
+                        <a
+                          href={ebook.banner_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Tap to view full image"
+                          aria-label={`View full cover image for ${ebook.title}`}
+                          className="aspect-video -mt-1 mb-3 rounded-lg overflow-hidden bg-brand-blue-pale block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                        >
                           <img
                             src={optimizeCloudinaryUrl(ebook.banner_url, 500)}
                             alt={ebook.title}
                             className="w-full h-full object-cover"
                           />
-                        </div>
+                        </a>
                       ) : (
                         <BookOpen className="text-brand-orange mb-3" size={28} />
                       )}
