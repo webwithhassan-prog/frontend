@@ -22,6 +22,11 @@ import TestimonialsSlider from "../../components/common/TestimonialsSlider";
 import AchievementMarquee from "../../components/common/AchievementMarquee";
 import api from "../../services/api";
 import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
+import pillarDietplanImg from "../../assets/home/pillar-dietplan.jpg";
+import pillarHomeworkoutImg from "../../assets/home/pillar-homeworkout.jpg";
+import step1ChooseImg from "../../assets/home/step1-choose.jpg";
+import step2ScheduleImg from "../../assets/home/step2-schedule.jpg";
+import step3JoinImg from "../../assets/home/step3-join.jpg";
 
 const pillars = [
   {
@@ -29,16 +34,14 @@ const pillars = [
     label: "Dietplan",
     title: "Customized Dietplans",
     desc: "Home-based menus built around your body, your food, your life — tracked daily, adjusted weekly.",
-    image:
-      "https://res.cloudinary.com/zyfxigcj/image/upload/v1789084354/homepage_dietplan.jpg",
+    image: pillarDietplanImg,
   },
   {
     icon: Dumbbell,
     label: "Home Workouts",
     title: "Home Workouts",
     desc: "50–55 minutes, six days a week, a different workout every day — led by female trainers. (recordings are also available)",
-    image:
-      "https://res.cloudinary.com/zyfxigcj/image/upload/v1789084362/homepage_homeworkout.jpg",
+    image: pillarHomeworkoutImg,
     imagePosition: "object-top",
   },
 ];
@@ -65,8 +68,7 @@ const steps = [
     n: "01",
     title: "Choose your path",
     desc: "Pick a Dietplan, Home Workouts, or both — combine them for full support.",
-    image:
-      "https://res.cloudinary.com/zyfxigcj/image/upload/v1789084366/homepage_step1_choose.jpg",
+    image: step1ChooseImg,
     imagePosition: "object-top",
   },
   {
@@ -74,16 +76,14 @@ const steps = [
     n: "02",
     title: "Get matched & scheduled",
     desc: "We assign your trainer and set your timetable around your week, not the other way round.",
-    image:
-      "https://res.cloudinary.com/zyfxigcj/image/upload/v1789084370/homepage_step2_schedule.jpg",
+    image: step2ScheduleImg,
   },
   {
     icon: Video,
     n: "03",
     title: "Join your workout",
     desc: "Join from your dashboard — no links to hunt for, no groups to scroll through.",
-    image:
-      "https://res.cloudinary.com/zyfxigcj/image/upload/v1789084375/homepage_step3_join.jpg",
+    image: step3JoinImg,
   },
 ];
 
@@ -593,7 +593,7 @@ const Home = () => {
               <Card className="h-full">
                 <div className="aspect-[4/3] mb-4 -mt-1 rounded-lg overflow-hidden bg-brand-blue-pale">
                   <img
-                    src={optimizeCloudinaryUrl(pillar.image, 600)}
+                    src={pillar.image}
                     alt={pillar.title}
                     className={`w-full h-full object-cover ${pillar.imagePosition || ""}`}
                   />
@@ -753,7 +753,7 @@ const Home = () => {
                 <Card className="h-full">
                   <div className="aspect-[4/3] mb-4 -mt-1 rounded-lg overflow-hidden bg-brand-blue-pale">
                     <img
-                      src={optimizeCloudinaryUrl(step.image, 600)}
+                      src={step.image}
                       alt={step.title}
                       className={`w-full h-full object-cover ${step.imagePosition || ""}`}
                     />
