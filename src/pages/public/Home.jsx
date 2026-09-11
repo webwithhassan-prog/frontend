@@ -17,16 +17,12 @@ import {
 } from "lucide-react";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
+import ImageReveal from "../../components/common/ImageReveal";
 import AnimatedCounter from "../../components/common/AnimatedCounter";
 import TestimonialsSlider from "../../components/common/TestimonialsSlider";
 import AchievementMarquee from "../../components/common/AchievementMarquee";
 import api from "../../services/api";
 import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
-import pillarDietplanImg from "../../assets/home/pillar-dietplan.jpg";
-import pillarHomeworkoutImg from "../../assets/home/pillar-homeworkout.jpg";
-import step1ChooseImg from "../../assets/home/step1-choose.jpg";
-import step2ScheduleImg from "../../assets/home/step2-schedule.jpg";
-import step3JoinImg from "../../assets/home/step3-join.jpg";
 
 const pillars = [
   {
@@ -34,15 +30,12 @@ const pillars = [
     label: "Dietplan",
     title: "Customized Dietplans",
     desc: "Home-based menus built around your body, your food, your life — tracked daily, adjusted weekly.",
-    image: pillarDietplanImg,
   },
   {
     icon: Dumbbell,
     label: "Home Workouts",
     title: "Home Workouts",
     desc: "50–55 minutes, six days a week, a different workout every day — led by female trainers. (recordings are also available)",
-    image: pillarHomeworkoutImg,
-    imagePosition: "object-top",
   },
 ];
 
@@ -68,22 +61,18 @@ const steps = [
     n: "01",
     title: "Choose your path",
     desc: "Pick a Dietplan, Home Workouts, or both — combine them for full support.",
-    image: step1ChooseImg,
-    imagePosition: "object-top",
   },
   {
     icon: CalendarCheck,
     n: "02",
     title: "Get matched & scheduled",
     desc: "We assign your trainer and set your timetable around your week, not the other way round.",
-    image: step2ScheduleImg,
   },
   {
     icon: Video,
     n: "03",
     title: "Join your workout",
     desc: "Join from your dashboard — no links to hunt for, no groups to scroll through.",
-    image: step3JoinImg,
   },
 ];
 
@@ -591,13 +580,6 @@ const Home = () => {
               transition={{ duration: 0.5, delay: i * 0.1 }}
             >
               <Card className="h-full">
-                <div className="aspect-[4/3] mb-4 -mt-1 rounded-lg overflow-hidden bg-brand-blue-pale">
-                  <img
-                    src={pillar.image}
-                    alt={pillar.title}
-                    className={`w-full h-full object-cover ${pillar.imagePosition || ""}`}
-                  />
-                </div>
                 <div className="flex items-center gap-2 mb-3">
                   <div className="inline-flex shrink-0 bg-brand-blue-pale rounded-full p-2">
                     <pillar.icon className="text-brand-blue" size={18} />
@@ -609,9 +591,13 @@ const Home = () => {
                 <h3 className="font-display text-brand-blue text-lg mb-3">
                   {pillar.title}
                 </h3>
-                <p className="text-brand-blue/70 text-sm leading-relaxed">
+                <p className="text-brand-blue/70 text-sm leading-relaxed mb-4">
                   {pillar.desc}
                 </p>
+                <ImageReveal
+                  Icon={pillar.icon}
+                  className="aspect-[4/3] rounded-lg overflow-hidden"
+                />
               </Card>
             </motion.div>
           ))}
@@ -751,13 +737,6 @@ const Home = () => {
                 transition={{ duration: 0.5, delay: i * 0.15 }}
               >
                 <Card className="h-full">
-                  <div className="aspect-[4/3] mb-4 -mt-1 rounded-lg overflow-hidden bg-brand-blue-pale">
-                    <img
-                      src={step.image}
-                      alt={step.title}
-                      className={`w-full h-full object-cover ${step.imagePosition || ""}`}
-                    />
-                  </div>
                   <div className="flex items-center gap-3 mb-4">
                     <div className="inline-flex shrink-0 bg-brand-orange/10 rounded-full p-3">
                       <step.icon className="text-brand-orange" size={22} />
@@ -769,9 +748,13 @@ const Home = () => {
                   <h3 className="font-display text-brand-blue text-base mb-2">
                     {step.title}
                   </h3>
-                  <p className="text-brand-blue/70 text-sm leading-relaxed">
+                  <p className="text-brand-blue/70 text-sm leading-relaxed mb-4">
                     {step.desc}
                   </p>
+                  <ImageReveal
+                    Icon={step.icon}
+                    className="aspect-[4/3] rounded-lg overflow-hidden"
+                  />
                 </Card>
               </motion.div>
             ))}
