@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
-import ImageReveal from "../../components/common/ImageReveal";
+import IconDraw from "../../components/common/IconDraw";
 import AnimatedCounter from "../../components/common/AnimatedCounter";
 import TestimonialsSlider from "../../components/common/TestimonialsSlider";
 import AchievementMarquee from "../../components/common/AchievementMarquee";
@@ -579,26 +579,32 @@ const Home = () => {
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
             >
-              <Card className="h-full">
+              <motion.div
+                className="h-full rounded-2xl shadow-md p-6 flex flex-col overflow-hidden relative bg-gradient-to-br from-brand-blue to-brand-blue-light"
+                whileHover={{ y: -6, boxShadow: "0 16px 32px rgba(30,58,138,0.3)" }}
+                transition={{
+                  default: { duration: 0.35 },
+                  y: { type: "spring", stiffness: 300, damping: 20 },
+                }}
+              >
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="inline-flex shrink-0 bg-brand-blue-pale rounded-full p-2">
-                    <pillar.icon className="text-brand-blue" size={18} />
+                  <div className="inline-flex shrink-0 bg-white/15 rounded-full p-2">
+                    <pillar.icon className="text-white" size={18} />
                   </div>
-                  <span className="font-display text-brand-orange text-[10px] tracking-[0.15em]">
+                  <span className="font-display text-white/70 text-[10px] tracking-[0.15em]">
                     {pillar.label.toUpperCase()}
                   </span>
                 </div>
-                <h3 className="font-display text-brand-blue text-lg mb-3">
+                <h3 className="font-display text-white text-lg mb-3">
                   {pillar.title}
                 </h3>
-                <p className="text-brand-blue/70 text-sm leading-relaxed mb-4">
+                <p className="text-white/80 text-sm leading-relaxed mb-6">
                   {pillar.desc}
                 </p>
-                <ImageReveal
-                  Icon={pillar.icon}
-                  className="aspect-[4/3] rounded-lg overflow-hidden"
-                />
-              </Card>
+                <div className="mt-auto flex justify-center pt-2">
+                  <IconDraw Icon={pillar.icon} size={64} />
+                </div>
+              </motion.div>
             </motion.div>
           ))}
         </div>
@@ -736,26 +742,32 @@ const Home = () => {
                 viewport={{ once: true, amount: 0.4 }}
                 transition={{ duration: 0.5, delay: i * 0.15 }}
               >
-                <Card className="h-full">
+                <motion.div
+                  className="h-full rounded-2xl shadow-md p-6 flex flex-col overflow-hidden relative bg-gradient-to-br from-brand-blue to-brand-blue-light"
+                  whileHover={{ y: -6, boxShadow: "0 16px 32px rgba(30,58,138,0.3)" }}
+                  transition={{
+                    default: { duration: 0.35 },
+                    y: { type: "spring", stiffness: 300, damping: 20 },
+                  }}
+                >
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="inline-flex shrink-0 bg-brand-orange/10 rounded-full p-3">
-                      <step.icon className="text-brand-orange" size={22} />
+                    <div className="inline-flex shrink-0 bg-white/15 rounded-full p-3">
+                      <step.icon className="text-white" size={22} />
                     </div>
                     <p className="font-display text-brand-orange text-3xl">
                       {step.n}
                     </p>
                   </div>
-                  <h3 className="font-display text-brand-blue text-base mb-2">
+                  <h3 className="font-display text-white text-base mb-2">
                     {step.title}
                   </h3>
-                  <p className="text-brand-blue/70 text-sm leading-relaxed mb-4">
+                  <p className="text-white/80 text-sm leading-relaxed mb-6">
                     {step.desc}
                   </p>
-                  <ImageReveal
-                    Icon={step.icon}
-                    className="aspect-[4/3] rounded-lg overflow-hidden"
-                  />
-                </Card>
+                  <div className="mt-auto flex justify-center pt-2">
+                    <IconDraw Icon={step.icon} size={56} />
+                  </div>
+                </motion.div>
               </motion.div>
             ))}
           </div>
