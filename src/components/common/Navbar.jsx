@@ -31,14 +31,29 @@ const navLinks = [
   { label: "E-Books & Courses", href: "/ebooks" },
 ];
 
+// `keywords` widen what a search query matches without cluttering the
+// label shown in results — e.g. searching "diet plan" or "workout" should
+// find the pricing page even though its label is "Packages & Pricing".
 const searchablePages = [
   { label: "Home", href: "/" },
-  { label: "Packages & Pricing", href: "/plans" },
-  { label: "Time Slots", href: "/timetable" },
-  { label: "Careers", href: "/careers" },
-  { label: "E-Books & Courses", href: "/ebooks" },
+  {
+    label: "Packages & Pricing",
+    href: "/plans",
+    keywords: "packages pricing plans dietplan diet plan workout home workout combo membership subscribe",
+  },
+  { label: "Time Slots", href: "/timetable", keywords: "schedule classes timetable" },
+  { label: "Careers", href: "/careers", keywords: "jobs job trainer apply hiring work" },
+  {
+    label: "E-Books & Courses",
+    href: "/ebooks",
+    keywords: "ebook ebooks course courses guide guides recipes",
+  },
   { label: "Trainers", href: "/trainers" },
-  { label: "Success Stories", href: "/success-stories" },
+  {
+    label: "Success Stories",
+    href: "/success-stories",
+    keywords: "testimonials reviews results",
+  },
   { label: "Contact", href: "/contact" },
   { label: "Privacy Policy", href: "/privacy-policy" },
   { label: "Terms of Service", href: "/terms" },
@@ -108,7 +123,9 @@ const Navbar = () => {
 
   const searchResults = searchQuery.trim()
     ? allSearchItems.filter((p) =>
-        p.label.toLowerCase().includes(searchQuery.trim().toLowerCase()),
+        `${p.label} ${p.keywords || ""}`
+          .toLowerCase()
+          .includes(searchQuery.trim().toLowerCase()),
       )
     : [];
 
