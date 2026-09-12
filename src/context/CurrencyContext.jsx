@@ -9,6 +9,7 @@ export const CurrencyProvider = ({ children }) => {
   const [currency, setCurrencyState] = useState(DEFAULT_CURRENCY);
   const [currencies, setCurrencies] = useState([DEFAULT_CURRENCY]);
   const [rates, setRates] = useState({ INR: 1 });
+  const [countryCode, setCountryCode] = useState(null);
 
   useEffect(() => {
     const init = async () => {
@@ -29,6 +30,10 @@ export const CurrencyProvider = ({ children }) => {
         setRates(ratesResult.value.data.rates);
       } else {
         console.error(ratesResult.reason);
+      }
+
+      if (detectResult.status === "fulfilled") {
+        setCountryCode(detectResult.value.data.country_code || null);
       }
 
       // Location-detected currency takes priority on each fresh visit — a
@@ -88,7 +93,7 @@ export const CurrencyProvider = ({ children }) => {
 
   return (
     <CurrencyContext.Provider
-      value={{ currency, currencies, setCurrency, format, rates }}
+      value={{ currency, currencies, setCurrency, format, rates, countryCode }}
     >
       {children}
     </CurrencyContext.Provider>

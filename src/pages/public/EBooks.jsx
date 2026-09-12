@@ -11,6 +11,8 @@ import { useCurrency } from "../../context/CurrencyContext";
 import CurrencySwitcher from "../../components/common/CurrencySwitcher";
 import { getErrorMessage } from "../../utils/errors";
 import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
+import Modal from "../../components/admin/Modal";
+import ManualPaymentPanel from "../../components/common/ManualPaymentPanel";
 
 const EBooks = () => {
   const [ebooks, setEbooks] = useState([]);
@@ -19,8 +21,10 @@ const EBooks = () => {
   const [buyingId, setBuyingId] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { format, currency } = useCurrency();
+  const { format, currency, countryCode } = useCurrency();
   const { role } = useAuth();
+  const [manualMethods, setManualMethods] = useState([]);
+  const [manualPayFor, setManualPayFor] = useState(null); // { type, id, itemLabel, amountLabel }
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -39,6 +43,17 @@ const EBooks = () => {
     };
     fetchAll();
   }, []);
+
+  // Which manual (non-Stripe) payment methods, if any, apply to this
+  // client's detected country — entirely admin-managed, see
+  // admin/ManualPaymentMethods.jsx.
+  useEffect(() => {
+    if (!countryCode) return;
+    api
+      .get("/manual-payment-methods/public", { params: { country: countryCode } })
+      .then((res) => setManualMethods(res.data))
+      .catch((err) => console.error(err));
+  }, [countryCode]);
 
   const handleBuyEbook = async (ebook) => {
     setError("");
@@ -161,6 +176,22 @@ const EBooks = () => {
                       >
                         {buyingId === ebook._id ? "Redirecting..." : "Buy Now"}
                       </Button>
+                      {role === "client" && manualMethods.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setManualPayFor({
+                              type: "ebook",
+                              id: ebook._id,
+                              itemLabel: ebook.title,
+                              amountLabel: format(ebook.price),
+                            })
+                          }
+                          className="mt-2 w-full text-center text-xs text-brand-blue-light hover:text-brand-orange underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded"
+                        >
+                          Pay via Bank Transfer / JazzCash / Easypaisa
+                        </button>
+                      )}
                     </Card>
                   </motion.div>
                 ))}
@@ -220,6 +251,22 @@ const EBooks = () => {
                       >
                         {buyingId === course._id ? "Redirecting..." : "Buy Now"}
                       </Button>
+                      {role === "client" && manualMethods.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setManualPayFor({
+                              type: "course",
+                              id: course._id,
+                              itemLabel: course.title,
+                              amountLabel: format(course.price),
+                            })
+                          }
+                          className="mt-2 w-full text-center text-xs text-brand-blue-light hover:text-brand-orange underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded"
+                        >
+                          Pay via Bank Transfer / JazzCash / Easypaisa
+                        </button>
+                      )}
                     </Card>
                   </motion.div>
                 ))}
@@ -234,6 +281,24 @@ const EBooks = () => {
           )}
         </>
       )}
+
+      <Modal
+        isOpen={!!manualPayFor}
+        onClose={() => setManualPayFor(null)}
+        title="Manual Payment"
+      >
+        {manualPayFor && (
+          <ManualPaymentPanel
+            methods={manualMethods}
+            type={manualPayFor.type}
+            ebookId={manualPayFor.type === "ebook" ? manualPayFor.id : undefined}
+            courseId={manualPayFor.type === "course" ? manualPayFor.id : undefined}
+            itemLabel={manualPayFor.itemLabel}
+            amountLabel={manualPayFor.amountLabel}
+            currencyCode={currency.code}
+          />
+        )}
+      </Modal>
     </section>
   );
 };

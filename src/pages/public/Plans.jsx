@@ -12,6 +12,8 @@ import { trackEvent } from "../../utils/analytics";
 import { useCurrency } from "../../context/CurrencyContext";
 import CurrencySwitcher from "../../components/common/CurrencySwitcher";
 import { getErrorMessage } from "../../utils/errors";
+import Modal from "../../components/admin/Modal";
+import ManualPaymentPanel from "../../components/common/ManualPaymentPanel";
 
 const durations = [30, 90, 180];
 
@@ -59,14 +61,29 @@ const Plans = () => {
   const navigate = useNavigate();
   const { role } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { format, currency } = useCurrency();
+  const { format, currency, countryCode } = useCurrency();
 
   const [couponInput, setCouponInput] = useState("");
   const [couponChecking, setCouponChecking] = useState(false);
   const [couponError, setCouponError] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null); // { code, discount_percent, applies_to }
 
+  const [manualMethods, setManualMethods] = useState([]);
+  const [manualPayFor, setManualPayFor] = useState(null); // { duration, planIds, amountLabel }
+
   const selectedType = searchParams.get("type") || "dietplan";
+
+  // Which manual (non-Stripe) payment methods, if any, apply to this
+  // client's detected country — entirely admin-managed, see
+  // admin/ManualPaymentMethods.jsx. An empty result just means Stripe is
+  // the only option shown, same as before this feature existed.
+  useEffect(() => {
+    if (!countryCode) return;
+    api
+      .get("/manual-payment-methods/public", { params: { country: countryCode } })
+      .then((res) => setManualMethods(res.data))
+      .catch((err) => console.error(err));
+  }, [countryCode]);
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -456,12 +473,48 @@ const Plans = () => {
                       ? "Redirecting..."
                       : "Checkout"}
                   </Button>
+
+                  {role === "client" &&
+                    manualMethods.length > 0 &&
+                    selection.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setManualPayFor({
+                            duration,
+                            planIds: selection.map((p) => p._id),
+                            amountLabel: format(total),
+                          })
+                        }
+                        className="mt-2 w-full text-center text-xs text-brand-blue-light hover:text-brand-orange underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded"
+                      >
+                        Pay via Bank Transfer / JazzCash / Easypaisa
+                      </button>
+                    )}
                 </Card>
               </motion.div>
             );
           })}
         </div>
       )}
+
+      <Modal
+        isOpen={!!manualPayFor}
+        onClose={() => setManualPayFor(null)}
+        title="Manual Payment"
+      >
+        {manualPayFor && (
+          <ManualPaymentPanel
+            methods={manualMethods}
+            type="package"
+            planIds={manualPayFor.planIds}
+            couponCode={appliedCoupon?.code}
+            itemLabel={`${packageLabels[selectedType]} (${manualPayFor.duration} Days)`}
+            amountLabel={manualPayFor.amountLabel}
+            currencyCode={currency.code}
+          />
+        )}
+      </Modal>
     </section>
   );
 };

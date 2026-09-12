@@ -50,6 +50,8 @@ const AdminSettings = lazy(() => import("./pages/admin/Settings"));
 const AdminCourses = lazy(() => import("./pages/admin/Courses"));
 const RecordedGallery = lazy(() => import("./pages/admin/RecordedGallery"));
 const Analytics = lazy(() => import("./pages/admin/Analytics"));
+const ManualPayments = lazy(() => import("./pages/admin/ManualPayments"));
+const ManualPaymentMethods = lazy(() => import("./pages/admin/ManualPaymentMethods"));
 
 const ClientLayout = lazy(() => import("./components/client/ClientLayout"));
 const Profile = lazy(() => import("./pages/client/Profile"));
@@ -305,6 +307,8 @@ function AppRoutes() {
           <Route path="promotions" element={<Promotions />} />
           <Route path="courses" element={<AdminCourses />} />
           <Route path="recorded-gallery" element={<RecordedGallery />} />
+          <Route path="manual-payments" element={<ManualPayments />} />
+          <Route path="manual-payment-methods" element={<ManualPaymentMethods />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="analytics" element={<Analytics />} />
         </Route>

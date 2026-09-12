@@ -22,6 +22,8 @@ import {
   GraduationCap,
   Film,
   Settings as SettingsIcon,
+  Landmark,
+  Wallet,
 } from "lucide-react";
 
 const navItems = [
@@ -33,6 +35,8 @@ const navItems = [
   { label: "Trainer Applications", to: "/admin/trainer-applications", icon: Briefcase },
   { label: "Sales", to: "/admin/sales", icon: BarChart3 },
   { label: "Custom Invoices", to: "/admin/custom-invoices", icon: Receipt },
+  { label: "Manual Payments", to: "/admin/manual-payments", icon: Wallet },
+  { label: "Payment Methods", to: "/admin/manual-payment-methods", icon: Landmark },
   { label: "Home Content", to: "/admin/home-content", icon: Clapperboard },
   { label: "E-Books", to: "/admin/ebooks", icon: BookOpen },
   { label: "Recorded Content", to: "/admin/courses", icon: GraduationCap },
