@@ -35,10 +35,11 @@ api.interceptors.response.use(
           : "Your session has expired — please log in again.",
       );
       // A full navigation unloads the page almost immediately — delay it
-      // just long enough for the toast above to actually paint first.
+      // long enough that a real person actually sees and reads the toast
+      // above before landing on Login.
       setTimeout(() => {
         window.location.href = "/login";
-      }, 300);
+      }, 1200);
     }
     return Promise.reject(err);
   },
