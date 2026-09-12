@@ -519,7 +519,7 @@ const Plans = () => {
                       : "Pay with Card"}
                   </Button>
                   <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
-                    Instant — access unlocks right away
+                    Instant Access
                   </p>
 
                   {manualMethods.length > 0 && selection.length > 0 && (
@@ -532,7 +532,7 @@ const Plans = () => {
                         Bank Transfer / JazzCash / Easypaisa
                       </Button>
                       <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
-                        Manual — access unlocks after we verify your payment
+                        Instant Access (once your payment is verified by our team)
                       </p>
                     </>
                   )}
