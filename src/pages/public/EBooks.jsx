@@ -13,6 +13,7 @@ import { getErrorMessage } from "../../utils/errors";
 import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
 import Modal from "../../components/admin/Modal";
 import ManualPaymentPanel from "../../components/common/ManualPaymentPanel";
+import { CURRENCY_TO_COUNTRY } from "../../utils/currencyToCountry";
 
 const EBooks = () => {
   const [ebooks, setEbooks] = useState([]);
@@ -21,7 +22,7 @@ const EBooks = () => {
   const [buyingId, setBuyingId] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { format, currency, countryCode } = useCurrency();
+  const { format, currency } = useCurrency();
   const { role } = useAuth();
   const [manualMethods, setManualMethods] = useState([]);
   const [manualPayFor, setManualPayFor] = useState(null); // { type, id, itemLabel, amountLabel }
@@ -44,16 +45,22 @@ const EBooks = () => {
     fetchAll();
   }, []);
 
-  // Which manual (non-Stripe) payment methods, if any, apply to this
-  // client's detected country — entirely admin-managed, see
-  // admin/ManualPaymentMethods.jsx.
+  // Which manual (non-Stripe) payment methods, if any, apply to the
+  // country tied to the client's currently-selected currency — entirely
+  // admin-managed, see admin/ManualPaymentMethods.jsx. Tied to the
+  // currency (not the raw geo-detected country) so switching currency
+  // manually also switches which methods show.
+  const manualMethodsCountry = CURRENCY_TO_COUNTRY[currency.code];
   useEffect(() => {
-    if (!countryCode) return;
+    if (!manualMethodsCountry) {
+      setManualMethods([]);
+      return;
+    }
     api
-      .get("/manual-payment-methods/public", { params: { country: countryCode } })
+      .get("/manual-payment-methods/public", { params: { country: manualMethodsCountry } })
       .then((res) => setManualMethods(res.data))
       .catch((err) => console.error(err));
-  }, [countryCode]);
+  }, [manualMethodsCountry]);
 
   // A guest who clicked the manual payment button gets sent to signup with
   // the intent saved (see handleManualPayClick below) — once they're a

@@ -14,6 +14,7 @@ import CurrencySwitcher from "../../components/common/CurrencySwitcher";
 import { getErrorMessage } from "../../utils/errors";
 import Modal from "../../components/admin/Modal";
 import ManualPaymentPanel from "../../components/common/ManualPaymentPanel";
+import { CURRENCY_TO_COUNTRY } from "../../utils/currencyToCountry";
 
 const durations = [30, 90, 180];
 
@@ -61,7 +62,7 @@ const Plans = () => {
   const navigate = useNavigate();
   const { role } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { format, currency, countryCode } = useCurrency();
+  const { format, currency } = useCurrency();
 
   const [couponInput, setCouponInput] = useState("");
   const [couponChecking, setCouponChecking] = useState(false);
@@ -73,17 +74,24 @@ const Plans = () => {
 
   const selectedType = searchParams.get("type") || "dietplan";
 
-  // Which manual (non-Stripe) payment methods, if any, apply to this
-  // client's detected country — entirely admin-managed, see
-  // admin/ManualPaymentMethods.jsx. An empty result just means Stripe is
-  // the only option shown, same as before this feature existed.
+  // Which manual (non-Stripe) payment methods, if any, apply to the
+  // country tied to the client's currently-selected currency — entirely
+  // admin-managed, see admin/ManualPaymentMethods.jsx. Tied to the
+  // currency (not the raw geo-detected country) so switching currency
+  // manually also switches which methods show — a client can deliberately
+  // reveal a country's methods by picking its currency, same as they'd
+  // pick it to see prices in that currency.
+  const manualMethodsCountry = CURRENCY_TO_COUNTRY[currency.code];
   useEffect(() => {
-    if (!countryCode) return;
+    if (!manualMethodsCountry) {
+      setManualMethods([]);
+      return;
+    }
     api
-      .get("/manual-payment-methods/public", { params: { country: countryCode } })
+      .get("/manual-payment-methods/public", { params: { country: manualMethodsCountry } })
       .then((res) => setManualMethods(res.data))
       .catch((err) => console.error(err));
-  }, [countryCode]);
+  }, [manualMethodsCountry]);
 
   // A guest who clicked "Pay via Bank Transfer..." gets sent to signup with
   // the intent saved (see handleManualPayClick below) — once they're a
