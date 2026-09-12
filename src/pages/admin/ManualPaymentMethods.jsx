@@ -10,6 +10,7 @@ import Button from "../../components/common/Button";
 import Modal from "../../components/admin/Modal";
 import { getErrorMessage } from "../../utils/errors";
 import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
+import { COUNTRY_CODES, flagEmoji } from "../../utils/countryCodes";
 
 const CLOUDINARY_CLOUD_NAME = "zyfxigcj";
 const CLOUDINARY_UPLOAD_PRESET = "FitnessZone";
@@ -276,15 +277,21 @@ const ManualPaymentMethods = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <input
-              type="text"
-              placeholder="Country Code (e.g. PK)"
+            <select
               value={formData.country_code}
               onChange={(e) => setFormData({ ...formData, country_code: e.target.value })}
               required
-              maxLength={2}
-              className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 uppercase focus:outline-none focus:ring-2 focus:ring-brand-orange"
-            />
+              className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 text-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-orange"
+            >
+              <option value="" disabled>
+                Select country...
+              </option>
+              {COUNTRY_CODES.map((c) => (
+                <option key={c.iso} value={c.iso}>
+                  {flagEmoji(c.iso)} {c.name}
+                </option>
+              ))}
+            </select>
             <input
               type="text"
               placeholder="Method Name (e.g. JazzCash)"
