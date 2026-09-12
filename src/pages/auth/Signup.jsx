@@ -201,6 +201,7 @@ const Signup = () => {
               value={formData.password}
               onChange={handleChange}
               required
+              minLength={6}
               className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 pr-11 focus:outline-none focus:ring-2 focus:ring-brand-orange"
             />
             <button
