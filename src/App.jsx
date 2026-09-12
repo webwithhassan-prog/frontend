@@ -11,6 +11,7 @@ import FloatingActions from "./components/common/FloatingActions";
 import Loader from "./components/common/Loader";
 import usePageTracking from "./hooks/usePageTracking";
 import usePageMeta from "./hooks/usePageMeta";
+import useScrollToTop from "./hooks/useScrollToTop";
 
 import Home from "./pages/public/Home";
 const Plans = lazy(() => import("./pages/public/Plans"));
@@ -85,9 +86,15 @@ function PublicLayout({ children }) {
   );
 }
 
+function ScrollToTop() {
+  useScrollToTop();
+  return null;
+}
+
 function AppRoutes() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       {/* Outer boundary: only needed for the very first load of a lazy
           layout itself (AdminLayout/ClientLayout), before it has mounted
           its own inner Suspense around its <Outlet/>. */}
