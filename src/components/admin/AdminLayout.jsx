@@ -1,7 +1,8 @@
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
+import api from "../../services/api";
 import Loader from "../common/Loader";
 import {
   LayoutDashboard,
@@ -49,34 +50,59 @@ const navItems = [
 const AdminLayout = () => {
   const { logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [pendingManualCount, setPendingManualCount] = useState(0);
+
+  // Polls while an admin is anywhere in the panel so a new manual payment
+  // claim shows up on the sidebar without needing to open that page —
+  // the actual alert email covers "right now", this covers "still open".
+  useEffect(() => {
+    const fetchPendingCount = () => {
+      api
+        .get("/payments/manual/pending")
+        .then((res) => setPendingManualCount(res.data.length))
+        .catch(() => {});
+    };
+    fetchPendingCount();
+    const interval = setInterval(fetchPendingCount, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const NavLinks = ({ onNavigate }) => (
     <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
-      {navItems.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          onClick={onNavigate}
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium relative ${
-              isActive ? "bg-white/10" : "hover:bg-white/5"
-            }`
-          }
-        >
-          {({ isActive }) => (
-            <>
-              <item.icon size={18} />
-              {item.label}
-              {isActive && (
-                <motion.span
-                  layoutId="admin-active-indicator"
-                  className="absolute left-0 top-0 h-full w-1 bg-brand-orange rounded-r"
-                />
-              )}
-            </>
-          )}
-        </NavLink>
-      ))}
+      {navItems.map((item) => {
+        const badgeCount =
+          item.to === "/admin/manual-payments" ? pendingManualCount : 0;
+        return (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            onClick={onNavigate}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium relative ${
+                isActive ? "bg-white/10" : "hover:bg-white/5"
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <item.icon size={18} />
+                {item.label}
+                {badgeCount > 0 && (
+                  <span className="ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-brand-orange text-white text-[11px] font-bold">
+                    {badgeCount}
+                  </span>
+                )}
+                {isActive && (
+                  <motion.span
+                    layoutId="admin-active-indicator"
+                    className="absolute left-0 top-0 h-full w-1 bg-brand-orange rounded-r"
+                  />
+                )}
+              </>
+            )}
+          </NavLink>
+        );
+      })}
     </nav>
   );
 

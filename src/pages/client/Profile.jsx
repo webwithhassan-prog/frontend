@@ -110,8 +110,20 @@ const Profile = () => {
   const [pushStatus, setPushStatus] = useState("unsupported");
   const [pushBusy, setPushBusy] = useState(false);
 
+  const [pendingManualPayments, setPendingManualPayments] = useState([]);
+
   useEffect(() => {
     setPushStatus(getPushStatus());
+  }, []);
+
+  // Shows "still waiting on verification" for a manual (bank/JazzCash/
+  // Easypaisa) payment claim — otherwise a client who submitted one has no
+  // way to tell it wasn't lost, short of messaging to ask.
+  useEffect(() => {
+    api
+      .get("/payments/manual/mine")
+      .then((res) => setPendingManualPayments(res.data))
+      .catch((err) => console.error(err));
   }, []);
 
   const handleEnableNotifications = async () => {
@@ -469,12 +481,11 @@ const Profile = () => {
     {
       key: "dailylog",
       label: "TODAY'S LOG",
-      subtitle: hasWorkout
-        ? dailySteps || dailyWater
+      subtitle:
+        dailySteps || dailyWater
           ? `${dailySteps || 0} steps, ${dailyWater || 0} L water`
-          : "Not logged yet today"
-        : "Log steps & water for workout clients",
-      active: client?.status === "active" && client?.has_workout,
+          : "Not logged yet today",
+      active: client?.status === "active",
       upgradeType: "workout",
     },
   ];
@@ -485,6 +496,30 @@ const Profile = () => {
         <Loader />
       ) : (
         <>
+          {pendingManualPayments.length > 0 && (
+            <Card className="mb-8 border-brand-orange/40 bg-brand-orange/5">
+              <p className="text-brand-blue text-sm font-semibold mb-2">
+                Payment{pendingManualPayments.length > 1 ? "s" : ""} pending
+                verification
+              </p>
+              <ul className="space-y-1">
+                {pendingManualPayments.map((p) => (
+                  <li
+                    key={p._id}
+                    className="text-brand-blue/70 text-xs leading-relaxed"
+                  >
+                    {p.item_label} — {p.currency_code} {p.amount.toLocaleString()}{" "}
+                    via {p.method_name}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-brand-blue/70 text-xs mt-2">
+                Your account will be activated as soon as your payment is
+                verified.
+              </p>
+            </Card>
+          )}
+
           {/* Day 1 Onboarding — shown once for new clients with a dietplan */}
           {hasDietplan && !client?.onboarding_completed && (
             <>
@@ -982,7 +1017,46 @@ const Profile = () => {
                 </>
               )}
 
-              {/* Today's Log */}
+              {/* Recorded Gallery — weekly session recordings, separate
+                  from the Recorded Content below */}
+              <h2 className="font-display text-lg text-brand-blue mb-4">
+                RECORDED GALLERY
+              </h2>
+              {recordedGallery.length === 0 ? (
+                <p className="text-brand-blue/70 mb-12">
+                  No session recordings yet — check back after this week's
+                  classes.
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                  {recordedGallery.map((item) => (
+                    <Card key={item._id}>
+                      <div className="aspect-video mb-3 rounded-lg overflow-hidden bg-brand-blue-pale">
+                        <iframe
+                          src={item.youtube_link.replace("watch?v=", "embed/")}
+                          title={item.title}
+                          className="w-full h-full"
+                          allowFullScreen
+                        />
+                      </div>
+                      <h3 className="font-display text-brand-blue text-sm mb-1">
+                        {item.title}
+                      </h3>
+                      <p className="text-brand-blue/50 text-xs">
+                        Added {new Date(item.createdAt).toLocaleDateString()}
+                      </p>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Today's Log — open to every active client, not just Workout
+              package holders (steps/water tracking isn't tied to a
+              purchased service). */}
+          {client?.status === "active" && (
+            <>
               <h2 id="daily-log" className="font-display text-lg text-brand-blue mb-4">
                 TODAY'S LOG
               </h2>
@@ -1019,39 +1093,6 @@ const Profile = () => {
                   <Button type="submit">Save Today's Log</Button>
                 </form>
               </Card>
-
-              {/* Recorded Gallery — weekly session recordings, separate
-                  from the Recorded Content below */}
-              <h2 className="font-display text-lg text-brand-blue mb-4">
-                RECORDED GALLERY
-              </h2>
-              {recordedGallery.length === 0 ? (
-                <p className="text-brand-blue/70 mb-12">
-                  No session recordings yet — check back after this week's
-                  classes.
-                </p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                  {recordedGallery.map((item) => (
-                    <Card key={item._id}>
-                      <div className="aspect-video mb-3 rounded-lg overflow-hidden bg-brand-blue-pale">
-                        <iframe
-                          src={item.youtube_link.replace("watch?v=", "embed/")}
-                          title={item.title}
-                          className="w-full h-full"
-                          allowFullScreen
-                        />
-                      </div>
-                      <h3 className="font-display text-brand-blue text-sm mb-1">
-                        {item.title}
-                      </h3>
-                      <p className="text-brand-blue/50 text-xs">
-                        Added {new Date(item.createdAt).toLocaleDateString()}
-                      </p>
-                    </Card>
-                  ))}
-                </div>
-              )}
             </>
           )}
 
