@@ -55,9 +55,9 @@ const EBooks = () => {
       .catch((err) => console.error(err));
   }, [countryCode]);
 
-  // A guest who clicked "Bank Transfer / JazzCash / Easypaisa" gets sent to
-  // signup with the intent saved (see handleManualPayClick below) — once
-  // they're a client, reopen the same manual-payment panel automatically.
+  // A guest who clicked the manual payment button gets sent to signup with
+  // the intent saved (see handleManualPayClick below) — once they're a
+  // client, reopen the same manual-payment panel automatically.
   useEffect(() => {
     if (role !== "client") return;
     const raw = localStorage.getItem("pending_manual_payment");
@@ -223,7 +223,7 @@ const EBooks = () => {
                               })
                             }
                           >
-                            Bank Transfer / JazzCash / Easypaisa
+                            {manualMethods.map((m) => m.name).join(" / ")}
                           </Button>
                           <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
                             Instant Access (once your payment is verified by our team)
@@ -306,7 +306,7 @@ const EBooks = () => {
                               })
                             }
                           >
-                            Bank Transfer / JazzCash / Easypaisa
+                            {manualMethods.map((m) => m.name).join(" / ")}
                           </Button>
                           <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
                             Instant Access (once your payment is verified by our team)

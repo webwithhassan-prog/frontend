@@ -529,7 +529,7 @@ const Plans = () => {
                         variant="secondary"
                         className="w-full mt-3"
                       >
-                        Bank Transfer / JazzCash / Easypaisa
+                        {manualMethods.map((m) => m.name).join(" / ")}
                       </Button>
                       <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
                         Instant Access (once your payment is verified by our team)
