@@ -23,7 +23,7 @@ export default defineConfig({
         name: "Fitness Zone",
         short_name: "Fitness Zone",
         description:
-          "Dietplans and live workout sessions — built for women, all on one platform.",
+          "Dietplans and home workout sessions — built for women, all on one platform.",
         theme_color: "#12224a",
         background_color: "#12224a",
         icons: [
