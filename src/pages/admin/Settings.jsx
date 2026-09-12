@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { MessageCircle, Lock } from "lucide-react";
+import { MessageCircle, Lock, BellRing } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
@@ -14,6 +14,9 @@ const Settings = () => {
   const [whatsappDietician, setWhatsappDietician] = useState("");
   const [savingWhatsapp, setSavingWhatsapp] = useState(false);
 
+  const [manualAlertsEnabled, setManualAlertsEnabled] = useState(true);
+  const [savingManualAlerts, setSavingManualAlerts] = useState(false);
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [passwordMessage, setPasswordMessage] = useState("");
@@ -24,6 +27,27 @@ const Settings = () => {
     setWhatsappGeneral(settings.whatsapp_general || "");
     setWhatsappDietician(settings.whatsapp_dietician || "");
   }, [settings]);
+
+  useEffect(() => {
+    api
+      .get("/settings/admin")
+      .then((res) => setManualAlertsEnabled(res.data.manual_payment_alerts_enabled !== false))
+      .catch(() => {});
+  }, []);
+
+  const handleToggleManualAlerts = async () => {
+    const next = !manualAlertsEnabled;
+    setSavingManualAlerts(true);
+    try {
+      await api.put("/settings", { manual_payment_alerts_enabled: next });
+      setManualAlertsEnabled(next);
+      toast.success(next ? "Alert emails turned on" : "Alert emails turned off");
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to update"));
+    } finally {
+      setSavingManualAlerts(false);
+    }
+  };
 
   const handleSaveWhatsapp = async (e) => {
     e.preventDefault();
@@ -123,6 +147,43 @@ const Settings = () => {
               {savingWhatsapp ? "Saving..." : "Save Numbers"}
             </Button>
           </form>
+        </Card>
+
+        <Card>
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-9 h-9 rounded-full bg-brand-blue-light/10 flex items-center justify-center shrink-0">
+              <BellRing className="text-brand-blue-light" size={16} />
+            </div>
+            <div>
+              <p className="text-brand-blue text-sm font-semibold">
+                Manual Payment Alerts
+              </p>
+              <p className="text-brand-blue-light text-xs">
+                Email sent to the team inbox whenever a client submits a manual payment claim.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleToggleManualAlerts}
+            disabled={savingManualAlerts}
+            className="flex items-center gap-3"
+          >
+            <span
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                manualAlertsEnabled ? "bg-brand-orange" : "bg-brand-blue-pale"
+              } ${savingManualAlerts ? "opacity-60" : ""}`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  manualAlertsEnabled ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </span>
+            <span className="text-sm font-medium text-brand-blue">
+              {manualAlertsEnabled ? "On" : "Off"}
+            </span>
+          </button>
         </Card>
 
         <Card>

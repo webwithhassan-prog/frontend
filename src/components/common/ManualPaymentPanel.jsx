@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Upload, X as XIcon } from "lucide-react";
 import toast from "react-hot-toast";
+import axios from "axios";
 import api from "../../services/api";
 import { useSettings } from "../../context/SettingsContext";
 import { getErrorMessage } from "../../utils/errors";
 import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
+
+const CLOUDINARY_CLOUD_NAME = "zyfxigcj";
+const CLOUDINARY_UPLOAD_PRESET = "FitnessZone";
 
 // Shown to clients whose detected country has at least one admin-configured
 // manual (non-Stripe) payment method — Stripe can't process most local
@@ -32,6 +36,10 @@ const ManualPaymentPanel = ({
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [copiedField, setCopiedField] = useState("");
+  const [slipFile, setSlipFile] = useState(null);
+  const [slipPreview, setSlipPreview] = useState(null);
+  const [uploadingSlip, setUploadingSlip] = useState(false);
+  const [slipWasUploaded, setSlipWasUploaded] = useState(false);
 
   // `methods` usually arrives after this component's first render (it's
   // fetched async by the parent) — the useState initializer above only
@@ -51,9 +59,43 @@ const ManualPaymentPanel = ({
     setTimeout(() => setCopiedField(""), 1500);
   };
 
+  const handleSlipChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSlipFile(file);
+    setSlipPreview(URL.createObjectURL(file));
+  };
+
+  const handleRemoveSlip = () => {
+    setSlipFile(null);
+    setSlipPreview(null);
+  };
+
+  const uploadSlipToCloudinary = async () => {
+    const uploadData = new FormData();
+    uploadData.append("file", slipFile);
+    uploadData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+    const res = await axios.post(
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+      uploadData,
+    );
+    return res.data.secure_url;
+  };
+
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
+      let slipUrl = null;
+      if (slipFile) {
+        setUploadingSlip(true);
+        try {
+          slipUrl = await uploadSlipToCloudinary();
+        } finally {
+          setUploadingSlip(false);
+        }
+      }
+
       const clientId = localStorage.getItem("client_id");
       await api.post("/payments/manual/initiate", {
         client_id: clientId,
@@ -64,14 +106,18 @@ const ManualPaymentPanel = ({
         coupon_code: couponCode,
         method_id: selectedId,
         currency_code: currencyCode,
+        slip_url: slipUrl,
       });
 
       const method = methods.find((m) => m._id === selectedId);
-      const message = `Hi! I've sent payment for "${itemLabel}" (${amountLabel}) via ${method?.name}. Attaching my payment screenshot here.`;
-      window.open(
-        `https://wa.me/${settings.whatsapp_general}?text=${encodeURIComponent(message)}`,
-        "_blank",
-      );
+      if (!slipUrl) {
+        const message = `Hi! I've sent payment for "${itemLabel}" (${amountLabel}) via ${method?.name}. Attaching my payment screenshot here.`;
+        window.open(
+          `https://wa.me/${settings.whatsapp_general}?text=${encodeURIComponent(message)}`,
+          "_blank",
+        );
+      }
+      setSlipWasUploaded(Boolean(slipUrl));
       setSubmitted(true);
     } catch (err) {
       toast.error(getErrorMessage(err, "Something went wrong"));
@@ -89,10 +135,18 @@ const ManualPaymentPanel = ({
           Payment submitted
         </p>
         <p className="text-brand-blue/70 text-xs leading-relaxed">
-          Your account will be activated as soon as your payment is verified.
-          If WhatsApp didn't open, send your screenshot to{" "}
-          <span className="font-semibold">+{settings.whatsapp_general}</span>{" "}
-          directly.
+          {slipWasUploaded ? (
+            "Your screenshot was received. Your account will be activated as soon as your payment is verified."
+          ) : (
+            <>
+              Your account will be activated as soon as your payment is
+              verified. If WhatsApp didn't open, send your screenshot to{" "}
+              <span className="font-semibold">
+                +{settings.whatsapp_general}
+              </span>{" "}
+              directly.
+            </>
+          )}
         </p>
       </div>
     );
@@ -158,10 +212,44 @@ const ManualPaymentPanel = ({
       )}
 
       <p className="text-xs text-brand-blue-light leading-relaxed">
-        Transfer {amountLabel} to the account above, then tap the button
-        below — you'll be asked to send your payment screenshot on WhatsApp
-        so we can verify and activate your purchase.
+        Transfer {amountLabel} to the account above, then attach your payment
+        screenshot below (or send it on WhatsApp instead) so we can verify
+        and activate your purchase.
       </p>
+
+      <div>
+        <p className="text-[10px] text-brand-blue-light uppercase tracking-wide mb-1.5">
+          Payment Screenshot (optional)
+        </p>
+        {slipPreview ? (
+          <div className="relative inline-block">
+            <img
+              src={slipPreview}
+              alt="Payment slip preview"
+              className="h-24 rounded-lg border border-brand-blue-pale object-cover"
+            />
+            <button
+              type="button"
+              onClick={handleRemoveSlip}
+              className="absolute -top-2 -right-2 bg-white rounded-full shadow p-1 text-brand-blue-light hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+              aria-label="Remove screenshot"
+            >
+              <XIcon size={14} />
+            </button>
+          </div>
+        ) : (
+          <label className="flex items-center justify-center gap-2 border-2 border-dashed border-brand-blue-pale rounded-lg py-3 text-xs font-medium text-brand-blue-light cursor-pointer hover:border-brand-orange hover:text-brand-orange transition-colors">
+            <Upload size={14} />
+            Upload screenshot
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleSlipChange}
+              className="hidden"
+            />
+          </label>
+        )}
+      </div>
 
       <button
         type="button"
@@ -169,7 +257,11 @@ const ManualPaymentPanel = ({
         disabled={submitting}
         className="w-full flex items-center justify-center gap-2 bg-brand-orange text-white font-semibold text-sm py-3 rounded-full hover:bg-brand-orange/90 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
       >
-        {submitting ? "Submitting..." : "I've Sent the Payment"}
+        {uploadingSlip
+          ? "Uploading screenshot..."
+          : submitting
+            ? "Submitting..."
+            : "I've Sent the Payment"}
       </button>
     </div>
   );

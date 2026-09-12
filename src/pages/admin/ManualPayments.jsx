@@ -6,6 +6,7 @@ import api from "../../services/api";
 import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
 import { getErrorMessage } from "../../utils/errors";
+import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
 
 // Admin's review queue for manual (non-Stripe) payment claims — a client
 // transferred money themselves and reported it via WhatsApp; this is
@@ -91,6 +92,7 @@ const ManualPayments = () => {
                 <th className="py-3 px-2">Item</th>
                 <th className="py-3 px-2">Method</th>
                 <th className="py-3 px-2">Amount</th>
+                <th className="py-3 px-2">Slip</th>
                 <th className="py-3 px-2">Submitted</th>
                 <th className="py-3 px-2">Actions</th>
               </tr>
@@ -113,6 +115,21 @@ const ManualPayments = () => {
                   <td className="py-3 px-2 text-brand-blue-light">{p.method_name}</td>
                   <td className="py-3 px-2 text-brand-blue font-medium">
                     {p.currency_code} {p.amount.toLocaleString()}
+                  </td>
+                  <td className="py-3 px-2">
+                    {p.slip_url ? (
+                      <a href={p.slip_url} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={optimizeCloudinaryUrl(p.slip_url, 100)}
+                          alt="Payment slip"
+                          className="h-10 w-10 rounded-md object-cover border border-brand-blue-pale hover:opacity-80 transition-opacity"
+                        />
+                      </a>
+                    ) : (
+                      <span className="text-xs text-brand-blue-light">
+                        Sent on WhatsApp
+                      </span>
+                    )}
                   </td>
                   <td className="py-3 px-2 text-brand-blue-light text-xs">
                     {new Date(p.created_at).toLocaleString()}
