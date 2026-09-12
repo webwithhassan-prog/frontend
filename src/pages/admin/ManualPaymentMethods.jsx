@@ -10,7 +10,7 @@ import Button from "../../components/common/Button";
 import Modal from "../../components/admin/Modal";
 import { getErrorMessage } from "../../utils/errors";
 import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
-import { COUNTRY_CODES, flagEmoji } from "../../utils/countryCodes";
+import { COUNTRY_CODES } from "../../utils/countryCodes";
 
 const CLOUDINARY_CLOUD_NAME = "zyfxigcj";
 const CLOUDINARY_UPLOAD_PRESET = "FitnessZone";
@@ -288,7 +288,7 @@ const ManualPaymentMethods = () => {
               </option>
               {COUNTRY_CODES.map((c) => (
                 <option key={c.iso} value={c.iso}>
-                  {flagEmoji(c.iso)} {c.name}
+                  {c.name}
                 </option>
               ))}
             </select>
