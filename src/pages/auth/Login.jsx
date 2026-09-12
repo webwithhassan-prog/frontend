@@ -50,6 +50,22 @@ const Login = () => {
         return;
       }
 
+      // A pending manual (bank/JazzCash/Easypaisa) payment can't be
+      // auto-submitted like a Stripe checkout — it needs the client to pick
+      // a method and confirm, so just send them back to where they were;
+      // Plans/EBooks itself reopens the manual-payment panel from this same
+      // localStorage key once it sees they're logged in.
+      const pendingManualRaw = localStorage.getItem("pending_manual_payment");
+      if (pendingManualRaw) {
+        try {
+          const pending = JSON.parse(pendingManualRaw);
+          navigate(pending.returnTo || "/client");
+          return;
+        } catch (err) {
+          localStorage.removeItem("pending_manual_payment");
+        }
+      }
+
       // Resume a pending package checkout, if any
       const pendingPlanIdsRaw = localStorage.getItem("pending_plan_ids");
       const pendingCouponCode = localStorage.getItem("pending_coupon_code");

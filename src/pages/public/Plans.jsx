@@ -85,6 +85,29 @@ const Plans = () => {
       .catch((err) => console.error(err));
   }, [countryCode]);
 
+  // A guest who clicked "Pay via Bank Transfer..." gets sent to signup with
+  // the intent saved (see handleManualPayClick below) — once they're a
+  // client, reopen the same manual-payment panel automatically instead of
+  // making them find the button again.
+  useEffect(() => {
+    if (role !== "client") return;
+    const raw = localStorage.getItem("pending_manual_payment");
+    if (!raw) return;
+    localStorage.removeItem("pending_manual_payment");
+    try {
+      const pending = JSON.parse(raw);
+      if (pending.type === "package") {
+        setManualPayFor({
+          duration: pending.duration,
+          planIds: pending.planIds,
+          amountLabel: pending.amountLabel,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }, [role]);
+
   useEffect(() => {
     const fetchPlans = async () => {
       try {
@@ -218,6 +241,28 @@ const Plans = () => {
     }
 
     startCheckout(planIds);
+  };
+
+  const handleManualPayClick = (duration, selection, total) => {
+    const planIds = selection.map((p) => p._id);
+    const amountLabel = format(total);
+
+    if (role !== "client") {
+      localStorage.setItem(
+        "pending_manual_payment",
+        JSON.stringify({
+          type: "package",
+          duration,
+          planIds,
+          amountLabel,
+          returnTo: `/plans?type=${selectedType}`,
+        }),
+      );
+      navigate("/signup");
+      return;
+    }
+
+    setManualPayFor({ duration, planIds, amountLabel });
   };
 
   return (
@@ -471,26 +516,26 @@ const Plans = () => {
                   >
                     {checkingOutDuration === duration
                       ? "Redirecting..."
-                      : "Checkout"}
+                      : "Pay with Card"}
                   </Button>
+                  <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
+                    Instant — access unlocks right away
+                  </p>
 
-                  {role === "client" &&
-                    manualMethods.length > 0 &&
-                    selection.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setManualPayFor({
-                            duration,
-                            planIds: selection.map((p) => p._id),
-                            amountLabel: format(total),
-                          })
-                        }
-                        className="mt-2 w-full text-center text-xs text-brand-blue-light hover:text-brand-orange underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded"
+                  {manualMethods.length > 0 && selection.length > 0 && (
+                    <>
+                      <Button
+                        onClick={() => handleManualPayClick(duration, selection, total)}
+                        variant="secondary"
+                        className="w-full mt-3"
                       >
-                        Pay via Bank Transfer / JazzCash / Easypaisa
-                      </button>
-                    )}
+                        Bank Transfer / JazzCash / Easypaisa
+                      </Button>
+                      <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
+                        Manual — access unlocks after we verify your payment
+                      </p>
+                    </>
+                  )}
                 </Card>
               </motion.div>
             );

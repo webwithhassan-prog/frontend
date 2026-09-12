@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Copy, Check } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../../services/api";
@@ -32,6 +32,17 @@ const ManualPaymentPanel = ({
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [copiedField, setCopiedField] = useState("");
+
+  // `methods` usually arrives after this component's first render (it's
+  // fetched async by the parent) — the useState initializer above only
+  // runs once, so without this, opening the panel before that fetch
+  // resolves leaves selectedId stuck at null forever, hiding the account
+  // details entirely even once methods populate.
+  useEffect(() => {
+    if (!selectedId && methods.length > 0) {
+      setSelectedId(methods[0]._id);
+    }
+  }, [methods, selectedId]);
 
   const handleCopy = (value, field) => {
     navigator.clipboard.writeText(value);

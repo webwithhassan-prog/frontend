@@ -55,6 +55,36 @@ const EBooks = () => {
       .catch((err) => console.error(err));
   }, [countryCode]);
 
+  // A guest who clicked "Bank Transfer / JazzCash / Easypaisa" gets sent to
+  // signup with the intent saved (see handleManualPayClick below) — once
+  // they're a client, reopen the same manual-payment panel automatically.
+  useEffect(() => {
+    if (role !== "client") return;
+    const raw = localStorage.getItem("pending_manual_payment");
+    if (!raw) return;
+    localStorage.removeItem("pending_manual_payment");
+    try {
+      const pending = JSON.parse(raw);
+      if (pending.type === "ebook" || pending.type === "course") {
+        setManualPayFor(pending);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }, [role]);
+
+  const handleManualPayClick = (payload) => {
+    if (role !== "client") {
+      localStorage.setItem(
+        "pending_manual_payment",
+        JSON.stringify({ ...payload, returnTo: "/ebooks" }),
+      );
+      navigate("/signup");
+      return;
+    }
+    setManualPayFor(payload);
+  };
+
   const handleBuyEbook = async (ebook) => {
     setError("");
 
@@ -174,23 +204,31 @@ const EBooks = () => {
                         onClick={() => handleBuyEbook(ebook)}
                         disabled={buyingId === ebook._id}
                       >
-                        {buyingId === ebook._id ? "Redirecting..." : "Buy Now"}
+                        {buyingId === ebook._id ? "Redirecting..." : "Pay with Card"}
                       </Button>
-                      {role === "client" && manualMethods.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setManualPayFor({
-                              type: "ebook",
-                              id: ebook._id,
-                              itemLabel: ebook.title,
-                              amountLabel: format(ebook.price),
-                            })
-                          }
-                          className="mt-2 w-full text-center text-xs text-brand-blue-light hover:text-brand-orange underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded"
-                        >
-                          Pay via Bank Transfer / JazzCash / Easypaisa
-                        </button>
+                      <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
+                        Instant — access unlocks right away
+                      </p>
+                      {manualMethods.length > 0 && (
+                        <>
+                          <Button
+                            variant="secondary"
+                            className="w-full mt-3"
+                            onClick={() =>
+                              handleManualPayClick({
+                                type: "ebook",
+                                id: ebook._id,
+                                itemLabel: ebook.title,
+                                amountLabel: format(ebook.price),
+                              })
+                            }
+                          >
+                            Bank Transfer / JazzCash / Easypaisa
+                          </Button>
+                          <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
+                            Manual — access unlocks after we verify your payment
+                          </p>
+                        </>
                       )}
                     </Card>
                   </motion.div>
@@ -249,23 +287,31 @@ const EBooks = () => {
                         onClick={() => handleBuyCourse(course)}
                         disabled={buyingId === course._id}
                       >
-                        {buyingId === course._id ? "Redirecting..." : "Buy Now"}
+                        {buyingId === course._id ? "Redirecting..." : "Pay with Card"}
                       </Button>
-                      {role === "client" && manualMethods.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setManualPayFor({
-                              type: "course",
-                              id: course._id,
-                              itemLabel: course.title,
-                              amountLabel: format(course.price),
-                            })
-                          }
-                          className="mt-2 w-full text-center text-xs text-brand-blue-light hover:text-brand-orange underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded"
-                        >
-                          Pay via Bank Transfer / JazzCash / Easypaisa
-                        </button>
+                      <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
+                        Instant — access unlocks right away
+                      </p>
+                      {manualMethods.length > 0 && (
+                        <>
+                          <Button
+                            variant="secondary"
+                            className="w-full mt-3"
+                            onClick={() =>
+                              handleManualPayClick({
+                                type: "course",
+                                id: course._id,
+                                itemLabel: course.title,
+                                amountLabel: format(course.price),
+                              })
+                            }
+                          >
+                            Bank Transfer / JazzCash / Easypaisa
+                          </Button>
+                          <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
+                            Manual — access unlocks after we verify your payment
+                          </p>
+                        </>
                       )}
                     </Card>
                   </motion.div>
