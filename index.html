@@ -28,6 +28,22 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- The homepage hero photo is the page's LCP element, but its URL only
+       becomes known after this API call resolves (it's admin-editable
+       content, not a static asset) — normally that means the browser
+       can't even start fetching it until the JS bundle has loaded, parsed,
+       and run. Preconnecting gets the connection to the backend warmed up
+       immediately, and preloading the request itself means the data is
+       already in flight (often already cached) by the time React's own
+       fetch call runs, instead of starting from zero. On mobile's slow
+       simulated network this one dependency chain was costing 10+ seconds
+       of LCP. -->
+  <link rel="preconnect" href="https://fitnesszone-backend.onrender.com" crossorigin />
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+  <link rel="preload" as="fetch"
+    href="https://fitnesszone-backend.onrender.com/api/hero-banners/public"
+    crossorigin="anonymous" />
   <!-- Loaded non-blocking (preload + swap-on-load) — a synchronous
        stylesheet link here was the page's single biggest render-blocking
        request. The <noscript> fallback covers non-JS clients. -->
