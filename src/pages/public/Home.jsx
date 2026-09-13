@@ -91,7 +91,7 @@ const Home = () => {
         const res = await api.get("/hero-banners/public");
         setHeroSlides(
           res.data.map((b) => ({
-            image: optimizeCloudinaryUrl(b.image_url, 1200),
+            image: b.image_url,
             eyebrow: b.eyebrow,
             title: b.title,
             desc: b.desc,
@@ -270,8 +270,16 @@ const Home = () => {
         <div className="relative w-full aspect-[4/5] sm:aspect-[3/2] lg:aspect-[2/1] lg:max-h-[560px]">
           <div className="absolute inset-0">
             <img
-              src={heroSlides[heroSlide].image}
+              src={optimizeCloudinaryUrl(heroSlides[heroSlide].image, 1200)}
+              srcSet={[600, 900, 1200, 1600]
+                .map((w) => `${optimizeCloudinaryUrl(heroSlides[heroSlide].image, w)} ${w}w`)
+                .join(", ")}
+              sizes="100vw"
               alt={heroSlides[heroSlide].title}
+              // This is almost always the page's LCP element — full
+              // priority, and only the very first slide needs it (the
+              // rest are swapped in later via user/timer interaction).
+              fetchPriority={heroSlide === 0 ? "high" : "auto"}
               className="absolute inset-0 w-full h-full object-cover object-center"
             />
 
