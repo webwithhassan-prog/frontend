@@ -485,8 +485,7 @@ const Profile = () => {
         dailySteps || dailyWater
           ? `${dailySteps || 0} steps, ${dailyWater || 0} L water`
           : "Not logged yet today",
-      active: client?.status === "active",
-      upgradeType: "workout",
+      active: true,
     },
   ];
 
@@ -1052,49 +1051,45 @@ const Profile = () => {
             </>
           )}
 
-          {/* Today's Log — open to every active client, not just Workout
-              package holders (steps/water tracking isn't tied to a
-              purchased service). */}
-          {client?.status === "active" && (
-            <>
-              <h2 id="daily-log" className="font-display text-lg text-brand-blue mb-4">
-                TODAY'S LOG
-              </h2>
-              <Card className="max-w-md mb-12">
-                <form onSubmit={handleSaveDailyLog} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="flex items-center gap-1 text-sm text-brand-blue/60 mb-1">
-                        <Footprints size={14} /> Steps
-                      </label>
-                      <input
-                        type="number"
-                        value={dailySteps}
-                        onChange={(e) => setDailySteps(e.target.value)}
-                        className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                      />
-                    </div>
-                    <div>
-                      <label className="flex items-center gap-1 text-sm text-brand-blue/60 mb-1">
-                        <Droplet size={14} /> Water (liters)
-                      </label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={dailyWater}
-                        onChange={(e) => setDailyWater(e.target.value)}
-                        className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                      />
-                    </div>
-                  </div>
-                  {dailyLogMessage && (
-                    <p className="text-brand-blue text-sm">{dailyLogMessage}</p>
-                  )}
-                  <Button type="submit">Save Today's Log</Button>
-                </form>
-              </Card>
-            </>
-          )}
+          {/* Today's Log — open to every client, active or not, and
+              regardless of purchased service (steps/water tracking isn't
+              tied to a package). */}
+          <h2 id="daily-log" className="font-display text-lg text-brand-blue mb-4">
+            TODAY'S LOG
+          </h2>
+          <Card className="max-w-md mb-12">
+            <form onSubmit={handleSaveDailyLog} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="flex items-center gap-1 text-sm text-brand-blue/60 mb-1">
+                    <Footprints size={14} /> Steps
+                  </label>
+                  <input
+                    type="number"
+                    value={dailySteps}
+                    onChange={(e) => setDailySteps(e.target.value)}
+                    className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                  />
+                </div>
+                <div>
+                  <label className="flex items-center gap-1 text-sm text-brand-blue/60 mb-1">
+                    <Droplet size={14} /> Water (liters)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={dailyWater}
+                    onChange={(e) => setDailyWater(e.target.value)}
+                    className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                  />
+                </div>
+              </div>
+              {dailyLogMessage && (
+                <p className="text-brand-blue text-sm">{dailyLogMessage}</p>
+              )}
+              <Button type="submit">Save Today's Log</Button>
+            </form>
+          </Card>
 
           {/* My E-Books */}
           <h2
