@@ -15,6 +15,11 @@ const pageMeta = {
     description:
       "Choose a Dietplan, Home Workouts, or both — 30, 90, or 180-day packages with transparent pricing.",
   },
+  "/about": {
+    title: `About Us | ${siteName}`,
+    description:
+      "Fitness Zone is a fitness platform built for women — dietplans and home workouts, all in one place.",
+  },
   "/trainers": {
     title: `Meet Our Trainers | ${siteName}`,
     description:
