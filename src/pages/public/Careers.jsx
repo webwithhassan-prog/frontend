@@ -17,6 +17,7 @@ const emptyForm = {
   available_days: "",
   bio: "",
   contact: "",
+  website: "",
 };
 
 const Careers = () => {
@@ -108,6 +109,18 @@ const Careers = () => {
           </motion.div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Honeypot — hidden from real users via CSS, so any bot that
+                fills every field it can find gets caught server-side. */}
+            <input
+              type="text"
+              name="website"
+              tabIndex={-1}
+              autoComplete="off"
+              value={formData.website}
+              onChange={handleChange}
+              className="hidden"
+              aria-hidden="true"
+            />
             {/* Photo upload */}
             <div>
               <label className="text-sm text-brand-blue/60 mb-2 block">

@@ -15,6 +15,7 @@ const emptyForm = {
   client_phone: "",
   description: "",
   amount: "",
+  website: "",
 };
 
 const PayNow = () => {
@@ -79,6 +80,18 @@ const PayNow = () => {
 
         <Card>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Honeypot — hidden from real users via CSS, so any bot that
+                fills every field it can find gets caught server-side. */}
+            <input
+              type="text"
+              name="website"
+              tabIndex={-1}
+              autoComplete="off"
+              value={formData.website}
+              onChange={handleChange}
+              className="hidden"
+              aria-hidden="true"
+            />
             <input
               type="text"
               name="client_name"
