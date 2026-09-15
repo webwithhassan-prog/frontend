@@ -9,6 +9,11 @@
   <title>Fitness Zone — Dietplans & Home Workouts for Women</title>
   <meta name="description"
     content="Fitness Zone is a fitness platform built for women — customized dietplans and home workouts with female trainers. One platform, no WhatsApp groups, no missed links." />
+  <!-- Static fallback for the homepage — usePageMeta overrides this (and
+       sets it fresh on every other route) once React mounts, but a crawler
+       that only reads the initial HTML still gets a correct canonical
+       pointing at the apex domain, matching the www -> apex redirect. -->
+  <link rel="canonical" href="https://fitnesszone.ltd/" />
   <meta name="theme-color" content="#12224a" />
 
   <!-- Open Graph / social link previews (WhatsApp, Facebook, etc.) -->
