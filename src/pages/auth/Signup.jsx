@@ -17,9 +17,11 @@ const Signup = () => {
     phone_number: "",
     email: "",
     password: "",
+    website: "", // honeypot — always empty for a real person
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const { login, role, loading } = useAuth();
   const redirectingRef = useRef(false);
@@ -39,6 +41,8 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    if (formData.website) return; // honeypot — a real user never fills this
+    setSubmitting(true);
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/auth/register`,
@@ -152,6 +156,7 @@ const Signup = () => {
       const msg = getErrorMessage(err, "Signup failed");
       setError(msg);
       toast.error(msg);
+      setSubmitting(false);
     }
   };
 
@@ -170,6 +175,18 @@ const Signup = () => {
 
       <Card>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Honeypot — hidden from real users via CSS, so any bot that
+              fills every field it can find gets caught server-side. */}
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            value={formData.website}
+            onChange={handleChange}
+            className="hidden"
+            aria-hidden="true"
+          />
           <input
             type="text"
             name="name"
@@ -217,8 +234,8 @@ const Signup = () => {
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
-          <Button type="submit" className="w-full">
-            Create Account
+          <Button type="submit" className="w-full" disabled={submitting}>
+            {submitting ? "Creating Account..." : "Create Account"}
           </Button>
         </form>
 

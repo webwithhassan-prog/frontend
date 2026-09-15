@@ -14,6 +14,7 @@ const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const { login, role, loading } = useAuth();
   const redirectingRef = useRef(false);
@@ -33,6 +34,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSubmitting(true);
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/auth/login`,
@@ -151,6 +153,7 @@ const Login = () => {
       const msg = getErrorMessage(err, "Login failed");
       setError(msg);
       toast.error(msg);
+      setSubmitting(false);
     }
   };
 
@@ -209,8 +212,8 @@ const Login = () => {
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
-          <Button type="submit" className="w-full">
-            Login
+          <Button type="submit" className="w-full" disabled={submitting}>
+            {submitting ? "Logging in..." : "Login"}
           </Button>
         </form>
 
