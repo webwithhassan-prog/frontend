@@ -101,7 +101,14 @@ const ManualPayments = () => {
               {payments.map((p) => (
                 <tr key={p._id} className="border-b border-brand-blue-pale/60">
                   <td className="py-3 px-2">
-                    <p className="font-medium text-brand-blue">{p.client_name}</p>
+                    <p className="font-medium text-brand-blue">
+                      {p.client_name}
+                      {p.is_guest && (
+                        <span className="ml-1.5 text-[10px] text-brand-blue-light font-semibold">
+                          (guest)
+                        </span>
+                      )}
+                    </p>
                     <p className="text-xs text-brand-blue-light">{p.client_phone}</p>
                   </td>
                   <td className="py-3 px-2 text-brand-blue-light">

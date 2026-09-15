@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { BookOpen, GraduationCap, Video } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
-import { useAuth } from "../../context/AuthContext";
 import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
@@ -21,9 +19,7 @@ const EBooks = () => {
   const [loading, setLoading] = useState(true);
   const [buyingId, setBuyingId] = useState(null);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
   const { format, currency } = useCurrency();
-  const { role } = useAuth();
   const [manualMethods, setManualMethods] = useState([]);
   const [manualPayFor, setManualPayFor] = useState(null); // { type, id, itemLabel, amountLabel }
 
@@ -62,50 +58,18 @@ const EBooks = () => {
       .catch((err) => console.error(err));
   }, [manualMethodsCountry]);
 
-  // A guest who clicked the manual payment button gets sent to signup with
-  // the intent saved (see handleManualPayClick below) — once they're a
-  // client, reopen the same manual-payment panel automatically.
-  useEffect(() => {
-    if (role !== "client") return;
-    const raw = localStorage.getItem("pending_manual_payment");
-    if (!raw) return;
-    localStorage.removeItem("pending_manual_payment");
-    try {
-      const pending = JSON.parse(raw);
-      if (pending.type === "ebook" || pending.type === "course") {
-        setManualPayFor(pending);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }, [role]);
-
   const handleManualPayClick = (payload) => {
-    if (role !== "client") {
-      localStorage.setItem(
-        "pending_manual_payment",
-        JSON.stringify({ ...payload, returnTo: "/ebooks" }),
-      );
-      navigate("/signup");
-      return;
-    }
     setManualPayFor(payload);
   };
 
+  // No client_id here — the backend resolves that from the auth token when
+  // logged in, and lets Stripe's own checkout page collect an email (plus
+  // phone/name) for a guest.
   const handleBuyEbook = async (ebook) => {
     setError("");
-
-    if (role !== "client") {
-      localStorage.setItem("pending_ebook_id", ebook._id);
-      navigate("/signup");
-      return;
-    }
-
     setBuyingId(ebook._id);
     try {
-      const clientId = localStorage.getItem("client_id");
       const res = await api.post("/payments/stripe/ebook-checkout", {
-        client_id: clientId,
         ebook_id: ebook._id,
         currency_code: currency.code,
       });
@@ -118,18 +82,9 @@ const EBooks = () => {
 
   const handleBuyCourse = async (course) => {
     setError("");
-
-    if (role !== "client") {
-      localStorage.setItem("pending_course_id", course._id);
-      navigate("/signup");
-      return;
-    }
-
     setBuyingId(course._id);
     try {
-      const clientId = localStorage.getItem("client_id");
       const res = await api.post("/payments/stripe/course-checkout", {
-        client_id: clientId,
         course_id: course._id,
         currency_code: currency.code,
       });

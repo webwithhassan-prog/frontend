@@ -30,6 +30,7 @@ const Login = lazy(() => import("./pages/auth/Login"));
 const Signup = lazy(() => import("./pages/auth/Signup"));
 const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/auth/ResetPassword"));
+const CompleteAccount = lazy(() => import("./pages/auth/CompleteAccount"));
 const NotFound = lazy(() => import("./pages/public/NotFound"));
 const About = lazy(() => import("./pages/public/About"));
 const PrivacyPolicy = lazy(() => import("./pages/public/PrivacyPolicy"));
@@ -274,6 +275,14 @@ function AppRoutes() {
           element={
             <PublicLayout>
               <ResetPassword />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/complete-account/:token"
+          element={
+            <PublicLayout>
+              <CompleteAccount />
             </PublicLayout>
           }
         />

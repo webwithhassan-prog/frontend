@@ -6,6 +6,7 @@ import api from "../../services/api";
 import { useSettings } from "../../context/SettingsContext";
 import { getErrorMessage } from "../../utils/errors";
 import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
+import PhoneInput from "./PhoneInput";
 
 const CLOUDINARY_CLOUD_NAME = "zyfxigcj";
 const CLOUDINARY_UPLOAD_PRESET = "FitnessZone";
@@ -40,6 +41,14 @@ const ManualPaymentPanel = ({
   const [slipPreview, setSlipPreview] = useState(null);
   const [uploadingSlip, setUploadingSlip] = useState(false);
   const [slipWasUploaded, setSlipWasUploaded] = useState(false);
+
+  // No account exists yet for a guest — the claim is submitted with just
+  // enough to reach them once it's verified (an admin confirming it is
+  // what actually creates their account, see confirmManualPayment).
+  const isGuest = !localStorage.getItem("client_id");
+  const [guestName, setGuestName] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
 
   // `methods` usually arrives after this component's first render (it's
   // fetched async by the parent) — the useState initializer above only
@@ -84,6 +93,11 @@ const ManualPaymentPanel = ({
   };
 
   const handleSubmit = async () => {
+    if (isGuest && (!guestName.trim() || !guestPhone.trim() || !guestEmail.trim())) {
+      toast.error("Please fill in your name, phone, and email");
+      return;
+    }
+
     setSubmitting(true);
     try {
       let slipUrl = null;
@@ -96,9 +110,7 @@ const ManualPaymentPanel = ({
         }
       }
 
-      const clientId = localStorage.getItem("client_id");
       await api.post("/payments/manual/initiate", {
-        client_id: clientId,
         type,
         plan_ids: planIds,
         ebook_id: ebookId,
@@ -107,6 +119,9 @@ const ManualPaymentPanel = ({
         method_id: selectedId,
         currency_code: currencyCode,
         slip_url: slipUrl,
+        ...(isGuest
+          ? { guest_name: guestName.trim(), guest_phone: guestPhone, guest_email: guestEmail.trim() }
+          : {}),
       });
 
       const method = methods.find((m) => m._id === selectedId);
@@ -136,17 +151,19 @@ const ManualPaymentPanel = ({
         </p>
         <p className="text-brand-blue/70 text-xs leading-relaxed">
           {slipWasUploaded ? (
-            "Your screenshot was received. Your account will be activated as soon as your payment is verified."
+            "Your screenshot was received. "
           ) : (
             <>
-              Your account will be activated as soon as your payment is
-              verified. If WhatsApp didn't open, send your screenshot to{" "}
+              If WhatsApp didn't open, send your screenshot to{" "}
               <span className="font-semibold">
                 +{settings.whatsapp_general}
               </span>{" "}
-              directly.
+              directly.{" "}
             </>
           )}
+          {isGuest
+            ? "Once your payment is verified, we'll email you a link to set up your account."
+            : "Your account will be activated as soon as your payment is verified."}
         </p>
       </div>
     );
@@ -216,6 +233,45 @@ const ManualPaymentPanel = ({
         screenshot below (or send it on WhatsApp instead) so we can verify
         and activate your purchase.
       </p>
+
+      {isGuest && (
+        <div className="space-y-2">
+          <p className="text-[10px] text-brand-blue-light uppercase tracking-wide">
+            Your Details
+          </p>
+          {/* Honeypot — hidden from real users via CSS, so any bot that
+              fills every field it can find gets caught server-side. */}
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            value=""
+            onChange={() => {}}
+            className="hidden"
+            aria-hidden="true"
+          />
+          <input
+            type="text"
+            placeholder="Full Name"
+            value={guestName}
+            onChange={(e) => setGuestName(e.target.value)}
+            className="w-full border border-brand-blue-pale rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange"
+          />
+          <PhoneInput value={guestPhone} onChange={setGuestPhone} />
+          <input
+            type="email"
+            placeholder="Email"
+            value={guestEmail}
+            onChange={(e) => setGuestEmail(e.target.value)}
+            className="w-full border border-brand-blue-pale rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange"
+          />
+          <p className="text-[11px] text-brand-blue-light leading-relaxed">
+            We'll use this to reach you once your payment is verified and set
+            up your account.
+          </p>
+        </div>
+      )}
 
       <div>
         <p className="text-[10px] text-brand-blue-light uppercase tracking-wide mb-1.5">

@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Check, Tag, X } from "lucide-react";
 import toast from "react-hot-toast";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import api from "../../services/api";
-import { useAuth } from "../../context/AuthContext";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
@@ -59,8 +58,6 @@ const Plans = () => {
   const [loading, setLoading] = useState(true);
   const [checkingOutDuration, setCheckingOutDuration] = useState(null);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
-  const { role } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const { format, currency } = useCurrency();
 
@@ -92,29 +89,6 @@ const Plans = () => {
       .then((res) => setManualMethods(res.data))
       .catch((err) => console.error(err));
   }, [manualMethodsCountry]);
-
-  // A guest who clicked "Pay via Bank Transfer..." gets sent to signup with
-  // the intent saved (see handleManualPayClick below) — once they're a
-  // client, reopen the same manual-payment panel automatically instead of
-  // making them find the button again.
-  useEffect(() => {
-    if (role !== "client") return;
-    const raw = localStorage.getItem("pending_manual_payment");
-    if (!raw) return;
-    localStorage.removeItem("pending_manual_payment");
-    try {
-      const pending = JSON.parse(raw);
-      if (pending.type === "package") {
-        setManualPayFor({
-          duration: pending.duration,
-          planIds: pending.planIds,
-          amountLabel: pending.amountLabel,
-        });
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }, [role]);
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -153,11 +127,13 @@ const Plans = () => {
     return [];
   };
 
+  // No client_id here — the backend resolves that from the auth token when
+  // logged in, and lets Stripe's own checkout page collect an email (plus
+  // phone/name) for a guest. Either way, the account this purchase grants
+  // access to is settled once the payment actually completes, not before.
   const startCheckout = async (planIds) => {
     try {
-      const clientId = localStorage.getItem("client_id");
       const res = await api.post("/payments/stripe/checkout", {
-        client_id: clientId,
         plan_ids: planIds,
         coupon_code: appliedCoupon?.code,
         currency_code: currency.code,
@@ -239,37 +215,12 @@ const Plans = () => {
       duration,
     });
 
-    if (role !== "client") {
-      localStorage.setItem("pending_plan_ids", JSON.stringify(planIds));
-      if (appliedCoupon?.code) {
-        localStorage.setItem("pending_coupon_code", appliedCoupon.code);
-      }
-      navigate("/signup");
-      return;
-    }
-
     startCheckout(planIds);
   };
 
   const handleManualPayClick = (duration, selection, total) => {
     const planIds = selection.map((p) => p._id);
     const amountLabel = format(total);
-
-    if (role !== "client") {
-      localStorage.setItem(
-        "pending_manual_payment",
-        JSON.stringify({
-          type: "package",
-          duration,
-          planIds,
-          amountLabel,
-          returnTo: `/plans?type=${selectedType}`,
-        }),
-      );
-      navigate("/signup");
-      return;
-    }
-
     setManualPayFor({ duration, planIds, amountLabel });
   };
 

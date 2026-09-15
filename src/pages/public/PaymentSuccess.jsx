@@ -6,6 +6,7 @@ import { useSearchParams } from "react-router-dom";
 import api from "../../services/api";
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
+import CompleteAccountForm from "../../components/common/CompleteAccountForm";
 import { trackEvent } from "../../utils/analytics";
 import logo from "../../assets/logo.jpeg";
 
@@ -14,6 +15,7 @@ const PaymentSuccess = () => {
   const sessionId = searchParams.get("session_id");
   const [receipt, setReceipt] = useState(null);
   const [loading, setLoading] = useState(!!sessionId);
+  const [accountReady, setAccountReady] = useState(false);
   const receiptRef = useRef(null);
 
   useEffect(() => {
@@ -56,15 +58,32 @@ const PaymentSuccess = () => {
           <h1 className="font-display text-2xl text-brand-blue mb-3">
             PAYMENT SUCCESSFUL
           </h1>
-          <p className="text-brand-blue/70 mb-8 leading-relaxed">
-            You're all set — this is now ready in your profile.
-          </p>
-          <Button
-            onClick={() => (window.location.href = "/client")}
-            className="w-full"
-          >
-            Go to My Profile
-          </Button>
+
+          {receipt?.needs_account_setup && !accountReady ? (
+            <>
+              <p className="text-brand-blue/70 mb-6 leading-relaxed">
+                Your account is ready — just confirm your phone number and
+                set a password to access it.
+              </p>
+              <CompleteAccountForm
+                token={receipt.setup_token}
+                email={receipt.email}
+                onDone={() => setAccountReady(true)}
+              />
+            </>
+          ) : (
+            <>
+              <p className="text-brand-blue/70 mb-8 leading-relaxed">
+                You're all set — this is now ready in your profile.
+              </p>
+              <Button
+                onClick={() => (window.location.href = "/client")}
+                className="w-full"
+              >
+                Go to My Profile
+              </Button>
+            </>
+          )}
           <p className="text-brand-blue/40 text-xs mt-4">
             We've also emailed your receipt — check your spam or junk folder
             if it doesn't show up in a few minutes.
