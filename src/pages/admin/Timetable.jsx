@@ -70,6 +70,7 @@ const Timetable = () => {
 
   const [zoomLink, setZoomLink] = useState(null);
   const [zoomCopied, setZoomCopied] = useState(false);
+  const [zoomLinkInput, setZoomLinkInput] = useState("");
 
   const fetchData = async () => {
     try {
@@ -96,6 +97,7 @@ const Timetable = () => {
       setTimeSlots(timeSlotsRes.data);
       setTrainers(trainersRes.data);
       setZoomLink(zoomRes.data);
+      setZoomLinkInput(zoomRes.data?.zoom_join_url || "");
 
       const upcoming = [...classesRes.data].sort(
         (a, b) => new Date(a.datetime) - new Date(b.datetime),
@@ -116,24 +118,24 @@ const Timetable = () => {
     setTimeout(() => setZoomCopied(false), 2000);
   };
 
-  const [rotatingZoom, setRotatingZoom] = useState(false);
-  const handleRotateZoomLink = async () => {
-    if (
-      !window.confirm(
-        "Generate a new Zoom link now? The old link will stop working immediately.",
-      )
-    ) {
+  const [savingZoom, setSavingZoom] = useState(false);
+  const handleSaveZoomLink = async () => {
+    if (!zoomLinkInput.trim()) {
+      toast.error("Enter a Zoom link first");
       return;
     }
-    setRotatingZoom(true);
+    setSavingZoom(true);
     try {
-      const res = await api.post("/timetable/zoom-link/rotate");
+      const res = await api.put("/timetable/zoom-link", {
+        zoom_join_url: zoomLinkInput.trim(),
+      });
       setZoomLink(res.data);
-      toast.success("Zoom link rotated");
+      setZoomLinkInput(res.data.zoom_join_url);
+      toast.success("Zoom link updated — pushed to every upcoming class");
     } catch (err) {
-      toast.error(getErrorMessage(err, "Could not rotate the link"));
+      toast.error(getErrorMessage(err, "Could not update the link"));
     } finally {
-      setRotatingZoom(false);
+      setSavingZoom(false);
     }
   };
 
@@ -302,10 +304,10 @@ const Timetable = () => {
       ) : (
         <>
           {/* One shared Zoom link for every class — same link for every
-              trainer/time, rotated weekly. Copy it once and forward to the
-              trainers' group, same as before. */}
-          <StaticCard className="mb-8 flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-3">
+              trainer/time. Admin-managed: paste a link below and it's
+              pushed onto every upcoming class immediately. */}
+          <StaticCard className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
               <div className="w-9 h-9 rounded-full bg-brand-blue-pale flex items-center justify-center shrink-0">
                 <Video className="text-brand-blue" size={16} />
               </div>
@@ -314,15 +316,20 @@ const Timetable = () => {
                   Class Zoom Link
                 </p>
                 <p className="text-brand-blue-light text-xs">
-                  {zoomLink?.zoom_join_url
-                    ? zoomLink.zoom_rotated_at
-                      ? `Rotates weekly — last updated ${new Date(zoomLink.zoom_rotated_at).toLocaleDateString()}`
-                      : "Same link for every class — forward it to the trainers' group"
-                    : "Provisioning..."}
+                  {zoomLink?.zoom_rotated_at
+                    ? `Same link for every class — last updated ${new Date(zoomLink.zoom_rotated_at).toLocaleDateString()}`
+                    : "Paste your Zoom link below — it's used for every class until you change it"}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <input
+                type="url"
+                value={zoomLinkInput}
+                onChange={(e) => setZoomLinkInput(e.target.value)}
+                placeholder="https://zoom.us/j/..."
+                className="flex-1 min-w-[240px] border border-brand-blue-pale rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange"
+              />
               {zoomLink?.zoom_join_url && (
                 <button
                   onClick={handleCopyZoomLink}
@@ -334,18 +341,18 @@ const Timetable = () => {
                     </>
                   ) : (
                     <>
-                      <Copy size={14} /> Copy Link
+                      <Copy size={14} /> Copy
                     </>
                   )}
                 </button>
               )}
               <button
-                onClick={handleRotateZoomLink}
-                disabled={rotatingZoom}
-                className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full border border-brand-blue-pale text-brand-blue-light hover:bg-brand-blue-pale/40 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                onClick={handleSaveZoomLink}
+                disabled={savingZoom}
+                className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full bg-brand-orange text-white hover:bg-brand-orange/90 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
               >
-                <RefreshCw size={14} className={rotatingZoom ? "animate-spin" : ""} />
-                {rotatingZoom ? "Rotating..." : "Rotate Now"}
+                <RefreshCw size={14} className={savingZoom ? "animate-spin" : ""} />
+                {savingZoom ? "Saving..." : "Save Link"}
               </button>
             </div>
           </StaticCard>
