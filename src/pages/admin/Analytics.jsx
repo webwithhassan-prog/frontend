@@ -1,10 +1,22 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Users, Wallet, BarChart3, CalendarClock, Receipt } from "lucide-react";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
 
 const rangeOptions = [7, 30, 90];
+
+// The sections admin actually jumps to day-to-day — shown right up top so
+// they don't have to scan the full sidebar every time they land here.
+const quickLinks = [
+  { label: "Enrollments", to: "/admin/enrollments", icon: Users },
+  { label: "Manual Payments", to: "/admin/manual-payments", icon: Wallet },
+  { label: "Sales", to: "/admin/sales", icon: BarChart3 },
+  { label: "Timetable", to: "/admin/timetable", icon: CalendarClock },
+  { label: "Custom Invoices", to: "/admin/custom-invoices", icon: Receipt },
+];
 
 const StatCard = ({ label, value, sublabel }) => (
   <Card>
@@ -80,6 +92,19 @@ const Analytics = () => {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-8">
+        {quickLinks.map((link) => (
+          <Link
+            key={link.to}
+            to={link.to}
+            className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-full bg-white border border-brand-blue-pale text-brand-blue hover:border-brand-orange hover:text-brand-orange transition-colors"
+          >
+            <link.icon size={15} />
+            {link.label}
+          </Link>
+        ))}
       </div>
 
       {loading || !summary ? (

@@ -27,24 +27,54 @@ import {
   Wallet,
 } from "lucide-react";
 
-const navItems = [
-  { label: "Overview", to: "/admin/dashboard", icon: LayoutDashboard },
-  { label: "Enrollments", to: "/admin/enrollments", icon: Users },
-  { label: "Trainers", to: "/admin/trainers", icon: Dumbbell },
-  { label: "Packages", to: "/admin/packages", icon: Package },
-  { label: "Timetable", to: "/admin/timetable", icon: CalendarClock },
-  { label: "Trainer Applications", to: "/admin/trainer-applications", icon: Briefcase },
-  { label: "Sales", to: "/admin/sales", icon: BarChart3 },
-  { label: "Custom Invoices", to: "/admin/custom-invoices", icon: Receipt },
-  { label: "Manual Payments", to: "/admin/manual-payments", icon: Wallet },
-  { label: "Payment Methods", to: "/admin/manual-payment-methods", icon: Landmark },
-  { label: "Home Content", to: "/admin/home-content", icon: Clapperboard },
-  { label: "E-Books", to: "/admin/ebooks", icon: BookOpen },
-  { label: "Recorded Content", to: "/admin/courses", icon: GraduationCap },
-  { label: "Recorded Gallery", to: "/admin/recorded-gallery", icon: Film },
-  { label: "Promotions", to: "/admin/promotions", icon: Megaphone },
-  { label: "Analytics", to: "/admin/analytics", icon: TrendingUp },
-  { label: "Settings", to: "/admin/settings", icon: SettingsIcon },
+// Grouped instead of one flat 17-item list — a section header every few
+// items gives the eye a place to jump to instead of scanning the whole
+// sidebar top to bottom every time.
+const navGroups = [
+  {
+    label: null, // no header for the single top-level item
+    items: [{ label: "Overview", to: "/admin/dashboard", icon: LayoutDashboard }],
+  },
+  {
+    label: "People",
+    items: [
+      { label: "Enrollments", to: "/admin/enrollments", icon: Users },
+      { label: "Trainers", to: "/admin/trainers", icon: Dumbbell },
+      { label: "Trainer Applications", to: "/admin/trainer-applications", icon: Briefcase },
+    ],
+  },
+  {
+    label: "Schedule",
+    items: [{ label: "Timetable", to: "/admin/timetable", icon: CalendarClock }],
+  },
+  {
+    label: "Payments",
+    items: [
+      { label: "Sales", to: "/admin/sales", icon: BarChart3 },
+      { label: "Custom Invoices", to: "/admin/custom-invoices", icon: Receipt },
+      { label: "Manual Payments", to: "/admin/manual-payments", icon: Wallet },
+      { label: "Payment Methods", to: "/admin/manual-payment-methods", icon: Landmark },
+    ],
+  },
+  {
+    label: "Content",
+    items: [
+      { label: "Packages", to: "/admin/packages", icon: Package },
+      { label: "Home Content", to: "/admin/home-content", icon: Clapperboard },
+      { label: "E-Books", to: "/admin/ebooks", icon: BookOpen },
+      { label: "Recorded Content", to: "/admin/courses", icon: GraduationCap },
+      { label: "Recorded Gallery", to: "/admin/recorded-gallery", icon: Film },
+      { label: "Promotions", to: "/admin/promotions", icon: Megaphone },
+    ],
+  },
+  {
+    label: "Insights",
+    items: [{ label: "Analytics", to: "/admin/analytics", icon: TrendingUp }],
+  },
+  {
+    label: "System",
+    items: [{ label: "Settings", to: "/admin/settings", icon: SettingsIcon }],
+  },
 ];
 
 const AdminLayout = () => {
@@ -68,41 +98,50 @@ const AdminLayout = () => {
   }, []);
 
   const NavLinks = ({ onNavigate }) => (
-    <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
-      {navItems.map((item) => {
-        const badgeCount =
-          item.to === "/admin/manual-payments" ? pendingManualCount : 0;
-        return (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            onClick={onNavigate}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium relative ${
-                isActive ? "bg-white/10" : "hover:bg-white/5"
-              }`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <item.icon size={18} />
-                {item.label}
-                {badgeCount > 0 && (
-                  <span className="ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-brand-orange text-white text-[11px] font-bold">
-                    {badgeCount}
-                  </span>
+    <nav className="flex-1 px-3 py-6 space-y-4 overflow-y-auto">
+      {navGroups.map((group, i) => (
+        <div key={group.label || i} className="space-y-1">
+          {group.label && (
+            <p className="px-4 pt-1 pb-1 text-[11px] font-bold uppercase tracking-wider text-white/40">
+              {group.label}
+            </p>
+          )}
+          {group.items.map((item) => {
+            const badgeCount =
+              item.to === "/admin/manual-payments" ? pendingManualCount : 0;
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={onNavigate}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium relative ${
+                    isActive ? "bg-white/10" : "hover:bg-white/5"
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <item.icon size={18} />
+                    {item.label}
+                    {badgeCount > 0 && (
+                      <span className="ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-brand-orange text-white text-[11px] font-bold">
+                        {badgeCount}
+                      </span>
+                    )}
+                    {isActive && (
+                      <motion.span
+                        layoutId="admin-active-indicator"
+                        className="absolute left-0 top-0 h-full w-1 bg-brand-orange rounded-r"
+                      />
+                    )}
+                  </>
                 )}
-                {isActive && (
-                  <motion.span
-                    layoutId="admin-active-indicator"
-                    className="absolute left-0 top-0 h-full w-1 bg-brand-orange rounded-r"
-                  />
-                )}
-              </>
-            )}
-          </NavLink>
-        );
-      })}
+              </NavLink>
+            );
+          })}
+        </div>
+      ))}
     </nav>
   );
 
