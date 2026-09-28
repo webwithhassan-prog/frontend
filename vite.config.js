@@ -19,6 +19,15 @@ export default defineConfig({
       strategies: "injectManifest",
       srcDir: "src",
       filename: "sw.js",
+      // Precache only what push notifications need. Precaching the whole
+      // build made every visitor download ~2MB up front — every admin page
+      // and the PDF/Excel libraries included — and served pages from a cache
+      // that could lag behind the live site. Pages and hashed assets now come
+      // from the CDN, which browsers already cache for a year.
+      injectManifest: {
+        globPatterns: ["icon-192.png"],
+      },
+      includeManifestIcons: false,
       manifest: {
         name: "Fitness Zone",
         short_name: "Fitness Zone",

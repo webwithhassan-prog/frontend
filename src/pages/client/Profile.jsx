@@ -21,6 +21,7 @@ import Modal from "../../components/admin/Modal";
 import { useSettings } from "../../context/SettingsContext";
 import { getErrorMessage } from "../../utils/errors";
 import { getPushStatus, subscribeToPush, unsubscribeFromPush } from "../../utils/push";
+import YouTubeFacade from "../../components/common/YouTubeFacade";
 
 const statusColors = {
   active: "bg-green-100 text-green-700",
@@ -1031,11 +1032,10 @@ const Profile = () => {
                   {recordedGallery.map((item) => (
                     <Card key={item._id}>
                       <div className="aspect-video mb-3 rounded-lg overflow-hidden bg-brand-blue-pale">
-                        <iframe
-                          src={item.youtube_link.replace("watch?v=", "embed/")}
+                        <YouTubeFacade
+                          link={item.youtube_link}
                           title={item.title}
                           className="w-full h-full"
-                          allowFullScreen
                         />
                       </div>
                       <h3 className="font-display text-brand-blue text-sm mb-1">
@@ -1152,14 +1152,10 @@ const Profile = () => {
                     {course.lessons.map((lesson, i) => (
                       <Card key={i}>
                         <div className="aspect-video mb-3 rounded-lg overflow-hidden bg-brand-blue-pale">
-                          <iframe
-                            src={lesson.youtube_link.replace(
-                              "watch?v=",
-                              "embed/",
-                            )}
+                          <YouTubeFacade
+                            link={lesson.youtube_link}
                             title={lesson.title}
                             className="w-full h-full"
-                            allowFullScreen
                           />
                         </div>
                         <h4 className="font-display text-brand-blue text-sm">

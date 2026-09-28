@@ -9,18 +9,10 @@ import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import Modal from "../../components/admin/Modal";
 import { getErrorMessage } from "../../utils/errors";
+import YouTubeFacade from "../../components/common/YouTubeFacade";
 
 const CLOUDINARY_CLOUD_NAME = "zyfxigcj";
 const CLOUDINARY_UPLOAD_PRESET = "FitnessZone";
-
-const getYoutubeEmbedSrc = (link) => {
-  if (!link) return "";
-  const match = link.match(
-    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/,
-  );
-  const videoId = match ? match[1] : link;
-  return `https://www.youtube.com/embed/${videoId}`;
-};
 
 const formatUploadedAt = (isoDate) => {
   if (!isoDate) return null;
@@ -421,11 +413,10 @@ const VideoManager = ({ endpoint, title, description, aspect, onCountChange }) =
               <div
                 className={`${aspect === "portrait" ? "aspect-[9/16]" : "aspect-video"} mb-3 rounded-lg overflow-hidden bg-brand-blue-pale`}
               >
-                <iframe
-                  src={getYoutubeEmbedSrc(video.youtube_link)}
+                <YouTubeFacade
+                  link={video.youtube_link}
                   title={video.title || "Video"}
                   className="w-full h-full"
-                  allowFullScreen
                 />
               </div>
               {video.title && (

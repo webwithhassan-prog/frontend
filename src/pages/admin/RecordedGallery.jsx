@@ -8,6 +8,7 @@ import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import Modal from "../../components/admin/Modal";
 import { getErrorMessage } from "../../utils/errors";
+import YouTubeFacade from "../../components/common/YouTubeFacade";
 
 const emptyForm = { title: "", youtube_link: "" };
 
@@ -110,11 +111,10 @@ const RecordedGallery = () => {
           {recordings.map((item) => (
             <Card key={item._id}>
               <div className="aspect-video mb-3 rounded-lg overflow-hidden bg-brand-blue-pale">
-                <iframe
-                  src={item.youtube_link.replace("watch?v=", "embed/")}
+                <YouTubeFacade
+                  link={item.youtube_link}
                   title={item.title}
                   className="w-full h-full"
-                  allowFullScreen
                 />
               </div>
               <h3 className="text-brand-blue font-bold text-sm mb-1">

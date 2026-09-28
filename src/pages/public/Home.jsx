@@ -20,6 +20,7 @@ import AnimatedCounter from "../../components/common/AnimatedCounter";
 import TestimonialsSlider from "../../components/common/TestimonialsSlider";
 import AchievementMarquee from "../../components/common/AchievementMarquee";
 import ComboPlans from "../../components/common/ComboPlans";
+import YouTubeFacade from "../../components/common/YouTubeFacade";
 import api from "../../services/api";
 import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
 
@@ -29,15 +30,6 @@ const stats = [
   { icon: TrendingUp, target: 10000, suffix: "+", label: "Success Stories" },
   { icon: Headset, display: "24/7", label: "Support" },
 ];
-
-const getYoutubeEmbedSrc = (link) => {
-  if (!link) return "";
-  const match = link.match(
-    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/,
-  );
-  const videoId = match ? match[1] : link;
-  return `https://www.youtube.com/embed/${videoId}`;
-};
 
 const steps = [
   {
@@ -63,6 +55,7 @@ const steps = [
 const Home = () => {
   const [demoVideos, setDemoVideos] = useState([]);
   const [demoSlide, setDemoSlide] = useState(0);
+  const [demoPlaying, setDemoPlaying] = useState(false);
   const [heroSlide, setHeroSlide] = useState(0);
   const [heroSlides, setHeroSlides] = useState([]);
   const [heroLoading, setHeroLoading] = useState(true);
@@ -102,18 +95,22 @@ const Home = () => {
     fetchDemoVideos();
   }, []);
 
+  // Auto-advance stops once a visitor starts a video — otherwise it would
+  // switch away from the video they're watching 6 seconds later.
   useEffect(() => {
-    if (demoVideos.length <= 1) return;
+    if (demoVideos.length <= 1 || demoPlaying) return;
     const timer = setInterval(() => {
       setDemoSlide((prev) => (prev + 1) % demoVideos.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, [demoVideos.length]);
+  }, [demoVideos.length, demoPlaying]);
 
-  const goPrevDemo = () =>
-    setDemoSlide((prev) => (prev - 1 + demoVideos.length) % demoVideos.length);
-  const goNextDemo = () =>
-    setDemoSlide((prev) => (prev + 1) % demoVideos.length);
+  const showDemo = (index) => {
+    setDemoPlaying(false);
+    setDemoSlide((index + demoVideos.length) % demoVideos.length);
+  };
+  const goPrevDemo = () => showDemo(demoSlide - 1);
+  const goNextDemo = () => showDemo(demoSlide + 1);
 
   useEffect(() => {
     if (heroSlides.length <= 1) return;
@@ -451,14 +448,11 @@ const Home = () => {
                   >
                     <Card className="p-2">
                       <div className="aspect-video rounded-xl overflow-hidden bg-brand-blue-pale">
-                        <iframe
-                          src={getYoutubeEmbedSrc(
-                            demoVideos[demoSlide].youtube_link,
-                          )}
-                          title={demoVideos[demoSlide].title || "Video"}
+                        <YouTubeFacade
+                          link={demoVideos[demoSlide].youtube_link}
+                          title={demoVideos[demoSlide].title || "Session demo"}
                           className="w-full h-full"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
+                          onPlay={() => setDemoPlaying(true)}
                         />
                       </div>
                       {demoVideos[demoSlide].title && (
@@ -475,7 +469,7 @@ const Home = () => {
                     {demoVideos.map((v, i) => (
                       <button
                         key={v._id}
-                        onClick={() => setDemoSlide(i)}
+                        onClick={() => showDemo(i)}
                         aria-label={`Go to video ${i + 1}`}
                         className={`h-2 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
                           i === demoSlide
