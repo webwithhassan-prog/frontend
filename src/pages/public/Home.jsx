@@ -19,6 +19,7 @@ import IconDraw from "../../components/common/IconDraw";
 import AnimatedCounter from "../../components/common/AnimatedCounter";
 import TestimonialsSlider from "../../components/common/TestimonialsSlider";
 import AchievementMarquee from "../../components/common/AchievementMarquee";
+import ComboPlans from "../../components/common/ComboPlans";
 import api from "../../services/api";
 import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
 
@@ -61,9 +62,7 @@ const steps = [
 
 const Home = () => {
   const [demoVideos, setDemoVideos] = useState([]);
-  const [transformationVideos, setTransformationVideos] = useState([]);
   const [demoSlide, setDemoSlide] = useState(0);
-  const [transformationSlide, setTransformationSlide] = useState(0);
   const [heroSlide, setHeroSlide] = useState(0);
   const [heroSlides, setHeroSlides] = useState([]);
   const [heroLoading, setHeroLoading] = useState(true);
@@ -101,16 +100,6 @@ const Home = () => {
       }
     };
     fetchDemoVideos();
-
-    const fetchTransformationVideos = async () => {
-      try {
-        const res = await api.get("/transformation-videos/public");
-        setTransformationVideos(res.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchTransformationVideos();
   }, []);
 
   useEffect(() => {
@@ -125,22 +114,6 @@ const Home = () => {
     setDemoSlide((prev) => (prev - 1 + demoVideos.length) % demoVideos.length);
   const goNextDemo = () =>
     setDemoSlide((prev) => (prev + 1) % demoVideos.length);
-
-  useEffect(() => {
-    if (transformationVideos.length <= 1) return;
-    const timer = setInterval(() => {
-      setTransformationSlide((prev) => (prev + 1) % transformationVideos.length);
-    }, 6000);
-    return () => clearInterval(timer);
-  }, [transformationVideos.length]);
-
-  const goPrevTransformation = () =>
-    setTransformationSlide(
-      (prev) =>
-        (prev - 1 + transformationVideos.length) % transformationVideos.length,
-    );
-  const goNextTransformation = () =>
-    setTransformationSlide((prev) => (prev + 1) % transformationVideos.length);
 
   useEffect(() => {
     if (heroSlides.length <= 1) return;
@@ -437,123 +410,9 @@ const Home = () => {
           ))}
         </div>
       </section>
-      {/* Transformations — right after the stats bar, as before */}
-      {transformationVideos.length > 0 && (
-        <section className="py-20">
-          <div className="max-w-6xl mx-auto px-6">
-            <motion.h2
-              className="font-display text-2xl md:text-3xl text-brand-blue text-center mb-4"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              REAL RESULTS
-            </motion.h2>
-            <p className="text-brand-blue/70 text-center max-w-xl mx-auto mb-14">
-              Real member transformations, in their own words.
-            </p>
-
-            <div>
-              <div className="relative flex items-center justify-center gap-4 sm:gap-6">
-                  {transformationVideos.length > 1 && (
-                    <button
-                      onClick={goPrevTransformation}
-                      className="hidden sm:flex shrink-0 bg-white shadow-md rounded-full p-2.5 text-brand-blue hover:text-brand-orange transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
-                      aria-label="Previous video"
-                    >
-                      <ChevronLeft size={20} />
-                    </button>
-                  )}
-
-                  <div className="flex flex-col items-center">
-                    <AnimatePresence mode="wait" initial={false}>
-                      <motion.div
-                        key={transformationSlide}
-                        initial={{ opacity: 0, x: 30 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -30 }}
-                        transition={{ duration: 0.35 }}
-                        className="w-full max-w-[260px] sm:max-w-[300px]"
-                      >
-                        <Card className="p-2">
-                          <div className="aspect-[9/16] rounded-xl overflow-hidden bg-brand-blue-pale">
-                            <iframe
-                              src={getYoutubeEmbedSrc(
-                                transformationVideos[transformationSlide]
-                                  .youtube_link,
-                              )}
-                              title={
-                                transformationVideos[transformationSlide]
-                                  .title || "Video"
-                              }
-                              className="w-full h-full"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
-                          </div>
-                          {transformationVideos[transformationSlide].title && (
-                            <h3 className="font-display text-brand-blue text-sm mt-2 text-center">
-                              {transformationVideos[transformationSlide].title}
-                            </h3>
-                          )}
-                        </Card>
-                      </motion.div>
-                    </AnimatePresence>
-
-                    {transformationVideos.length > 1 && (
-                      <div className="flex justify-center gap-2 mt-6">
-                        {transformationVideos.map((v, i) => (
-                          <button
-                            key={v._id}
-                            onClick={() => setTransformationSlide(i)}
-                            aria-label={`Go to video ${i + 1}`}
-                            className={`h-2 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
-                              i === transformationSlide
-                                ? "w-6 bg-brand-orange"
-                                : "w-2 bg-brand-blue-pale"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {transformationVideos.length > 1 && (
-                    <button
-                      onClick={goNextTransformation}
-                      className="hidden sm:flex shrink-0 bg-white shadow-md rounded-full p-2.5 text-brand-blue hover:text-brand-orange transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
-                      aria-label="Next video"
-                    >
-                      <ChevronRight size={20} />
-                    </button>
-                  )}
-                </div>
-
-                {transformationVideos.length > 1 && (
-                  <div className="flex sm:hidden justify-center gap-6 mt-6">
-                    <button
-                      onClick={goPrevTransformation}
-                      className="bg-white shadow-md rounded-full p-2.5 text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
-                      aria-label="Previous video"
-                    >
-                      <ChevronLeft size={20} />
-                    </button>
-                    <button
-                      onClick={goNextTransformation}
-                      className="bg-white shadow-md rounded-full p-2.5 text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
-                      aria-label="Next video"
-                    >
-                      <ChevronRight size={20} />
-                    </button>
-                  </div>
-                )}
-              </div>
-          </div>
-        </section>
-      )}
-      {/* Session Demos — its own section, separate from Transformations
-          since one's landscape and the other's portrait. Blue background
-          to keep the page's alternating light/blue rhythm. */}
+      <ComboPlans />
+      {/* Session Demos — blue background to keep the page's alternating
+          light/blue rhythm after the light Combo Plans section. */}
       {demoVideos.length > 0 && (
         <section className="bg-brand-blue py-20">
           <div className="max-w-6xl mx-auto px-6">
