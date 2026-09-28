@@ -5,6 +5,16 @@ const CurrencyContext = createContext();
 
 const DEFAULT_CURRENCY = { code: "INR", symbol: "₹", rate: 1 };
 
+// The browser's own timezone is a free, unlimited country signal the server
+// uses before falling back to a rate-limited IP lookup.
+const browserTimeZone = () => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 export const CurrencyProvider = ({ children }) => {
   const [currency, setCurrencyState] = useState(DEFAULT_CURRENCY);
   const [currencies, setCurrencies] = useState([DEFAULT_CURRENCY]);
@@ -21,7 +31,7 @@ export const CurrencyProvider = ({ children }) => {
       // the two.
       const [ratesResult, detectResult] = await Promise.allSettled([
         api.get("/currency/rates"),
-        api.get("/currency/detect"),
+        api.get("/currency/detect", { params: { tz: browserTimeZone() } }),
       ]);
 
       if (ratesResult.status === "fulfilled") {

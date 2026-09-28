@@ -44,10 +44,10 @@ const Signup = () => {
     if (formData.website) return; // honeypot — a real user never fills this
     setSubmitting(true);
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/auth/register`,
-        formData,
-      );
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, {
+        ...formData,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      });
       // Block the role-change effect above from racing this handler's own
       // navigation — otherwise it fires the instant login() updates auth
       // state, flashing the dashboard before an async checkout redirect

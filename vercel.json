@@ -1,5 +1,13 @@
 {
+  "redirects": [
+    {
+      "source": "/((?!sw\\.js).*)",
+      "has": [{ "type": "host", "value": "www.fitnesszone.ltd" }],
+      "destination": "https://fitnesszone.ltd/$1",
+      "permanent": true
+    }
+  ],
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/((?!assets/).*)", "destination": "/index.html" }
   ]
 }
