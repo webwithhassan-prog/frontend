@@ -24,10 +24,11 @@ import YouTubeFacade from "../../components/common/YouTubeFacade";
 import api from "../../services/api";
 import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
 
+// Thousands are shown as "K" so all four fit in one row on a phone.
 const stats = [
   { icon: CalendarDays, target: 3, suffix: "+", label: "Years Running" },
-  { icon: Users, target: 50000, suffix: "+", label: "Clients Served" },
-  { icon: TrendingUp, target: 10000, suffix: "+", label: "Success Stories" },
+  { icon: Users, target: 50, suffix: "K+", label: "Clients Served" },
+  { icon: TrendingUp, target: 10, suffix: "K+", label: "Success Stories" },
   { icon: Headset, display: "24/7", label: "Support" },
 ];
 
@@ -134,36 +135,41 @@ const Home = () => {
 
       {heroLoading && (
         <section className="relative bg-brand-blue overflow-hidden">
-          <div className="relative w-full aspect-[4/5] sm:aspect-[3/2] lg:aspect-[2/1] lg:max-h-[560px]">
+          <div className="relative w-full aspect-square sm:aspect-[3/2] lg:aspect-[2/1] lg:max-h-[560px]">
             <div className="absolute inset-0">
               <div className="absolute inset-0 bg-gradient-to-br from-brand-blue via-brand-blue-light to-brand-blue-light-dark" />
 
-              <div className="lg:hidden absolute inset-0 flex flex-col items-center justify-end text-center px-8 sm:px-16 pb-8 sm:pb-10 pt-16">
-                <p className="font-display text-brand-orange text-sm sm:text-base tracking-[0.15em] mb-2">
+              <div className="lg:hidden absolute inset-0 flex flex-col items-center justify-end text-center px-6 sm:px-16 pb-14 sm:pb-20 pt-10">
+                <p className="font-display text-brand-orange text-[11px] sm:text-sm tracking-[0.15em] mb-1.5 line-clamp-1">
                   HOME WORKOUTS
                 </p>
-                <h1 className="font-display text-3xl sm:text-4xl text-white leading-[1.2] mb-3">
+                <h1 className="font-display text-[26px] sm:text-4xl text-white leading-[1.15] mb-2 sm:mb-3 max-w-[300px] sm:max-w-[520px] text-balance line-clamp-3">
                   Dietplans &amp; Home Workouts — Built For You
                 </h1>
-                <p className="text-white font-medium text-base sm:text-lg leading-relaxed max-w-[300px] sm:max-w-[380px] mb-5">
+                <p className="text-white/90 font-medium text-sm sm:text-lg leading-snug sm:leading-relaxed max-w-[300px] sm:max-w-[420px] mb-4 sm:mb-5 line-clamp-2 sm:line-clamp-3">
                   Customized dietplans and home workouts — all on one
                   platform, wherever you are.
                 </p>
-                <div className="flex items-center gap-3">
-                  <Button size="sm" onClick={() => (window.location.href = "/plans")}>
+                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+                  <Button
+                    size="sm"
+                    className="whitespace-nowrap"
+                    onClick={() => (window.location.href = "/plans")}
+                  >
                     Explore Packages
                   </Button>
                   <Button
                     size="sm"
                     variant="secondary"
+                    className="whitespace-nowrap"
                     onClick={() =>
                       document
                         .getElementById("how-it-works")
                         ?.scrollIntoView({ behavior: "smooth" })
                     }
                   >
-                    <span className="flex items-center gap-2">
-                      How it works <ArrowRight size={16} />
+                    <span className="flex items-center gap-1.5">
+                      How it works <ArrowRight size={14} />
                     </span>
                   </Button>
                 </div>
@@ -222,7 +228,7 @@ const Home = () => {
             above the photo, description overlaid on it, buttons below),
             which read as disconnected chunks rather than one hero. Desktop
             keeps its own wide ratio and left-column layout, unchanged. */}
-        <div className="relative w-full aspect-[4/5] sm:aspect-[3/2] lg:aspect-[2/1] lg:max-h-[560px]">
+        <div className="relative w-full aspect-square sm:aspect-[3/2] lg:aspect-[2/1] lg:max-h-[560px]">
           <div className="absolute inset-0">
             <img
               src={optimizeCloudinaryUrl(heroSlides[heroSlide].image, 1200)}
@@ -244,32 +250,33 @@ const Home = () => {
                   column, so it gets a left-side gradient instead. Darker
                   than a typical scrim on purpose — legibility over photo
                   fidelity for the overlaid text. */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10 lg:bg-gradient-to-r lg:from-black/85 lg:via-black/50 lg:to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 via-55% to-black/5 lg:bg-gradient-to-r lg:from-black/85 lg:via-black/50 lg:via-50% lg:to-transparent" />
 
             {/* Text + CTA overlay — mobile + tablet, anchored to the bottom
                 of the photo as one block */}
-            <div className="lg:hidden absolute inset-0 flex flex-col items-center justify-end text-center px-8 sm:px-16 pb-8 sm:pb-10 pt-16">
+            <div className="lg:hidden absolute inset-0 flex flex-col items-center justify-end text-center px-6 sm:px-16 pb-14 sm:pb-20 pt-10">
               <p
-                className="font-display text-brand-orange text-sm sm:text-base tracking-[0.15em] mb-2"
+                className="font-display text-brand-orange text-[11px] sm:text-sm tracking-[0.15em] mb-1.5 line-clamp-1"
                 style={{ textShadow: "0 1px 8px rgba(0,0,0,0.7)" }}
               >
                 {heroSlides[heroSlide].eyebrow}
               </p>
               <h1
-                className="font-display text-3xl sm:text-4xl text-white leading-[1.2] mb-3"
+                className="font-display text-[26px] sm:text-4xl text-white leading-[1.15] mb-2 sm:mb-3 max-w-[300px] sm:max-w-[520px] text-balance line-clamp-3"
                 style={{ textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}
               >
                 {heroSlides[heroSlide].title}
               </h1>
               <p
-                className="text-white font-medium text-base sm:text-lg leading-relaxed max-w-[300px] sm:max-w-[380px] mb-5"
+                className="text-white/90 font-medium text-sm sm:text-lg leading-snug sm:leading-relaxed max-w-[300px] sm:max-w-[420px] mb-4 sm:mb-5 line-clamp-2 sm:line-clamp-3"
                 style={{ textShadow: "0 1px 8px rgba(0,0,0,0.7)" }}
               >
                 {heroSlides[heroSlide].desc}
               </p>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
                 <Button
                   size="sm"
+                  className="whitespace-nowrap"
                   onClick={() =>
                     (window.location.href = heroSlides[heroSlide].href)
                   }
@@ -279,14 +286,15 @@ const Home = () => {
                 <Button
                   size="sm"
                   variant="secondary"
+                  className="whitespace-nowrap"
                   onClick={() =>
                     document
                       .getElementById("how-it-works")
                       ?.scrollIntoView({ behavior: "smooth" })
                   }
                 >
-                  <span className="flex items-center gap-2">
-                    How it works <ArrowRight size={16} />
+                  <span className="flex items-center gap-1.5">
+                    How it works <ArrowRight size={14} />
                   </span>
                 </Button>
               </div>
@@ -367,7 +375,7 @@ const Home = () => {
           </button>
 
           {/* Dot indicators — stable, outside the crossfade */}
-          <div className="absolute bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 lg:bottom-5">
+          <div className="absolute bottom-9 sm:bottom-14 lg:bottom-16 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
             {heroSlides.map((_, i) => (
               <button
                 key={i}
@@ -384,27 +392,43 @@ const Home = () => {
       </section>
       )}
 
-      {/* Stats bar */}
-      <section className="bg-brand-blue">
-        <div className="max-w-6xl mx-auto px-6 py-7 md:py-10 grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-5 md:gap-8">
+      {/* Stats — one card of four, lifted over the banner's bottom edge so
+          the two read as one opening block (and the page no longer spends
+          a full-width band on four numbers). The banner leaves room at its
+          bottom for the overlap; with no banner the card just sits in flow. */}
+      <section
+        className={`relative z-10 px-4 sm:px-6 ${
+          heroLoading || heroSlides.length > 0
+            ? "-mt-7 sm:-mt-10 lg:-mt-12"
+            : "pt-8"
+        }`}
+      >
+        <div className="max-w-5xl mx-auto grid grid-cols-4 divide-x divide-brand-blue-pale bg-white border border-brand-blue-pale rounded-2xl shadow-[0_14px_36px_-14px_rgba(18,34,74,0.35)]">
           {stats.map((stat, i) => (
             <motion.div
               key={stat.label}
-              className="text-center"
-              initial={{ opacity: 0, y: 20 }}
+              className="flex flex-col lg:flex-row items-center justify-center gap-1.5 lg:gap-3.5 px-1 py-3.5 sm:py-5 text-center lg:text-left"
+              initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.5 }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
+              transition={{ duration: 0.4, delay: i * 0.08 }}
             >
-              <stat.icon className="mx-auto text-brand-orange mb-2" size={22} />
-              <p className="font-display text-2xl md:text-3xl text-brand-orange mb-1 tabular-nums">
-                {stat.display ?? (
-                  <AnimatedCounter target={stat.target} suffix={stat.suffix} />
-                )}
-              </p>
-              <p className="text-white/70 text-xs md:text-sm tracking-wide">
-                {stat.label}
-              </p>
+              <span className="hidden sm:flex shrink-0 w-9 h-9 lg:w-11 lg:h-11 rounded-full bg-brand-orange/10 items-center justify-center">
+                <stat.icon className="text-brand-orange" size={18} />
+              </span>
+              <div>
+                <p className="font-display text-xl sm:text-2xl lg:text-3xl text-brand-blue leading-none tabular-nums">
+                  {stat.display ?? (
+                    <>
+                      <AnimatedCounter target={stat.target} />
+                      <span className="text-brand-orange">{stat.suffix}</span>
+                    </>
+                  )}
+                </p>
+                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide leading-tight text-brand-blue/55 mt-1.5">
+                  {stat.label}
+                </p>
+              </div>
             </motion.div>
           ))}
         </div>
