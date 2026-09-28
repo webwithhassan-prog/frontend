@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import Button from "./Button";
 import { trackEvent } from "../../utils/analytics";
+import useLockBodyScroll from "../../hooks/useLockBodyScroll";
 
 const DISMISSED_KEY = "dismissed_offer_id";
 
@@ -12,6 +13,7 @@ const OfferPopup = () => {
   const [offer, setOffer] = useState(null);
   const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
+  useLockBodyScroll(visible);
 
   useEffect(() => {
     let timer;
@@ -58,7 +60,7 @@ const OfferPopup = () => {
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60] px-4"
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60] px-4 overscroll-contain"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -75,7 +77,8 @@ const OfferPopup = () => {
             <div className="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-brand-orange to-brand-gold" />
             <button
               onClick={handleClose}
-              className="absolute top-4 right-4 text-brand-blue/40 hover:text-brand-blue"
+              className="absolute top-4 right-4 text-brand-blue/40 hover:text-brand-blue rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+              aria-label="Close offer"
             >
               <X size={20} />
             </button>

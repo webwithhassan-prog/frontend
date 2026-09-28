@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { Link, Outlet } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-import logo from "../../assets/logo.jpeg";
+import logo from "../../assets/logo-nav.png";
 import Loader from "../common/Loader";
 
 const ClientLayout = () => {

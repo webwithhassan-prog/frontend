@@ -13,7 +13,7 @@ const pageMeta = {
   "/plans": {
     title: `Packages & Pricing | ${siteName}`,
     description:
-      "Choose a Dietplan, Home Workouts, or both — 30, 90, or 180-day packages with transparent pricing.",
+      "Choose a Dietplan, Home Workouts, or both — packages for every timeline, with transparent pricing.",
   },
   "/about": {
     title: `About Us | ${siteName}`,

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import logo from "../../assets/logo.jpeg";
+import logo from "../../assets/logo-nav.png";
 import WhatsAppIcon from "./WhatsAppIcon";
 import { useSettings } from "../../context/SettingsContext";
 
@@ -11,11 +11,11 @@ const Footer = () => {
       <div className="max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <img
-              src={logo}
-              alt="Fitness Zone"
-              className="h-9 w-9 object-contain"
-            />
+            {/* A white disc, not the logo's own white square: the mark's
+                dark lettering needs a light ground on the navy footer. */}
+            <span className="h-10 w-10 rounded-full bg-white flex items-center justify-center shrink-0">
+              <img src={logo} alt="Fitness Zone" className="h-8 w-8 object-contain" />
+            </span>
             <span className="font-display text-white text-sm tracking-wide">
               FITNESS <span className="text-brand-orange">ZONE</span>
             </span>

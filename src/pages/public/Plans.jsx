@@ -13,9 +13,9 @@ import CurrencySwitcher from "../../components/common/CurrencySwitcher";
 import { getErrorMessage } from "../../utils/errors";
 import Modal from "../../components/admin/Modal";
 import ManualPaymentPanel from "../../components/common/ManualPaymentPanel";
+import CardSlider from "../../components/common/CardSlider";
 import { CURRENCY_TO_COUNTRY } from "../../utils/currencyToCountry";
-
-const durations = [30, 90, 180];
+import { durationsForType, popularFlags } from "../../utils/packages";
 
 const packageLabels = {
   dietplan: "Customized Dietplan",
@@ -119,10 +119,11 @@ const Plans = () => {
     if (selectedType === "workout") return workout ? [workout] : [];
     // A dedicated combo plan (its own price + features) takes priority;
     // falling back to summing Dietplan + Workout keeps older durations
-    // working before a combo price is set for them.
+    // working before a combo price is set for them — but only when both
+    // halves exist, or a lone dietplan would be sold as "Both Combined".
     if (selectedType === "combo") {
       if (combo) return [combo];
-      return [dietplan, workout].filter(Boolean);
+      return dietplan && workout ? [dietplan, workout] : [];
     }
     return [];
   };
@@ -224,6 +225,175 @@ const Plans = () => {
     setManualPayFor({ duration, planIds, amountLabel });
   };
 
+  const durations = durationsForType(plans, selectedType);
+  const popular = popularFlags(
+    durations.map((d) => getSelectionForDuration(d).some((p) => p.is_popular)),
+  );
+  // Lifting the popular card only reads right when every card shares a row.
+  const liftPopular = durations.length <= 3;
+
+  const renderCard = (duration, i, inSlider) => {
+    const selection = getSelectionForDuration(duration);
+    const total = selection.reduce((sum, p) => sum + getPlanPrice(p), 0);
+    const originalTotal = selection.reduce((sum, p) => sum + p.price, 0);
+    const hasDiscount = selection.length > 0 && total < originalTotal;
+    const discountPercent = hasDiscount
+      ? Math.round((1 - total / originalTotal) * 100)
+      : 0;
+    const dietplan = selection.find((p) => p.product_type === "dietplan");
+    // Looked up independently of `selection` because once a dedicated combo
+    // plan exists, selection is just [combo] — but the combo card should
+    // still show both plans' real feature lists side by side, not only the
+    // combo's own summary.
+    const dietplanForDuration = plans.find(
+      (p) => p.product_type === "dietplan" && p.duration_days === duration,
+    );
+    const workoutForDuration = plans.find(
+      (p) => p.product_type === "workout" && p.duration_days === duration,
+    );
+    const isDedicatedCombo =
+      selectedType === "combo" &&
+      selection.length === 1 &&
+      selection[0].product_type === "combo";
+    const dietPlansIncluded = isDedicatedCombo
+      ? selection[0].diet_plans_included
+      : selectedType === "dietplan"
+        ? dietplan?.diet_plans_included
+        : null;
+    const isPopular = popular[i];
+    const perDay = selection.length > 0 ? Math.round(total / duration) : null;
+
+    return (
+      <Card
+        revealOnScroll={!inSlider}
+        className={`h-full flex flex-col ${
+          isPopular ? "border-brand-orange border-2 shadow-xl" : ""
+        }`}
+      >
+        {/* Badge shares the title row so every card is the same height —
+            in the phone slider the arrows and dots stay put. */}
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <h3 className="font-display text-brand-blue text-lg">
+            {duration} Days
+          </h3>
+          {isPopular && (
+            <span className="bg-brand-orange text-white text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap">
+              MOST POPULAR
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <p className="font-display text-3xl text-brand-blue tabular-nums">
+            {selection.length > 0 ? format(total) : "—"}
+          </p>
+          {hasDiscount && (
+            <span className="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-full">
+              {discountPercent}% OFF
+            </span>
+          )}
+        </div>
+        {hasDiscount && (
+          <p className="text-sm text-brand-blue/40 line-through tabular-nums">
+            {format(originalTotal)}
+          </p>
+        )}
+        {perDay && (
+          <p className="text-xs text-brand-blue/50 mb-4 tabular-nums">
+            ≈ {format(perDay)} / day
+          </p>
+        )}
+
+        {dietPlansIncluded && (
+          <p className="text-sm text-brand-blue/70 mb-2">
+            Includes {dietPlansIncluded} diet plans
+          </p>
+        )}
+
+        {selectedType === "combo" ? (
+          <div className="grid grid-cols-2 gap-4 my-4 flex-1">
+            <div className="pr-4 border-r border-brand-blue-pale">
+              <p className="text-[11px] font-bold text-brand-blue uppercase tracking-wide mb-2.5">
+                Dietplan
+              </p>
+              <ul className="space-y-2">
+                {(dietplanForDuration?.features?.length
+                  ? dietplanForDuration.features
+                  : featuresByType.dietplan
+                ).map((f) => (
+                  <li
+                    key={f}
+                    className="flex items-start gap-1.5 text-xs text-brand-blue/70"
+                  >
+                    <Check size={14} className="text-brand-orange mt-0.5 shrink-0" />
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="pl-1">
+              <p className="text-[11px] font-bold text-brand-blue uppercase tracking-wide mb-2.5">
+                Home Workouts
+              </p>
+              <ul className="space-y-2">
+                {(workoutForDuration?.features?.length
+                  ? workoutForDuration.features
+                  : featuresByType.workout
+                ).map((f) => (
+                  <li
+                    key={f}
+                    className="flex items-start gap-1.5 text-xs text-brand-blue/70"
+                  >
+                    <Check size={14} className="text-brand-orange mt-0.5 shrink-0" />
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ) : (
+          <ul className="space-y-2.5 my-4 flex-1">
+            {(selection.length === 1 && selection[0].features?.length
+              ? selection[0].features
+              : featuresByType[selectedType] || []
+            ).map((f) => (
+              <li key={f} className="flex items-start gap-2 text-sm text-brand-blue/70">
+                <Check size={16} className="text-brand-orange mt-0.5 shrink-0" />
+                <span>{f}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <Button
+          onClick={() => handleCheckout(duration)}
+          disabled={checkingOutDuration === duration}
+          variant={isPopular ? "primary" : "secondary"}
+          className="w-full"
+        >
+          {checkingOutDuration === duration ? "Redirecting..." : "Pay with Card"}
+        </Button>
+        <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
+          Instant Access
+        </p>
+
+        {manualMethods.length > 0 && selection.length > 0 && (
+          <>
+            <Button
+              onClick={() => handleManualPayClick(duration, selection, total)}
+              variant="secondary"
+              className="w-full mt-3"
+            >
+              {manualMethods.map((m) => m.name).join(" / ")}
+            </Button>
+            <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
+              Instant Access (once your payment is verified by our team)
+            </p>
+          </>
+        )}
+      </Card>
+    );
+  };
+
   return (
     <section className="max-w-5xl mx-auto px-6 py-20">
       <motion.h1
@@ -307,199 +477,43 @@ const Plans = () => {
 
       {loading ? (
         <Loader />
+      ) : durations.length === 0 ? (
+        <p className="text-center text-brand-blue/60">
+          No {packageLabels[selectedType] || ""} packages are available right now.
+        </p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {durations.map((duration, i) => {
-            const selection = getSelectionForDuration(duration);
-            const total = selection.reduce(
-              (sum, p) => sum + getPlanPrice(p),
-              0,
-            );
-            const originalTotal = selection.reduce(
-              (sum, p) => sum + p.price,
-              0,
-            );
-            const hasDiscount = selection.length > 0 && total < originalTotal;
-            const discountPercent = hasDiscount
-              ? Math.round((1 - total / originalTotal) * 100)
-              : 0;
-            const dietplan = selection.find(
-              (p) => p.product_type === "dietplan",
-            );
-            // Looked up independently of `selection` because once a
-            // dedicated combo plan exists, selection is just [combo] — but
-            // the combo card should still show both plans' real feature
-            // lists side by side, not only the combo's own summary.
-            const dietplanForDuration = plans.find(
-              (p) => p.product_type === "dietplan" && p.duration_days === duration,
-            );
-            const workoutForDuration = plans.find(
-              (p) => p.product_type === "workout" && p.duration_days === duration,
-            );
-            const isDedicatedCombo =
-              selectedType === "combo" &&
-              selection.length === 1 &&
-              selection[0].product_type === "combo";
-            const dietPlansIncluded = isDedicatedCombo
-              ? selection[0].diet_plans_included
-              : selectedType === "dietplan"
-                ? dietplan?.diet_plans_included
-                : null;
-            const isMiddle = i === 1;
-            const perDay =
-              selection.length > 0 ? Math.round(total / duration) : null;
-
-            return (
+        <>
+          {/* Tablet and up: a centred row that wraps, so any number of
+              admin-defined durations lays out without a stranded gap. */}
+          <div className="hidden md:flex md:flex-wrap md:justify-center gap-8 pt-4">
+            {durations.map((duration, i) => (
               <motion.div
                 key={duration}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.4, delay: i * 0.1 }}
-                className={isMiddle ? "md:-mt-4" : ""}
+                className={`md:w-[calc((100%-2rem)/2)] lg:w-[calc((100%-4rem)/3)] ${
+                  liftPopular && popular[i] ? "lg:-mt-4" : ""
+                }`}
               >
-                <Card
-                  className={`h-full flex flex-col ${
-                    isMiddle
-                      ? "border-brand-orange border-2 shadow-xl"
-                      : ""
-                  }`}
-                >
-                  {isMiddle && (
-                    <span className="inline-block bg-brand-orange text-white text-xs font-bold px-3 py-1 rounded-full mb-3 self-start">
-                      MOST POPULAR
-                    </span>
-                  )}
-                  <h3 className="font-display text-brand-blue text-lg mb-1">
-                    {duration} Days
-                  </h3>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-display text-3xl text-brand-blue">
-                      {selection.length > 0 ? format(total) : "—"}
-                    </p>
-                    {hasDiscount && (
-                      <span className="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-full">
-                        {discountPercent}% OFF
-                      </span>
-                    )}
-                  </div>
-                  {hasDiscount && (
-                    <p className="text-sm text-brand-blue/40 line-through">
-                      {format(originalTotal)}
-                    </p>
-                  )}
-                  {perDay && (
-                    <p className="text-xs text-brand-blue/50 mb-4">
-                      ≈ {format(perDay)} / day
-                    </p>
-                  )}
-
-                  {dietPlansIncluded && (
-                    <p className="text-sm text-brand-blue/70 mb-2">
-                      Includes {dietPlansIncluded} diet plans
-                    </p>
-                  )}
-
-                  {selectedType === "combo" ? (
-                    <div className="grid grid-cols-2 gap-4 my-4 flex-1">
-                      <div className="pr-4 border-r border-brand-blue-pale">
-                        <p className="text-[11px] font-bold text-brand-blue uppercase tracking-wide mb-2.5">
-                          Dietplan
-                        </p>
-                        <ul className="space-y-2">
-                          {(dietplanForDuration?.features?.length
-                            ? dietplanForDuration.features
-                            : featuresByType.dietplan
-                          ).map((f) => (
-                            <li
-                              key={f}
-                              className="flex items-start gap-1.5 text-xs text-brand-blue/70"
-                            >
-                              <Check
-                                size={14}
-                                className="text-brand-orange mt-0.5 shrink-0"
-                              />
-                              <span>{f}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="pl-1">
-                        <p className="text-[11px] font-bold text-brand-blue uppercase tracking-wide mb-2.5">
-                          Home Workouts
-                        </p>
-                        <ul className="space-y-2">
-                          {(workoutForDuration?.features?.length
-                            ? workoutForDuration.features
-                            : featuresByType.workout
-                          ).map((f) => (
-                            <li
-                              key={f}
-                              className="flex items-start gap-1.5 text-xs text-brand-blue/70"
-                            >
-                              <Check
-                                size={14}
-                                className="text-brand-orange mt-0.5 shrink-0"
-                              />
-                              <span>{f}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  ) : (
-                    <ul className="space-y-2.5 my-4 flex-1">
-                      {(selection.length === 1 && selection[0].features?.length
-                        ? selection[0].features
-                        : featuresByType[selectedType] || []
-                      ).map((f) => (
-                        <li
-                          key={f}
-                          className="flex items-start gap-2 text-sm text-brand-blue/70"
-                        >
-                          <Check
-                            size={16}
-                            className="text-brand-orange mt-0.5 shrink-0"
-                          />
-                          <span>{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  <Button
-                    onClick={() => handleCheckout(duration)}
-                    disabled={checkingOutDuration === duration}
-                    variant={isMiddle ? "primary" : "secondary"}
-                    className="w-full"
-                  >
-                    {checkingOutDuration === duration
-                      ? "Redirecting..."
-                      : "Pay with Card"}
-                  </Button>
-                  <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
-                    Instant Access
-                  </p>
-
-                  {manualMethods.length > 0 && selection.length > 0 && (
-                    <>
-                      <Button
-                        onClick={() => handleManualPayClick(duration, selection, total)}
-                        variant="secondary"
-                        className="w-full mt-3"
-                      >
-                        {manualMethods.map((m) => m.name).join(" / ")}
-                      </Button>
-                      <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
-                        Instant Access (once your payment is verified by our team)
-                      </p>
-                    </>
-                  )}
-                </Card>
+                {renderCard(duration, i, false)}
               </motion.div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+
+          {/* Phones: one card at a time; keyed by tab so switching package
+              type starts again from the first card. */}
+          <CardSlider
+            key={selectedType}
+            className="md:hidden"
+            items={durations}
+            getKey={(duration) => duration}
+            getLabel={(duration) => `${duration}-day package`}
+            itemName="package"
+            renderItem={(duration, i) => renderCard(duration, i, true)}
+          />
+        </>
       )}
 
       <Modal

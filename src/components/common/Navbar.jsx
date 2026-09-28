@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,10 +13,14 @@ import {
 import Button from "./Button";
 import InstagramIcon from "./InstagramIcon";
 import WhatsAppIcon from "./WhatsAppIcon";
-import logo from "../../assets/logo.jpeg";
+// Trimmed, transparent-background mark (scripts/generate-nav-logo.mjs) —
+// logo.jpeg is a white square, which showed as a box on the translucent
+// header whenever a coloured section scrolled underneath.
+import logo from "../../assets/logo-nav.png";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import { useSettings } from "../../context/SettingsContext";
+import useLockBodyScroll from "../../hooks/useLockBodyScroll";
 
 const packageOptions = [
   { label: "Customized Dietplan", type: "dietplan" },
@@ -139,12 +143,7 @@ const Navbar = () => {
     if (searchResults[0]) goToResult(searchResults[0]);
   };
 
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  useLockBodyScroll(isOpen);
 
   return (
     <div className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-brand-blue-pale/60">
@@ -155,7 +154,7 @@ const Navbar = () => {
               <img
                 src={logo}
                 alt="Fitness Zone"
-                className="h-14 w-14 object-contain"
+                className="h-11 w-11 object-contain"
               />
               <span className="font-display text-brand-blue text-lg tracking-wide hidden sm:block">
                 FITNESS <span className="text-brand-orange">ZONE</span>
@@ -360,7 +359,7 @@ const Navbar = () => {
               <AnimatePresence>
                 {isSearchOpen && (
                   <motion.div
-                    className="fixed left-4 right-4 top-[68px] bg-white rounded-2xl shadow-lg border border-brand-blue-pale overflow-hidden"
+                    className="fixed left-4 right-4 top-[84px] bg-white rounded-2xl shadow-lg border border-brand-blue-pale overflow-hidden"
                     initial={{ opacity: 0, y: -8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
@@ -448,7 +447,7 @@ const Navbar = () => {
                   <img
                     src={logo}
                     alt="Fitness Zone"
-                    className="h-14 w-14 object-contain"
+                    className="h-11 w-11 object-contain"
                   />
                   <span className="font-display text-brand-blue text-lg tracking-wide">
                     FITNESS <span className="text-brand-orange">ZONE</span>

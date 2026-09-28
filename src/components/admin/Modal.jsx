@@ -1,19 +1,38 @@
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
+import useLockBodyScroll from "../../hooks/useLockBodyScroll";
 
+// Portaled to <body>: rendered in place, a transformed ancestor (any
+// animated card or section) would become the containing block for its
+// `fixed` backdrop, and the sticky navbar (same z-index, earlier in the
+// page) could paint over it.
 const Modal = ({ isOpen, onClose, title, children }) => {
-  return (
+  useLockBodyScroll(isOpen);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, onClose]);
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4 py-8 overflow-y-auto"
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-[70] px-4 py-8 overflow-y-auto overscroll-contain"
+          role="dialog"
+          aria-modal="true"
+          aria-label={title}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
         >
           <motion.div
-            className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 my-auto max-h-full overflow-y-auto"
+            className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 my-auto max-h-full overflow-y-auto overscroll-contain"
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -43,7 +62,8 @@ const Modal = ({ isOpen, onClose, title, children }) => {
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 };
 

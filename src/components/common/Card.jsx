@@ -3,10 +3,10 @@ import { motion } from "framer-motion";
 // revealOnScroll={false} for cards inside a horizontal slider — the fade-in
 // waits for 30% of the card to enter the viewport, which a card parked
 // off to the side of a slider never does, so it would stay invisible.
-const Card = ({ children, className = "", revealOnScroll = true }) => {
+const Card = ({ children, className = "", padding = "p-6", revealOnScroll = true }) => {
   return (
     <motion.div
-      className={`bg-white border border-brand-blue-pale rounded-2xl shadow-md p-6 ${className}`}
+      className={`bg-white border border-brand-blue-pale rounded-2xl shadow-md ${padding} ${className}`}
       initial={revealOnScroll ? { opacity: 0, y: 20 } : false}
       whileInView={revealOnScroll ? { opacity: 1, y: 0 } : undefined}
       viewport={{ once: true, amount: 0.3 }}

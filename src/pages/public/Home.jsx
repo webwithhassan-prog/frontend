@@ -55,7 +55,7 @@ const steps = [
 const Home = () => {
   const [demoVideos, setDemoVideos] = useState([]);
   const [demoSlide, setDemoSlide] = useState(0);
-  const [demoPlaying, setDemoPlaying] = useState(false);
+  const [demoInteracted, setDemoInteracted] = useState(false);
   const [heroSlide, setHeroSlide] = useState(0);
   const [heroSlides, setHeroSlides] = useState([]);
   const [heroLoading, setHeroLoading] = useState(true);
@@ -95,18 +95,20 @@ const Home = () => {
     fetchDemoVideos();
   }, []);
 
-  // Auto-advance stops once a visitor starts a video — otherwise it would
-  // switch away from the video they're watching 6 seconds later.
+  // Auto-advance runs only until the visitor touches the slider — playing a
+  // video, or using the arrows/dots. After that they're in control: it must
+  // never switch away from a video they started, and restarting the timer
+  // after a manual pick would yank the next video they play, too.
   useEffect(() => {
-    if (demoVideos.length <= 1 || demoPlaying) return;
+    if (demoVideos.length <= 1 || demoInteracted) return;
     const timer = setInterval(() => {
       setDemoSlide((prev) => (prev + 1) % demoVideos.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, [demoVideos.length, demoPlaying]);
+  }, [demoVideos.length, demoInteracted]);
 
   const showDemo = (index) => {
-    setDemoPlaying(false);
+    setDemoInteracted(true);
     setDemoSlide((index + demoVideos.length) % demoVideos.length);
   };
   const goPrevDemo = () => showDemo(demoSlide - 1);
@@ -425,7 +427,13 @@ const Home = () => {
               Home workouts in action, exactly as our members experience them.
             </p>
 
-            <div className="relative flex items-center justify-center gap-4 sm:gap-6">
+            {/* Any press inside the slider counts, in the capture phase —
+                it lands before the tap that swaps in the YouTube player,
+                whose own iframe then swallows every later event. */}
+            <div
+              className="relative flex items-center justify-center gap-4 sm:gap-6"
+              onPointerDownCapture={() => setDemoInteracted(true)}
+            >
               {demoVideos.length > 1 && (
                 <button
                   onClick={goPrevDemo}
@@ -452,7 +460,7 @@ const Home = () => {
                           link={demoVideos[demoSlide].youtube_link}
                           title={demoVideos[demoSlide].title || "Session demo"}
                           className="w-full h-full"
-                          onPlay={() => setDemoPlaying(true)}
+                          onPlay={() => setDemoInteracted(true)}
                         />
                       </div>
                       {demoVideos[demoSlide].title && (

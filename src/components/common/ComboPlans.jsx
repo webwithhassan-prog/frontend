@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { Check } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import Card from "./Card";
 import Button from "./Button";
+import CardSlider from "./CardSlider";
+import CurrencySwitcher from "./CurrencySwitcher";
 import Modal from "../admin/Modal";
 import ManualPaymentPanel from "./ManualPaymentPanel";
 import { useCurrency } from "../../context/CurrencyContext";
 import { CURRENCY_TO_COUNTRY } from "../../utils/currencyToCountry";
 import { getErrorMessage } from "../../utils/errors";
 import { trackEvent } from "../../utils/analytics";
+import { popularFlags } from "../../utils/packages";
 
 // Same fallbacks the packages page uses when a plan has no features set.
 const defaultFeatures = {
@@ -32,22 +35,22 @@ const defaultFeatures = {
   ],
 };
 
-const SWIPE_DISTANCE = 60;
-const SWIPE_VELOCITY = 400;
-
 // Offer discount only — the coupon field lives on the packages page.
 const priceOf = (plan) =>
   Math.round(plan.price * (1 - (plan.discount_percent || 0) / 100));
 
 const FeatureColumn = ({ title, features, className }) => (
   <div className={className}>
-    <p className="text-[11px] font-bold text-brand-blue uppercase tracking-wide mb-2.5">
+    <p className="text-[10px] font-bold text-brand-blue uppercase tracking-wide mb-1.5">
       {title}
     </p>
-    <ul className="space-y-2">
+    <ul className="space-y-1">
       {features.map((f) => (
-        <li key={f} className="flex items-start gap-1.5 text-xs text-brand-blue/70">
-          <Check size={14} className="text-brand-orange mt-0.5 shrink-0" />
+        <li
+          key={f}
+          className="flex items-start gap-1 text-[11px] leading-snug text-brand-blue/70"
+        >
+          <Check size={12} className="text-brand-orange mt-[2px] shrink-0" />
           <span>{f}</span>
         </li>
       ))}
@@ -75,57 +78,61 @@ const PlanCard = ({
   return (
     <Card
       revealOnScroll={!inSlider}
+      padding="p-4 md:p-5"
       className={`h-full flex flex-col ${
         isPopular ? "border-brand-orange border-2 shadow-xl" : ""
       }`}
     >
       {/* Badge shares the title row, so every card is the same height and
           the slider's arrows/dots don't jump when the popular card appears. */}
-      <div className="flex items-center justify-between gap-2 mb-1">
-        <h3 className="font-display text-brand-blue text-lg">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="font-display text-brand-blue text-base">
           {plan.duration_days} Days
         </h3>
         {isPopular && (
-          <span className="bg-brand-orange text-white text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap">
+          <span className="bg-brand-orange text-white text-[9px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
             MOST POPULAR
           </span>
         )}
       </div>
-      <div className="flex items-center gap-2 flex-wrap">
-        <p className="font-display text-3xl text-brand-blue tabular-nums">{format(total)}</p>
+      <div className="flex items-center gap-2 flex-wrap mt-0.5">
+        <p className="font-display text-2xl text-brand-blue tabular-nums">{format(total)}</p>
         {hasDiscount && (
-          <span className="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-full">
+          <span className="text-[9px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded-full">
             {discountPercent}% OFF
           </span>
         )}
       </div>
-      {hasDiscount && (
-        <p className="text-sm text-brand-blue/40 line-through tabular-nums">
-          {format(plan.price)}
-        </p>
-      )}
-      <p className="text-xs text-brand-blue/50 mb-4 tabular-nums">≈ {format(perDay)} / day</p>
+      <p className="text-[11px] text-brand-blue/50 tabular-nums">
+        {hasDiscount && (
+          <>
+            <span className="line-through text-brand-blue/40">{format(plan.price)}</span>
+            <span className="mx-1.5" aria-hidden="true">·</span>
+          </>
+        )}
+        ≈ {format(perDay)} / day
+      </p>
 
       {plan.diet_plans_included > 0 && (
-        <p className="text-sm text-brand-blue/70 mb-2">
+        <p className="text-xs text-brand-blue/70 mt-1.5">
           Includes {plan.diet_plans_included} diet plans
         </p>
       )}
 
-      <div className="grid grid-cols-2 gap-4 my-4 flex-1">
+      <div className="grid grid-cols-2 gap-3 my-3 flex-1">
         <FeatureColumn
           title="Dietplan"
           features={dietplan?.features?.length ? dietplan.features : defaultFeatures.dietplan}
-          className="pr-4 border-r border-brand-blue-pale"
+          className="pr-3 border-r border-brand-blue-pale"
         />
         <FeatureColumn
           title="Home Workouts"
           features={workout?.features?.length ? workout.features : defaultFeatures.workout}
-          className="pl-1"
         />
       </div>
 
       <Button
+        size="sm"
         onClick={onPayWithCard}
         disabled={checkingOut}
         variant={isPopular ? "primary" : "secondary"}
@@ -133,14 +140,14 @@ const PlanCard = ({
       >
         {checkingOut ? "Redirecting..." : "Pay with Card"}
       </Button>
-      <p className="text-[11px] text-brand-blue-light text-center mt-1.5">Instant Access</p>
+      <p className="text-[10px] text-brand-blue-light text-center mt-1">Instant Access</p>
 
       {manualMethods.length > 0 && (
         <>
-          <Button onClick={onManualPay} variant="secondary" className="w-full mt-3">
+          <Button size="sm" onClick={onManualPay} variant="secondary" className="w-full mt-2.5">
             {manualMethods.map((m) => m.name).join(" / ")}
           </Button>
-          <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
+          <p className="text-[10px] text-brand-blue-light text-center mt-1">
             Instant Access (once your payment is verified by our team)
           </p>
         </>
@@ -150,17 +157,14 @@ const PlanCard = ({
 };
 
 // Homepage showcase of the Dietplan + Home Workouts packages, with the same
-// checkout and payment options as the packages page: a 3-up row on desktop,
-// a one-card-at-a-time slider (arrows, dots, swipe) on mobile.
+// checkout and payment options as the packages page: a row of cards on
+// larger screens, a one-card-at-a-time slider on phones.
 const ComboPlans = () => {
   const [allPlans, setAllPlans] = useState([]);
-  const [slide, setSlide] = useState(0);
-  const [direction, setDirection] = useState(1);
   const [checkingOutId, setCheckingOutId] = useState(null);
   const [manualMethods, setManualMethods] = useState([]);
   const [manualPayFor, setManualPayFor] = useState(null); // { plan, amountLabel }
   const { format, currency } = useCurrency();
-  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     api
@@ -191,7 +195,9 @@ const ComboPlans = () => {
 
   const findPlan = (type, days) =>
     allPlans.find((p) => p.product_type === type && p.duration_days === days);
-  const popularIndex = plans.length === 3 ? 1 : -1;
+  const popular = popularFlags(plans.map((p) => !!p.is_popular));
+  // Lifting the popular card only reads right when every card shares a row.
+  const liftPopular = plans.length <= 3;
 
   const payWithCard = async (plan) => {
     setCheckingOutId(plan._id);
@@ -212,7 +218,7 @@ const ComboPlans = () => {
     plan,
     dietplan: findPlan("dietplan", plan.duration_days),
     workout: findPlan("workout", plan.duration_days),
-    isPopular: i === popularIndex,
+    isPopular: popular[i],
     inSlider,
     format,
     manualMethods,
@@ -221,98 +227,49 @@ const ComboPlans = () => {
     onManualPay: () => setManualPayFor({ plan, amountLabel: format(priceOf(plan)) }),
   });
 
-  const goTo = (target, dir) => {
-    setDirection(dir);
-    setSlide((target + plans.length) % plans.length);
-  };
-  const goPrev = () => goTo(slide - 1, -1);
-  const goNext = () => goTo(slide + 1, 1);
-
-  const shift = reduceMotion ? 0 : 60;
-  const slideVariants = {
-    enter: (dir) => ({ opacity: 0, x: dir * shift }),
-    center: { opacity: 1, x: 0 },
-    exit: (dir) => ({ opacity: 0, x: dir * -shift }),
-  };
-
-  const arrowClass =
-    "bg-white shadow-md rounded-full p-2.5 text-brand-blue hover:text-brand-orange transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2";
-
   return (
-    <section className="py-20">
+    <section className="py-16 md:py-20">
       <div className="max-w-6xl mx-auto px-6">
         <motion.h2
-          className="font-display text-2xl md:text-3xl text-brand-blue text-center mb-4"
+          className="font-display text-2xl md:text-3xl text-brand-blue text-center mb-3"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
           DIETPLAN + HOME WORKOUTS
         </motion.h2>
-        <p className="text-brand-blue/70 text-center max-w-xl mx-auto mb-12">
+        <p className="text-brand-blue/70 text-center max-w-xl mx-auto mb-4">
           Both combined — your meals and your workouts, planned together in one
           package.
         </p>
+        <div className="flex justify-center mb-8">
+          <CurrencySwitcher />
+        </div>
 
-        {/* Desktop: all three side by side */}
-        <div className="hidden md:grid md:grid-cols-3 md:gap-8 md:items-start pt-4">
+        {/* Tablet and up: cards in a centred row that wraps, so any number
+            of admin-defined durations lays out without a stranded gap. */}
+        <div className="hidden md:flex md:flex-wrap md:justify-center md:gap-6 max-w-5xl mx-auto pt-3">
           {plans.map((plan, i) => (
-            <div key={plan._id} className={i === popularIndex ? "-mt-4" : ""}>
+            <div
+              key={plan._id}
+              className={`md:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3rem)/3)] ${
+                liftPopular && popular[i] ? "lg:-mt-3" : ""
+              }`}
+            >
               <PlanCard {...cardProps(plan, i, false)} />
             </div>
           ))}
         </div>
 
-        {/* Mobile: one full card at a time */}
-        <div className="md:hidden">
-          <div className="overflow-hidden">
-            <AnimatePresence mode="wait" initial={false} custom={direction}>
-              <motion.div
-                key={plans[slide]._id}
-                custom={direction}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.3, ease: "easeOut" }}
-                drag={plans.length > 1 ? "x" : false}
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.25}
-                onDragEnd={(_, { offset, velocity }) => {
-                  if (offset.x < -SWIPE_DISTANCE || velocity.x < -SWIPE_VELOCITY) goNext();
-                  else if (offset.x > SWIPE_DISTANCE || velocity.x > SWIPE_VELOCITY) goPrev();
-                }}
-                className="max-w-[360px] mx-auto touch-pan-y"
-              >
-                <PlanCard {...cardProps(plans[slide], slide, true)} />
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          {plans.length > 1 && (
-            <div className="flex items-center justify-center gap-5 mt-6">
-              <button onClick={goPrev} className={arrowClass} aria-label="Previous package">
-                <ChevronLeft size={20} />
-              </button>
-              <div className="flex gap-2">
-                {plans.map((plan, i) => (
-                  <button
-                    key={plan._id}
-                    onClick={() => goTo(i, i > slide ? 1 : -1)}
-                    aria-label={`Show ${plan.duration_days}-day package`}
-                    aria-current={i === slide}
-                    className={`h-2 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
-                      i === slide ? "w-6 bg-brand-orange" : "w-2 bg-brand-blue-pale"
-                    }`}
-                  />
-                ))}
-              </div>
-              <button onClick={goNext} className={arrowClass} aria-label="Next package">
-                <ChevronRight size={20} />
-              </button>
-            </div>
-          )}
-        </div>
+        {/* Phones: one card at a time */}
+        <CardSlider
+          className="md:hidden"
+          items={plans}
+          getKey={(plan) => plan._id}
+          getLabel={(plan) => `${plan.duration_days}-day package`}
+          itemName="package"
+          renderItem={(plan, i) => <PlanCard {...cardProps(plan, i, true)} />}
+        />
       </div>
 
       <Modal
