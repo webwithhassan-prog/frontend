@@ -8,6 +8,8 @@
     }
   ],
   "rewrites": [
-    { "source": "/((?!assets/).*)", "destination": "/index.html" }
+    { "source": "/(client|admin)", "destination": "/index.html" },
+    { "source": "/(client|admin)/:path*", "destination": "/index.html" },
+    { "source": "/(reset-password|complete-account)/:token", "destination": "/index.html" }
   ]
 }

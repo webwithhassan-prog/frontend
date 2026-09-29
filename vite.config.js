@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
-import { pageMeta, SITE_ORIGIN } from "./src/utils/pageMeta.js";
+import { getPageMeta, pageMeta, SITE_ORIGIN } from "./src/utils/pageMeta.js";
 
 const escapeAttr = (value) =>
   value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
@@ -63,6 +63,18 @@ const seoPages = () => ({
         source: withPageTags(withoutHeroPreload, pathname, meta),
       });
     }
+    // Served by the host, with a real 404 status, for any URL that isn't a
+    // page (see vercel.json) — the app still loads and shows its own "page
+    // not found" screen, but search engines get a 404 instead of a copy of
+    // the homepage. No canonical: there's no real page to point at.
+    this.emitFile({
+      type: "asset",
+      fileName: "404.html",
+      source: withPageTags(withoutHeroPreload, "/404", getPageMeta("/404")).replace(
+        /<link\s+rel="canonical"[^>]*\/>/,
+        "",
+      ),
+    });
   },
 });
 
