@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../services/api";
 import Card from "./Card";
@@ -165,6 +166,7 @@ const ComboPlans = () => {
   const [manualMethods, setManualMethods] = useState([]);
   const [manualPayFor, setManualPayFor] = useState(null); // { plan, amountLabel }
   const { format, currency } = useCurrency();
+  const navigate = useNavigate();
 
   useEffect(() => {
     api
@@ -270,6 +272,16 @@ const ComboPlans = () => {
           itemName="package"
           renderItem={(plan, i) => <PlanCard {...cardProps(plan, i, true)} />}
         />
+
+        {/* Onward to every package — Dietplan-only and Home Workouts-only
+            live on the packages page, not here. */}
+        <div className="text-center mt-8 md:mt-10">
+          <Button variant="secondary" onClick={() => navigate("/plans")}>
+            <span className="flex items-center gap-2">
+              View All Packages <ArrowRight size={16} />
+            </span>
+          </Button>
+        </div>
       </div>
 
       <Modal
