@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Star,
   ArrowRight,
@@ -20,6 +20,7 @@ import AnimatedCounter from "../../components/common/AnimatedCounter";
 import TestimonialsSlider from "../../components/common/TestimonialsSlider";
 import AchievementMarquee from "../../components/common/AchievementMarquee";
 import ComboPlans from "../../components/common/ComboPlans";
+import CardSlider from "../../components/common/CardSlider";
 import YouTubeFacade from "../../components/common/YouTubeFacade";
 import api from "../../services/api";
 import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
@@ -55,8 +56,6 @@ const steps = [
 
 const Home = () => {
   const [demoVideos, setDemoVideos] = useState([]);
-  const [demoSlide, setDemoSlide] = useState(0);
-  const [demoInteracted, setDemoInteracted] = useState(false);
   const [heroSlide, setHeroSlide] = useState(0);
   const [heroSlides, setHeroSlides] = useState([]);
   const [heroLoading, setHeroLoading] = useState(true);
@@ -95,25 +94,6 @@ const Home = () => {
     };
     fetchDemoVideos();
   }, []);
-
-  // Auto-advance runs only until the visitor touches the slider — playing a
-  // video, or using the arrows/dots. After that they're in control: it must
-  // never switch away from a video they started, and restarting the timer
-  // after a manual pick would yank the next video they play, too.
-  useEffect(() => {
-    if (demoVideos.length <= 1 || demoInteracted) return;
-    const timer = setInterval(() => {
-      setDemoSlide((prev) => (prev + 1) % demoVideos.length);
-    }, 6000);
-    return () => clearInterval(timer);
-  }, [demoVideos.length, demoInteracted]);
-
-  const showDemo = (index) => {
-    setDemoInteracted(true);
-    setDemoSlide((index + demoVideos.length) % demoVideos.length);
-  };
-  const goPrevDemo = () => showDemo(demoSlide - 1);
-  const goNextDemo = () => showDemo(demoSlide + 1);
 
   useEffect(() => {
     if (heroSlides.length <= 1) return;
@@ -437,112 +417,46 @@ const Home = () => {
       {/* Session Demos — blue background to keep the page's alternating
           light/blue rhythm after the light Combo Plans section. */}
       {demoVideos.length > 0 && (
-        <section className="bg-brand-blue py-20">
+        <section className="bg-brand-blue py-16 md:py-20">
           <div className="max-w-6xl mx-auto px-6">
             <motion.h2
-              className="font-display text-2xl md:text-3xl text-white text-center mb-4"
+              className="font-display text-2xl md:text-3xl text-white text-center mb-3"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
               SESSION DEMOS
             </motion.h2>
-            <p className="text-white/80 text-center max-w-xl mx-auto mb-14">
+            <p className="text-white/80 text-center max-w-xl mx-auto mb-8 md:mb-10">
               Home workouts in action, exactly as our members experience them.
             </p>
 
-            {/* Any press inside the slider counts, in the capture phase —
-                it lands before the tap that swaps in the YouTube player,
-                whose own iframe then swallows every later event. */}
-            <div
-              className="relative flex items-center justify-center gap-4 sm:gap-6"
-              onPointerDownCapture={() => setDemoInteracted(true)}
-            >
-              {demoVideos.length > 1 && (
-                <button
-                  onClick={goPrevDemo}
-                  className="hidden sm:flex shrink-0 bg-white shadow-md rounded-full p-2.5 text-brand-blue hover:text-brand-orange transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
-                  aria-label="Previous video"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-              )}
-
-              <div className="flex flex-col items-center">
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.div
-                    key={demoSlide}
-                    initial={{ opacity: 0, x: 30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -30 }}
-                    transition={{ duration: 0.35 }}
-                    className="w-full max-w-xl"
-                  >
-                    <Card className="p-2">
-                      <div className="aspect-video rounded-xl overflow-hidden bg-brand-blue-pale">
-                        <YouTubeFacade
-                          link={demoVideos[demoSlide].youtube_link}
-                          title={demoVideos[demoSlide].title || "Session demo"}
-                          className="w-full h-full"
-                          onPlay={() => setDemoInteracted(true)}
-                        />
-                      </div>
-                      {demoVideos[demoSlide].title && (
-                        <h3 className="font-display text-brand-blue text-sm mt-2 text-center">
-                          {demoVideos[demoSlide].title}
-                        </h3>
-                      )}
-                    </Card>
-                  </motion.div>
-                </AnimatePresence>
-
-                {demoVideos.length > 1 && (
-                  <div className="flex justify-center gap-2 mt-6">
-                    {demoVideos.map((v, i) => (
-                      <button
-                        key={v._id}
-                        onClick={() => showDemo(i)}
-                        aria-label={`Go to video ${i + 1}`}
-                        className={`h-2 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
-                          i === demoSlide
-                            ? "w-6 bg-brand-orange"
-                            : "w-2 bg-white/40"
-                        }`}
-                      />
-                    ))}
+            <CardSlider
+              className="max-w-3xl mx-auto"
+              itemClassName="max-w-2xl"
+              tone="dark"
+              autoAdvanceMs={6000}
+              items={demoVideos}
+              getKey={(video) => video._id}
+              getLabel={(video, i) => `video ${i + 1}`}
+              itemName="video"
+              renderItem={(video) => (
+                <Card revealOnScroll={false} padding="p-2">
+                  <div className="aspect-video rounded-xl overflow-hidden bg-brand-blue-pale">
+                    <YouTubeFacade
+                      link={video.youtube_link}
+                      title={video.title || "Session demo"}
+                      className="w-full h-full"
+                    />
                   </div>
-                )}
-              </div>
-
-              {demoVideos.length > 1 && (
-                <button
-                  onClick={goNextDemo}
-                  className="hidden sm:flex shrink-0 bg-white shadow-md rounded-full p-2.5 text-brand-blue hover:text-brand-orange transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
-                  aria-label="Next video"
-                >
-                  <ChevronRight size={20} />
-                </button>
+                  {video.title && (
+                    <h3 className="font-display text-brand-blue text-sm mt-2 mb-0.5 text-center">
+                      {video.title}
+                    </h3>
+                  )}
+                </Card>
               )}
-            </div>
-
-            {demoVideos.length > 1 && (
-              <div className="flex sm:hidden justify-center gap-6 mt-6">
-                <button
-                  onClick={goPrevDemo}
-                  className="bg-white shadow-md rounded-full p-2.5 text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
-                  aria-label="Previous video"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                <button
-                  onClick={goNextDemo}
-                  className="bg-white shadow-md rounded-full p-2.5 text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
-                  aria-label="Next video"
-                >
-                  <ChevronRight size={20} />
-                </button>
-              </div>
-            )}
+            />
           </div>
         </section>
       )}
