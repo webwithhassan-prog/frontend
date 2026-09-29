@@ -1,8 +1,16 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
+const MotionLink = motion.create(Link);
+
+// `to` renders a real link styled as a button — for anything that goes to
+// another page. Search engines follow links, not click handlers, and an
+// in-app path ("/plans") navigates without reloading the site. Anything
+// else (an external URL) becomes a plain <a>.
 const Button = ({
   children,
   onClick,
+  to,
   variant = "primary",
   size = "md",
   type = "button",
@@ -29,27 +37,40 @@ const Button = ({
     secondary: "0 8px 20px rgba(18,34,74,0.15)",
   };
 
+  const motionProps = {
+    whileHover: disabled ? {} : { scale: 1.05, boxShadow: hoverShadow[variant] },
+    whileTap: disabled ? {} : { scale: 0.95 },
+    animate: { opacity: disabled ? 0.5 : 1 },
+    transition: {
+      // Scale gets a spring — snappier and more tactile on press than a
+      // flat tween. Opacity/shadow stay smooth tweens since a spring on
+      // those (rather than a physical motion) just looks like flicker.
+      scale: { type: "spring", stiffness: 400, damping: 17 },
+      opacity: { duration: 0.2 },
+      boxShadow: { duration: 0.2 },
+    },
+  };
+
+  if (to) {
+    const linkClass = `inline-block text-center ${base} ${sizes[size]} ${variants[variant]} ${className}`;
+    return to.startsWith("/") ? (
+      <MotionLink to={to} onClick={onClick} className={linkClass} {...motionProps}>
+        {children}
+      </MotionLink>
+    ) : (
+      <motion.a href={to} onClick={onClick} className={linkClass} {...motionProps}>
+        {children}
+      </motion.a>
+    );
+  }
+
   return (
     <motion.button
       type={type}
       onClick={onClick}
       disabled={disabled}
       className={`${base} ${sizes[size]} ${variants[variant]} ${disabled ? "cursor-not-allowed" : ""} ${className}`}
-      whileHover={
-        disabled
-          ? {}
-          : { scale: 1.05, boxShadow: hoverShadow[variant] }
-      }
-      whileTap={disabled ? {} : { scale: 0.95 }}
-      animate={{ opacity: disabled ? 0.5 : 1 }}
-      transition={{
-        // Scale gets a spring — snappier and more tactile on press than a
-        // flat tween. Opacity/shadow stay smooth tweens since a spring on
-        // those (rather than a physical motion) just looks like flicker.
-        scale: { type: "spring", stiffness: 400, damping: 17 },
-        opacity: { duration: 0.2 },
-        boxShadow: { duration: 0.2 },
-      }}
+      {...motionProps}
     >
       {children}
     </motion.button>

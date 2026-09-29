@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { getPageMeta } from "../utils/pageMeta";
+import { getPageMeta, SITE_ORIGIN } from "../utils/pageMeta";
 
 const setMetaTag = (attr, value, content) => {
   let tag = document.querySelector(`meta[${attr}="${value}"]`);
@@ -12,15 +12,13 @@ const setMetaTag = (attr, value, content) => {
   tag.setAttribute("content", content);
 };
 
-const CANONICAL_ORIGIN = "https://fitnesszone.ltd";
-
 // The apex domain 308-redirects www -> apex, but a redirect alone left
 // Google treating the two as "duplicate without user-selected canonical"
 // (confirmed in Search Console) instead of confidently indexing the apex
 // version — an explicit canonical tag on every page is the stronger signal
-// that actually resolves it. Recomputed on every route change so a deep
-// link (e.g. /plans) canonicalizes to itself, not to whatever page loaded
-// first.
+// that actually resolves it. The build already writes each page's HTML
+// with its own canonical (vite.config.js); this keeps it right as the
+// visitor moves between pages without a reload.
 const setCanonicalTag = (pathname) => {
   let tag = document.querySelector('link[rel="canonical"]');
   if (!tag) {
@@ -28,21 +26,24 @@ const setCanonicalTag = (pathname) => {
     tag.setAttribute("rel", "canonical");
     document.head.appendChild(tag);
   }
-  tag.setAttribute("href", `${CANONICAL_ORIGIN}${pathname}`);
+  tag.setAttribute("href", `${SITE_ORIGIN}${pathname}`);
 };
 
-// Updates the document title + description/OG/Twitter meta tags on every
-// public route change, so each page gets its own search snippet instead of
-// every page sharing the same title (the default index.html only sets one).
+// Updates the document title, description, robots, canonical and OG/Twitter
+// tags on every public route change, so each page gets its own search
+// snippet — and the 404 page and account/payment screens stay out of
+// search results (noindex) instead of being indexed as thin duplicates.
 const usePageMeta = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const { title, description } = getPageMeta(location.pathname);
+    const { title, description, noindex } = getPageMeta(location.pathname);
     document.title = title;
     setMetaTag("name", "description", description);
+    setMetaTag("name", "robots", noindex ? "noindex, follow" : "index, follow");
     setMetaTag("property", "og:title", title);
     setMetaTag("property", "og:description", description);
+    setMetaTag("property", "og:url", `${SITE_ORIGIN}${location.pathname}`);
     setMetaTag("name", "twitter:title", title);
     setMetaTag("name", "twitter:description", description);
     setCanonicalTag(location.pathname);

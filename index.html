@@ -4,32 +4,55 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="google-site-verification" content="5WOM_iclPLmagbIF0QH8XP-8w7YOyAdGhbdGwTMx0bM" />
-  <link rel="icon" type="image/jpeg" href="/src/assets/logo.jpeg" />
+  <!-- Stable, public icon URLs: Google shows the favicon in results and
+       wants one that doesn't move, while bundled assets get a new hashed
+       name whenever they change. -->
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Page tags below are the homepage's. The build fills them from
+       src/utils/pageMeta.js and writes every other public page its own copy
+       of this file with that page's values (seoPages in vite.config.js), so
+       crawlers reading the raw HTML no longer see every page claiming to be
+       the homepage. usePageMeta keeps them right during in-app navigation. -->
   <title>Fitness Zone — Dietplans & Home Workouts for Women</title>
   <meta name="description"
-    content="Fitness Zone is a fitness platform built for women — customized dietplans and home workouts with female trainers. One platform, no WhatsApp groups, no missed links." />
-  <!-- Static fallback for the homepage — usePageMeta overrides this (and
-       sets it fresh on every other route) once React mounts, but a crawler
-       that only reads the initial HTML still gets a correct canonical
-       pointing at the apex domain, matching the www -> apex redirect. -->
+    content="Customized dietplans and home workouts — one platform, no WhatsApp groups, no missed links." />
+  <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://fitnesszone.ltd/" />
   <meta name="theme-color" content="#12224a" />
 
   <!-- Open Graph / social link previews (WhatsApp, Facebook, etc.) -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Fitness Zone" />
+  <meta property="og:url" content="https://fitnesszone.ltd/" />
   <meta property="og:title" content="Fitness Zone — Dietplans & Home Workouts for Women" />
   <meta property="og:description"
-    content="Customized dietplans and home workouts — built for women, all on one platform." />
-  <meta property="og:image" content="/src/assets/logo.jpeg" />
+    content="Customized dietplans and home workouts — one platform, no WhatsApp groups, no missed links." />
+  <meta property="og:image" content="https://fitnesszone.ltd/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Fitness Zone — Dietplans &amp; Home Workouts for Women" />
 
   <!-- Twitter/X card -->
-  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Fitness Zone — Dietplans & Home Workouts for Women" />
   <meta name="twitter:description"
-    content="Customized dietplans and home workouts — built for women, all on one platform." />
-  <meta name="twitter:image" content="/src/assets/logo.jpeg" />
+    content="Customized dietplans and home workouts — one platform, no WhatsApp groups, no missed links." />
+  <meta name="twitter:image" content="https://fitnesszone.ltd/og-image.png" />
+
+  <!-- Who runs the site, for Google's knowledge panel and result details. -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "FITNESSZONE OFFICIAL LTD",
+      "alternateName": "Fitness Zone",
+      "url": "https://fitnesszone.ltd/",
+      "logo": "https://fitnesszone.ltd/icon-512.png",
+      "sameAs": ["https://www.instagram.com/fitness_zone5566"]
+    }
+  </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

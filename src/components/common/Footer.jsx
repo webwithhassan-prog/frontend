@@ -1,7 +1,28 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import logo from "../../assets/logo-nav.png";
 import WhatsAppIcon from "./WhatsAppIcon";
 import { useSettings } from "../../context/SettingsContext";
+
+const MotionLink = motion.create(Link);
+
+const quickLinks = [
+  { label: "Home", href: "/" },
+  { label: "Packages", href: "/plans" },
+  { label: "Time Slots", href: "/timetable" },
+  { label: "Trainers", href: "/trainers" },
+  { label: "Success Stories", href: "/success-stories" },
+  { label: "E-Books & Courses", href: "/ebooks" },
+  { label: "About Us", href: "/about" },
+  { label: "Careers", href: "/careers" },
+  { label: "Contact", href: "/contact" },
+];
+
+const legalLinks = [
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms of Service", href: "/terms" },
+  { label: "Refund Policy", href: "/refund-policy" },
+];
 
 const Footer = () => {
   const { settings } = useSettings();
@@ -36,24 +57,20 @@ const Footer = () => {
           <h4 className="font-display text-sm mb-4 tracking-wide">
             QUICK LINKS
           </h4>
-          <ul className="space-y-2 text-sm">
-            {[
-              { label: "Home", href: "/" },
-              { label: "About Us", href: "/about" },
-              { label: "Packages", href: "/plans" },
-              { label: "Trainers", href: "/trainers" },
-              { label: "Careers", href: "/careers" },
-              { label: "Contact", href: "/contact" },
-            ].map((link) => (
+          {/* Every public page is linked here — real links are how search
+              engines find pages, and some (Success Stories) had no other
+              crawlable link on the site. */}
+          <ul className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+            {quickLinks.map((link) => (
               <li key={link.label}>
-                <motion.a
-                  href={link.href}
+                <MotionLink
+                  to={link.href}
                   className="text-brand-blue-pale/70 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                   whileHover={{ x: 4, color: "#F76B1C" }}
                   transition={{ duration: 0.2 }}
                 >
                   {link.label}
-                </motion.a>
+                </MotionLink>
               </li>
             ))}
           </ul>
@@ -91,27 +108,18 @@ const Footer = () => {
 
       <div className="border-t border-white/10 text-center py-4 text-xs text-brand-blue-pale/60">
         © {new Date().getFullYear()} Fitness Zone. All rights reserved.
-        <div className="flex justify-center gap-4 mt-2 text-xs text-brand-blue-pale/50">
-          <a
-            href="/privacy-policy"
-            className="hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
-          >
-            Privacy Policy
-          </a>
-          <span>·</span>
-          <a
-            href="/terms"
-            className="hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
-          >
-            Terms of Service
-          </a>
-          <span>·</span>
-          <a
-            href="/refund-policy"
-            className="hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
-          >
-            Refund Policy
-          </a>
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-2 px-4 text-xs text-brand-blue-pale/50">
+          {legalLinks.map((link, i) => (
+            <span key={link.href} className="flex gap-4">
+              {i > 0 && <span aria-hidden="true">·</span>}
+              <Link
+                to={link.href}
+                className="hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+              >
+                {link.label}
+              </Link>
+            </span>
+          ))}
         </div>
       </div>
     </footer>

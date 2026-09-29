@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu,
@@ -65,6 +65,9 @@ const searchablePages = [
 ];
 
 const instagramLink = "https://www.instagram.com/fitness_zone5566";
+
+// In-app links (no full page reload); the mobile menu animates its items.
+const MotionLink = motion.create(Link);
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -150,7 +153,7 @@ const Navbar = () => {
       <nav className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <a href="/" className="flex items-center gap-2.5">
+            <Link to="/" className="flex items-center gap-2.5">
               <img
                 src={logo}
                 alt="Fitness Zone"
@@ -159,7 +162,7 @@ const Navbar = () => {
               <span className="font-display text-brand-blue text-lg tracking-wide hidden sm:block">
                 FITNESS <span className="text-brand-orange">ZONE</span>
               </span>
-            </a>
+            </Link>
 
             {/* Mobile hamburger — next to the logo */}
             <button
@@ -178,13 +181,13 @@ const Navbar = () => {
           {/* Desktop links */}
           <div className="hidden lg:flex items-center gap-1 xl:gap-2">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.href}
-                href={link.href}
+                to={link.href}
                 className="text-brand-blue/80 font-medium text-sm px-2 xl:px-3 py-2 whitespace-nowrap hover:text-brand-orange transition-colors rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
 
             {/* Packages dropdown */}
@@ -222,13 +225,14 @@ const Navbar = () => {
                   >
                     <div className="bg-white rounded-2xl shadow-lg border border-brand-blue-pale py-2 w-56">
                       {packageOptions.map((opt) => (
-                        <a
+                        <Link
                           key={opt.type}
-                          href={`/plans?type=${opt.type}`}
+                          to={`/plans?type=${opt.type}`}
+                          onClick={() => setIsPackagesOpen(false)}
                           className="block px-4 py-2.5 text-sm text-brand-blue hover:bg-brand-blue-pale hover:text-brand-orange transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                         >
                           {opt.label}
-                        </a>
+                        </Link>
                       ))}
                     </div>
                   </motion.div>
@@ -313,13 +317,13 @@ const Navbar = () => {
 
             {isClient ? (
               <>
-                <a
-                  href="/client"
+                <Link
+                  to="/client"
                   className="flex items-center gap-1.5 text-brand-blue font-medium text-sm rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                 >
                   <User size={16} />
                   My Profile
-                </a>
+                </Link>
                 <button
                   onClick={logout}
                   className="flex items-center gap-1.5 text-brand-blue/70 hover:text-brand-orange text-sm transition-colors rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
@@ -331,13 +335,13 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                <a
-                  href="/login"
+                <Link
+                  to="/login"
                   className="text-brand-blue font-medium text-sm rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                 >
                   Login
-                </a>
-                <Button onClick={() => (window.location.href = "/signup")}>
+                </Link>
+                <Button to="/signup">
                   Join Now
                 </Button>
               </>
@@ -399,25 +403,25 @@ const Navbar = () => {
             </div>
 
             {isClient ? (
-              <a
-                href="/client"
+              <Link
+                to="/client"
                 className="text-brand-blue rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                 title="My Profile"
                 aria-label="My Profile"
               >
                 <User size={20} />
-              </a>
+              </Link>
             ) : (
               <>
-                <a
-                  href="/login"
+                <Link
+                  to="/login"
                   className="hidden min-[400px]:block text-brand-blue font-medium text-sm"
                 >
                   Login
-                </a>
+                </Link>
                 <Button
                   size="sm"
-                  onClick={() => (window.location.href = "/signup")}
+                  to="/signup"
                 >
                   Sign up
                 </Button>
@@ -439,8 +443,8 @@ const Navbar = () => {
               transition={{ duration: 0.25 }}
             >
               <div className="flex items-center justify-between px-6 py-5 shrink-0">
-                <a
-                  href="/"
+                <Link
+                  to="/"
                   className="flex items-center gap-2.5"
                   onClick={() => setIsOpen(false)}
                 >
@@ -452,7 +456,7 @@ const Navbar = () => {
                   <span className="font-display text-brand-blue text-lg tracking-wide">
                     FITNESS <span className="text-brand-orange">ZONE</span>
                   </span>
-                </a>
+                </Link>
                 <button
                   className="text-brand-blue rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
                   onClick={() => setIsOpen(false)}
@@ -465,9 +469,9 @@ const Navbar = () => {
               <div className="flex-1 overflow-y-auto px-6 pb-10 flex flex-col">
                 <div className="flex flex-col mt-2">
                   {navLinks.map((link, i) => (
-                    <motion.a
+                    <MotionLink
                       key={link.href}
-                      href={link.href}
+                      to={link.href}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.05 * i }}
@@ -475,7 +479,7 @@ const Navbar = () => {
                       onClick={() => setIsOpen(false)}
                     >
                       {link.label}
-                    </motion.a>
+                    </MotionLink>
                   ))}
 
                   <button
@@ -501,14 +505,14 @@ const Navbar = () => {
                         transition={{ duration: 0.25 }}
                       >
                         {packageOptions.map((opt) => (
-                          <a
+                          <Link
                             key={opt.type}
-                            href={`/plans?type=${opt.type}`}
+                            to={`/plans?type=${opt.type}`}
                             className="text-brand-blue/70 text-base py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded-lg"
                             onClick={() => setIsOpen(false)}
                           >
                             {opt.label}
-                          </a>
+                          </Link>
                         ))}
                       </motion.div>
                     )}
@@ -539,14 +543,14 @@ const Navbar = () => {
                 <div className="mt-auto pt-8">
                   {isClient ? (
                     <div className="flex flex-col gap-4">
-                      <a
-                        href="/client"
+                      <Link
+                        to="/client"
                         onClick={() => setIsOpen(false)}
                         className="flex items-center gap-2 text-brand-blue font-medium text-lg rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                       >
                         <User size={20} />
                         My Profile
-                      </a>
+                      </Link>
                       <button
                         onClick={() => {
                           logout();
@@ -560,15 +564,16 @@ const Navbar = () => {
                     </div>
                   ) : (
                     <div className="flex flex-col gap-4">
-                      <a
-                        href="/login"
+                      <Link
+                        to="/login"
                         onClick={() => setIsOpen(false)}
                         className="text-brand-blue font-medium text-lg rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                       >
                         Login
-                      </a>
+                      </Link>
                       <Button
-                        onClick={() => (window.location.href = "/signup")}
+                        to="/signup"
+                        onClick={() => setIsOpen(false)}
                         className="w-full"
                       >
                         Join Now

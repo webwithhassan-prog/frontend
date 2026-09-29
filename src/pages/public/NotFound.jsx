@@ -107,14 +107,14 @@ const NotFound = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1, duration: 0.5 }}
         >
-          <Button onClick={() => (window.location.href = "/")}>
+          <Button to="/">
             <span className="flex items-center gap-2">
               <Home size={16} /> Back Home
             </span>
           </Button>
           <Button
             variant="secondary"
-            onClick={() => (window.location.href = "/plans")}
+            to="/plans"
           >
             <span className="flex items-center gap-2">
               Explore Packages <ArrowRight size={16} />

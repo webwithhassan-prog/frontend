@@ -134,7 +134,7 @@ const Home = () => {
                   <Button
                     size="sm"
                     className="whitespace-nowrap"
-                    onClick={() => (window.location.href = "/plans")}
+                    to="/plans"
                   >
                     Explore Packages
                   </Button>
@@ -172,7 +172,7 @@ const Home = () => {
                       <Button
                         size="sm"
                         className="!px-6 !py-3 text-sm"
-                        onClick={() => (window.location.href = "/plans")}
+                        to="/plans"
                       >
                         Explore Packages
                       </Button>
@@ -257,9 +257,7 @@ const Home = () => {
                 <Button
                   size="sm"
                   className="whitespace-nowrap"
-                  onClick={() =>
-                    (window.location.href = heroSlides[heroSlide].href)
-                  }
+                  to={heroSlides[heroSlide].href}
                 >
                   {heroSlides[heroSlide].cta}
                 </Button>
@@ -310,9 +308,7 @@ const Home = () => {
                     <Button
                       size="sm"
                       className="!px-6 !py-3 text-sm"
-                      onClick={() =>
-                        (window.location.href = heroSlides[heroSlide].href)
-                      }
+                      to={heroSlides[heroSlide].href}
                     >
                       {heroSlides[heroSlide].cta}
                     </Button>
@@ -470,7 +466,7 @@ const Home = () => {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
           >
-            How it works?
+            HOW IT WORKS
           </motion.h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -535,7 +531,7 @@ const Home = () => {
           <div className="text-center mt-10">
             <Button
               variant="secondary"
-              onClick={() => (window.location.href = "/success-stories")}
+              to="/success-stories"
             >
               View All Stories
             </Button>
@@ -559,7 +555,7 @@ const Home = () => {
             Pick your package — Dietplan, Home Workouts, or both — and start
             this week.
           </p>
-          <Button onClick={() => (window.location.href = "/plans")}>
+          <Button to="/plans">
             Explore Packages
           </Button>
         </div>

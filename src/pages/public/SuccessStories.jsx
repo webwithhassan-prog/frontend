@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import api from "../../services/api";
 import Loader from "../../components/common/Loader";
+import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
 
 const SuccessStories = () => {
   const [images, setImages] = useState([]);
@@ -46,7 +47,15 @@ const SuccessStories = () => {
           {images.map((src, i) => (
             <motion.img
               key={src}
-              src={src}
+              // Resized/compressed by Cloudinary instead of the full-size
+              // uploads (~1.3MB for the set); off-screen ones load lazily.
+              src={optimizeCloudinaryUrl(src, 600)}
+              srcSet={[400, 600, 900]
+                .map((w) => `${optimizeCloudinaryUrl(src, w)} ${w}w`)
+                .join(", ")}
+              sizes="(max-width: 639px) 100vw, (max-width: 767px) 50vw, 320px"
+              loading={i < 3 ? "eager" : "lazy"}
+              decoding="async"
               alt={`Success story ${i + 1}`}
               className="w-full rounded-2xl shadow-md break-inside-avoid"
               initial={{ opacity: 0, y: 20 }}

@@ -24,7 +24,7 @@ const PaymentCancelled = () => {
             left off whenever you're ready.
           </p>
           <Button
-            onClick={() => (window.location.href = "/plans")}
+            to="/plans"
             className="w-full"
           >
             Back to Packages
