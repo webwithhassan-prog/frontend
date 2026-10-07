@@ -24,7 +24,7 @@ import useLockBodyScroll from "../../hooks/useLockBodyScroll";
 
 // Program pages, listed under the packages in the Packages menu.
 const programOptions = [
-  { label: "Hormonal Im-Balances", href: "/postpartum-weight-loss" },
+  { label: "Post-partum", href: "/postpartum-weight-loss" },
 ];
 
 const packageOptions = [
