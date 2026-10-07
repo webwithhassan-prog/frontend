@@ -105,6 +105,7 @@ const ZoomAccess = () => {
             value={formData.phone_number}
             onChange={(v) => setFormData({ ...formData, phone_number: v })}
             required
+            hint="Enter the WhatsApp number you registered with."
           />
 
           {error && <p className="text-red-500 text-sm">{error}</p>}

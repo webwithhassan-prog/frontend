@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import Loader from "../common/Loader";
+import AdminAlertBell from "./AdminAlertBell";
 import {
   LayoutDashboard,
   Users,
@@ -25,6 +26,7 @@ import {
   Settings as SettingsIcon,
   Landmark,
   Wallet,
+  Flag,
 } from "lucide-react";
 
 // Grouped instead of one flat 17-item list — a section header every few
@@ -73,7 +75,10 @@ const navGroups = [
   },
   {
     label: "System",
-    items: [{ label: "Settings", to: "/admin/settings", icon: SettingsIcon }],
+    items: [
+      { label: "Reported Issues", to: "/admin/issues", icon: Flag },
+      { label: "Settings", to: "/admin/settings", icon: SettingsIcon },
+    ],
   },
 ];
 
@@ -81,6 +86,7 @@ const AdminLayout = () => {
   const { logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [pendingManualCount, setPendingManualCount] = useState(0);
+  const [openIssueCount, setOpenIssueCount] = useState(0);
 
   // Polls while an admin is anywhere in the panel so a new manual payment
   // claim shows up on the sidebar without needing to open that page —
@@ -108,7 +114,11 @@ const AdminLayout = () => {
           )}
           {group.items.map((item) => {
             const badgeCount =
-              item.to === "/admin/manual-payments" ? pendingManualCount : 0;
+              item.to === "/admin/manual-payments"
+                ? pendingManualCount
+                : item.to === "/admin/issues"
+                  ? openIssueCount
+                  : 0;
             return (
               <NavLink
                 key={item.to}
@@ -207,7 +217,14 @@ const AdminLayout = () => {
         )}
       </AnimatePresence>
 
-      <main className="flex-1 min-w-0 p-4 pt-20 sm:p-6 sm:pt-20 lg:p-8">
+      {/* One bell for the whole panel: beside the menu button on phones,
+          top-right of the page on desktop. */}
+      <AdminAlertBell
+        onOpenIssuesChange={setOpenIssueCount}
+        className="fixed z-50 top-1.5 right-14 lg:top-5 lg:right-8"
+      />
+
+      <main className="flex-1 min-w-0 p-4 pt-20 sm:p-6 sm:pt-20 lg:p-8 lg:pt-20">
         <Suspense fallback={<Loader size={56} className="py-20" />}>
           <Outlet />
         </Suspense>

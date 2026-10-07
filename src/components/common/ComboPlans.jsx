@@ -6,6 +6,7 @@ import api from "../../services/api";
 import Card from "./Card";
 import Button from "./Button";
 import CardSlider from "./CardSlider";
+import CardRow from "./CardRow";
 import CurrencySwitcher from "./CurrencySwitcher";
 import Modal from "../admin/Modal";
 import ManualPaymentPanel from "./ManualPaymentPanel";
@@ -72,7 +73,9 @@ const PlanCard = ({
 }) => {
   const total = priceOf(plan);
   const hasDiscount = total < plan.price;
-  const discountPercent = hasDiscount ? Math.round((1 - total / plan.price) * 100) : 0;
+  const discountPercent = hasDiscount
+    ? Math.round((1 - total / plan.price) * 100)
+    : 0;
   const perDay = Math.round(total / plan.duration_days);
 
   return (
@@ -96,18 +99,24 @@ const PlanCard = ({
         )}
       </div>
       <div className="flex items-center gap-2 flex-wrap mt-0.5">
-        <p className="font-display text-2xl text-brand-blue tabular-nums">{format(total)}</p>
+        <p className="font-display text-2xl text-brand-blue tabular-nums">
+          {format(total)}
+        </p>
         {hasDiscount && (
           <span className="text-[9px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded-full">
             {discountPercent}% OFF
           </span>
         )}
       </div>
-      <p className="text-[11px] text-brand-blue/50 tabular-nums">
+      <p className="text-[11px] text-brand-blue/70 tabular-nums">
         {hasDiscount && (
           <>
-            <span className="line-through text-brand-blue/40">{format(plan.price)}</span>
-            <span className="mx-1.5" aria-hidden="true">·</span>
+            <span className="line-through text-brand-blue/60">
+              {format(plan.price)}
+            </span>
+            <span className="mx-1.5" aria-hidden="true">
+              ·
+            </span>
           </>
         )}
         ≈ {format(perDay)} / day
@@ -122,12 +131,20 @@ const PlanCard = ({
       <div className="grid grid-cols-2 gap-3 my-3 flex-1">
         <FeatureColumn
           title="Dietplan"
-          features={dietplan?.features?.length ? dietplan.features : defaultFeatures.dietplan}
+          features={
+            dietplan?.features?.length
+              ? dietplan.features
+              : defaultFeatures.dietplan
+          }
           className="pr-3 border-r border-brand-blue-pale"
         />
         <FeatureColumn
           title="Home Workouts"
-          features={workout?.features?.length ? workout.features : defaultFeatures.workout}
+          features={
+            workout?.features?.length
+              ? workout.features
+              : defaultFeatures.workout
+          }
         />
       </div>
 
@@ -140,11 +157,18 @@ const PlanCard = ({
       >
         {checkingOut ? "Redirecting..." : "Pay with Card"}
       </Button>
-      <p className="text-[10px] text-brand-blue-light text-center mt-1">Instant Access</p>
+      <p className="text-[10px] text-brand-blue-light text-center mt-1">
+        Instant Access
+      </p>
 
       {manualMethods.length > 0 && (
         <>
-          <Button size="sm" onClick={onManualPay} variant="secondary" className="w-full mt-2.5">
+          <Button
+            size="sm"
+            onClick={onManualPay}
+            variant="secondary"
+            className="w-full mt-2.5"
+          >
             {manualMethods.map((m) => m.name).join(" / ")}
           </Button>
           <p className="text-[10px] text-brand-blue-light text-center mt-1">
@@ -161,6 +185,7 @@ const PlanCard = ({
 // larger screens, a one-card-at-a-time slider on phones.
 const ComboPlans = () => {
   const [allPlans, setAllPlans] = useState([]);
+  const [loaded, setLoaded] = useState(false);
   const [checkingOutId, setCheckingOutId] = useState(null);
   const [manualMethods, setManualMethods] = useState([]);
   const [manualPayFor, setManualPayFor] = useState(null); // { plan, amountLabel }
@@ -170,7 +195,8 @@ const ComboPlans = () => {
     api
       .get("/plans/public")
       .then((res) => setAllPlans(res.data))
-      .catch((err) => console.error(err));
+      .catch((err) => console.error(err))
+      .finally(() => setLoaded(true));
   }, []);
 
   // Tied to the selected currency, exactly like the packages page — so the
@@ -182,7 +208,9 @@ const ComboPlans = () => {
       return;
     }
     api
-      .get("/manual-payment-methods/public", { params: { country: manualMethodsCountry } })
+      .get("/manual-payment-methods/public", {
+        params: { country: manualMethodsCountry },
+      })
       .then((res) => setManualMethods(res.data))
       .catch((err) => console.error(err));
   }, [manualMethodsCountry]);
@@ -191,17 +219,18 @@ const ComboPlans = () => {
     .filter((p) => p.product_type === "combo")
     .sort((a, b) => a.duration_days - b.duration_days);
 
-  if (plans.length === 0) return null;
+  if (loaded && plans.length === 0) return null;
 
   const findPlan = (type, days) =>
     allPlans.find((p) => p.product_type === type && p.duration_days === days);
   const popular = popularFlags(plans.map((p) => !!p.is_popular));
-  // Lifting the popular card only reads right when every card shares a row.
-  const liftPopular = plans.length <= 3;
 
   const payWithCard = async (plan) => {
     setCheckingOutId(plan._id);
-    trackEvent("checkout_started", "/", { type: "combo", duration: plan.duration_days });
+    trackEvent("checkout_started", "/", {
+      type: "combo",
+      duration: plan.duration_days,
+    });
     try {
       const res = await api.post("/payments/stripe/checkout", {
         plan_ids: [plan._id],
@@ -224,7 +253,8 @@ const ComboPlans = () => {
     manualMethods,
     checkingOut: checkingOutId === plan._id,
     onPayWithCard: () => payWithCard(plan),
-    onManualPay: () => setManualPayFor({ plan, amountLabel: format(priceOf(plan)) }),
+    onManualPay: () =>
+      setManualPayFor({ plan, amountLabel: format(priceOf(plan)) }),
   });
 
   return (
@@ -246,30 +276,49 @@ const ComboPlans = () => {
           <CurrencySwitcher />
         </div>
 
-        {/* Tablet and up: cards in a centred row that wraps, so any number
-            of admin-defined durations lays out without a stranded gap. */}
-        <div className="hidden md:flex md:flex-wrap md:justify-center md:gap-6 max-w-5xl mx-auto pt-3">
-          {plans.map((plan, i) => (
-            <div
-              key={plan._id}
-              className={`md:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3rem)/3)] ${
-                liftPopular && popular[i] ? "lg:-mt-3" : ""
-              }`}
-            >
-              <PlanCard {...cardProps(plan, i, false)} />
+        {/* Tablet and up: a centred row, which becomes a slider with
+            arrows once there are more packages than fit (3 on desktop,
+            2 on tablets) — admins can add any number of durations. */}
+        {!loaded ? (
+          // Card-sized placeholders while the packages load, so everything
+          // below doesn't jump down when they arrive.
+          <div aria-hidden="true">
+            <div className="md:hidden max-w-[311px] h-[440px] mx-auto my-2 rounded-2xl bg-white border border-brand-blue-pale animate-pulse" />
+            <div className="hidden md:flex gap-6 max-w-5xl mx-auto">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className={`flex-1 h-[440px] rounded-2xl bg-white border border-brand-blue-pale animate-pulse ${i === 2 ? "hidden lg:block" : ""}`}
+                />
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ) : (
+          <>
+            <CardRow
+              className="hidden md:block max-w-5xl mx-auto"
+              items={plans}
+              getKey={(plan) => plan._id}
+              getLabel={(plan) => `the ${plan.duration_days}-day package`}
+              itemName="package"
+              renderItem={(plan, i) => (
+                <PlanCard {...cardProps(plan, i, false)} />
+              )}
+            />
 
-        {/* Phones: one card at a time */}
-        <CardSlider
-          className="md:hidden"
-          items={plans}
-          getKey={(plan) => plan._id}
-          getLabel={(plan) => `${plan.duration_days}-day package`}
-          itemName="package"
-          renderItem={(plan, i) => <PlanCard {...cardProps(plan, i, true)} />}
-        />
+            {/* Phones: one card at a time */}
+            <CardSlider
+              className="md:hidden"
+              items={plans}
+              getKey={(plan) => plan._id}
+              getLabel={(plan) => `${plan.duration_days}-day package`}
+              itemName="package"
+              renderItem={(plan, i) => (
+                <PlanCard {...cardProps(plan, i, true)} />
+              )}
+            />
+          </>
+        )}
 
         {/* Onward to every package — Dietplan-only and Home Workouts-only
             live on the packages page, not here. */}

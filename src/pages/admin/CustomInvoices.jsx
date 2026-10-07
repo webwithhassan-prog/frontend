@@ -565,7 +565,8 @@ const CustomInvoices = () => {
               key={phoneResetKey}
               value={formData.client_phone}
               onChange={(v) => setFormData({ ...formData, client_phone: v })}
-              placeholder="Client Phone (optional)"
+              placeholder="Client's WhatsApp number (optional)"
+              hint="Use the client's active WhatsApp number — the team contacts them there."
             />
             <Button type="submit" className="w-full" disabled={creating}>
               {creating ? "Creating..." : "Generate Payment Link"}

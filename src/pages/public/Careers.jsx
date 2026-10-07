@@ -213,7 +213,7 @@ const Careers = () => {
             <input
               type="text"
               name="contact"
-              placeholder="Email & Phone Number (for verification — admin only)"
+              placeholder="Email & WhatsApp number (for verification — admin only)"
               value={formData.contact}
               onChange={handleChange}
               required

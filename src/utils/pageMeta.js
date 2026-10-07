@@ -5,53 +5,54 @@ const defaultDescription =
 
 // Path -> { title, description, noindex? }. Shared by usePageMeta (in the
 // browser) and the build, which writes each path its own HTML file with
-// these tags already in place — see seoPages in vite.config.js. Pages with
+// these tags already in place — see seo/build.js. Pages with
 // noindex are kept out of Google: account screens, payment results, and
 // anything not listed here (the 404 page, one-time token links).
 export const pageMeta = {
   "/": {
-    title: `${siteName} — Dietplans & Home Workouts for Women`,
+    title: `${siteName} — Online Diet Plans & Home Workouts for Women`,
     description:
-      "Customized dietplans and home workouts — one platform, no WhatsApp groups, no missed links.",
+      "Customized diet plans and live online home workout classes for women, led by female trainers six days a week — from anywhere. Choose your package today.",
   },
   "/plans": {
-    title: `Packages & Pricing | ${siteName}`,
+    title: `Diet Plan & Home Workout Packages for Women | ${siteName}`,
     description:
-      "Choose a Dietplan, Home Workouts, or both — packages for every timeline, with transparent pricing.",
+      "Compare diet plan, home workout and combined packages for women — several lengths, priced in your local currency. Pick your plan and start today.",
   },
   "/about": {
-    title: `About Us | ${siteName}`,
+    title: `About Us — Natural Nutrition for Women | ${siteName}`,
     description:
-      "Fitness Zone is a fitness platform built for women — dietplans and home workouts, all in one place.",
+      "Since 2023, Fitness Zone has helped women build lasting health with real-food diet plans and home workouts — no powders, pills or shortcuts. Meet us.",
   },
   "/trainers": {
-    title: `Meet Our Trainers | ${siteName}`,
+    title: `Female Fitness Trainers | ${siteName}`,
     description:
-      "Meet the female trainers behind Fitness Zone's home workouts.",
+      "Meet the female fitness trainers who lead Fitness Zone's live online home workout classes, six days a week. Find a class time that suits you.",
   },
   "/timetable": {
-    title: `Time Slots | ${siteName}`,
+    title: `Live Online Workout Class Times | ${siteName}`,
     description:
-      "This week's workout plan and daily time slots, shown in your local timezone.",
+      "Live home workout classes with female trainers run several times a day — see today's class times in your timezone and the weekly plan. Join a class.",
   },
   "/ebooks": {
-    title: `E-Books & Courses | ${siteName}`,
+    title: `Healthy Recipe E-Books & Fitness Courses | ${siteName}`,
     description:
-      "Guides, resources, and courses you can keep — workout and nutrition e-books available to purchase individually.",
+      "Healthy recipe e-books and fitness courses from Fitness Zone — buy individually, with instant access that stays in your account. Browse the library.",
   },
   "/success-stories": {
-    title: `Success Stories | ${siteName}`,
-    description: "Real check-ins, real progress, from real Fitness Zone members.",
+    title: `Weight Loss Success Stories | ${siteName}`,
+    description:
+      "Real check-ins and results from women on Fitness Zone diet plans and live home workouts. Read their stories and start your own.",
   },
   "/careers": {
     title: `Careers — Join Our Trainer Team | ${siteName}`,
     description:
-      "Are you a fitness trainer interested in leading home workout classes? Apply to join Fitness Zone.",
+      "Female fitness trainer? Lead live online home workout classes for women with Fitness Zone, from home. Apply to join our team today.",
   },
   "/contact": {
-    title: `Contact Us | ${siteName}`,
+    title: `Contact Us — WhatsApp & Email | ${siteName}`,
     description:
-      "Questions about packages or sessions? Reach Fitness Zone by WhatsApp, Instagram, or email.",
+      "Questions about diet plans, home workouts or your membership? Message Fitness Zone on WhatsApp or email us — we reply around the clock.",
   },
   "/join": {
     noindex: true,

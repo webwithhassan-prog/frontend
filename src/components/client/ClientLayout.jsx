@@ -4,6 +4,7 @@ import { LogOut } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import logo from "../../assets/logo-nav.png";
 import Loader from "../common/Loader";
+import ReportIssue from "../common/ReportIssue";
 
 const ClientLayout = () => {
   const { logout } = useAuth();
@@ -38,6 +39,10 @@ const ClientLayout = () => {
         <Suspense fallback={<Loader size={56} className="py-20" />}>
           <Outlet />
         </Suspense>
+        <p className="text-center text-sm text-brand-blue/70 mt-12">
+          Something not working?{" "}
+          <ReportIssue className="font-semibold text-brand-blue-light hover:text-brand-orange rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange" />
+        </p>
       </main>
     </div>
   );

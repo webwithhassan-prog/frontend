@@ -54,6 +54,7 @@ const RecordedGallery = lazy(() => import("./pages/admin/RecordedGallery"));
 const Analytics = lazy(() => import("./pages/admin/Analytics"));
 const ManualPayments = lazy(() => import("./pages/admin/ManualPayments"));
 const ManualPaymentMethods = lazy(() => import("./pages/admin/ManualPaymentMethods"));
+const IssueReports = lazy(() => import("./pages/admin/IssueReports"));
 
 const ClientLayout = lazy(() => import("./components/client/ClientLayout"));
 const Profile = lazy(() => import("./pages/client/Profile"));
@@ -326,6 +327,7 @@ function AppRoutes() {
           <Route path="manual-payments" element={<ManualPayments />} />
           <Route path="manual-payment-methods" element={<ManualPaymentMethods />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="issues" element={<IssueReports />} />
           <Route path="analytics" element={<Analytics />} />
         </Route>
       </Routes>

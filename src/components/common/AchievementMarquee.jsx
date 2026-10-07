@@ -5,6 +5,7 @@ import axios from "axios";
 
 const AchievementMarquee = () => {
   const [entries, setEntries] = useState([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const fetchEntries = async () => {
@@ -15,12 +16,17 @@ const AchievementMarquee = () => {
         setEntries(res.data);
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoaded(true);
       }
     };
     fetchEntries();
   }, []);
 
-  if (entries.length === 0) return null;
+  // The strip keeps its height while loading — appearing late above the
+  // hero used to push the whole page down (a visible layout shift).
+  if (loaded && entries.length === 0) return null;
+  if (!loaded) return <div className="bg-brand-blue h-10" aria-hidden="true" />;
 
   const renderEntries = () =>
     entries.map((entry, i) => (
@@ -46,7 +52,7 @@ const AchievementMarquee = () => {
     ));
 
   return (
-    <div className="bg-brand-blue overflow-hidden py-2.5 whitespace-nowrap">
+    <div className="bg-brand-blue overflow-hidden h-10 flex items-center whitespace-nowrap">
       <motion.div
         className="inline-flex text-white text-sm font-medium"
         animate={{ x: ["0%", "-50%"] }}

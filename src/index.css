@@ -45,3 +45,11 @@ body {
     animation: none;
   }
 }
+
+/* Horizontal card rows scroll by swipe, arrows and dots — no scrollbar. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

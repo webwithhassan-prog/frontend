@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import logo from "../../assets/logo-nav.png";
 import WhatsAppIcon from "./WhatsAppIcon";
+import ReportIssue from "./ReportIssue";
 import { useSettings } from "../../context/SettingsContext";
 
 const MotionLink = motion.create(Link);
@@ -44,7 +45,7 @@ const Footer = () => {
           <p className="text-brand-blue-pale/70 text-sm">
             Dietplans and home workouts — built for women.
           </p>
-          <p className="text-brand-blue-pale/50 text-xs mt-4 leading-relaxed">
+          <p className="text-brand-blue-pale/75 text-xs mt-4 leading-relaxed">
             Director / Founder: M Abu Bakar Siddique
             <br />
             Office 20790, 182–184 High Street North,
@@ -54,9 +55,9 @@ const Footer = () => {
         </div>
 
         <div>
-          <h4 className="font-display text-sm mb-4 tracking-wide">
+          <h2 className="font-display text-sm mb-4 tracking-wide">
             QUICK LINKS
-          </h4>
+          </h2>
           {/* Every public page is linked here — real links are how search
               engines find pages, and some (Success Stories) had no other
               crawlable link on the site. */}
@@ -77,9 +78,9 @@ const Footer = () => {
         </div>
 
         <div>
-          <h4 className="font-display text-sm mb-4 tracking-wide">
+          <h2 className="font-display text-sm mb-4 tracking-wide">
             GET IN TOUCH
-          </h4>
+          </h2>
           <div className="flex flex-col items-start gap-3">
             <motion.a
               href={`https://wa.me/${settings.whatsapp_general}`}
@@ -106,9 +107,9 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="border-t border-white/10 text-center py-4 text-xs text-brand-blue-pale/60">
+      <div className="border-t border-white/10 text-center py-4 text-xs text-brand-blue-pale/75">
         © {new Date().getFullYear()} Fitness Zone. All rights reserved.
-        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-2 px-4 text-xs text-brand-blue-pale/50">
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-2 px-4 text-xs text-brand-blue-pale/75">
           {legalLinks.map((link, i) => (
             <span key={link.href} className="flex gap-4">
               {i > 0 && <span aria-hidden="true">·</span>}
@@ -120,6 +121,10 @@ const Footer = () => {
               </Link>
             </span>
           ))}
+          <span className="flex gap-4">
+            <span aria-hidden="true">·</span>
+            <ReportIssue className="hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange" />
+          </span>
         </div>
       </div>
     </footer>

@@ -667,7 +667,8 @@ const Enrollments = () => {
                       onChange={(v) =>
                         setAddForm({ ...addForm, phone_number: v })
                       }
-                      placeholder="Phone number"
+                      placeholder="Client's WhatsApp number"
+                      hint="Use the client's active WhatsApp number — the team contacts them there."
                     />
                     <input
                       type="email"

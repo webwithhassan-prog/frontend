@@ -23,7 +23,15 @@ const TestimonialsSlider = () => {
     fetchTestimonials();
   }, []);
 
-  if (loading) return null;
+  // Same footprint as the slider, so the page below doesn't jump on load.
+  if (loading) {
+    return (
+      <div className="max-w-sm mx-auto px-2 sm:px-0 py-2" aria-hidden="true">
+        <div className="aspect-[4/5] rounded-2xl bg-white/10 animate-pulse" />
+        <div className="h-2 mt-4" />
+      </div>
+    );
+  }
 
   if (testimonials.length === 0) {
     return (

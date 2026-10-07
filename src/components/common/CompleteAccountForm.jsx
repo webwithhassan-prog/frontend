@@ -54,7 +54,7 @@ const CompleteAccountForm = ({ token, email, onDone }) => {
       )}
       <div>
         <label className="block text-xs font-semibold text-brand-blue-light mb-1">
-          Phone Number
+          WhatsApp Number
         </label>
         <PhoneInput value={phone} onChange={setPhone} required />
       </div>

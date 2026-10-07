@@ -12,8 +12,11 @@ import { useCurrency } from "../../context/CurrencyContext";
 import CurrencySwitcher from "../../components/common/CurrencySwitcher";
 import { getErrorMessage } from "../../utils/errors";
 import Modal from "../../components/admin/Modal";
+import FaqSection from "../../components/common/FaqSection";
+import { plansFaqs } from "../../content/faq";
 import ManualPaymentPanel from "../../components/common/ManualPaymentPanel";
 import CardSlider from "../../components/common/CardSlider";
+import CardRow from "../../components/common/CardRow";
 import { CURRENCY_TO_COUNTRY } from "../../utils/currencyToCountry";
 import { durationsForType, popularFlags } from "../../utils/packages";
 
@@ -85,7 +88,9 @@ const Plans = () => {
       return;
     }
     api
-      .get("/manual-payment-methods/public", { params: { country: manualMethodsCountry } })
+      .get("/manual-payment-methods/public", {
+        params: { country: manualMethodsCountry },
+      })
       .then((res) => setManualMethods(res.data))
       .catch((err) => console.error(err));
   }, [manualMethodsCountry]);
@@ -168,7 +173,9 @@ const Plans = () => {
         discount_percent: res.data.discount_percent,
         applies_to: res.data.applies_to,
       });
-      toast.success(`${code.toUpperCase()} applied — ${res.data.discount_percent}% off`);
+      toast.success(
+        `${code.toUpperCase()} applied — ${res.data.discount_percent}% off`,
+      );
     } catch (err) {
       setAppliedCoupon(null);
       const msg = getErrorMessage(err, "Invalid coupon code");
@@ -229,8 +236,6 @@ const Plans = () => {
   const popular = popularFlags(
     durations.map((d) => getSelectionForDuration(d).some((p) => p.is_popular)),
   );
-  // Lifting the popular card only reads right when every card shares a row.
-  const liftPopular = durations.length <= 3;
 
   const renderCard = (duration, i, inSlider) => {
     const selection = getSelectionForDuration(duration);
@@ -324,7 +329,10 @@ const Plans = () => {
                     key={f}
                     className="flex items-start gap-1.5 text-xs text-brand-blue/70"
                   >
-                    <Check size={14} className="text-brand-orange mt-0.5 shrink-0" />
+                    <Check
+                      size={14}
+                      className="text-brand-orange mt-0.5 shrink-0"
+                    />
                     <span>{f}</span>
                   </li>
                 ))}
@@ -343,7 +351,10 @@ const Plans = () => {
                     key={f}
                     className="flex items-start gap-1.5 text-xs text-brand-blue/70"
                   >
-                    <Check size={14} className="text-brand-orange mt-0.5 shrink-0" />
+                    <Check
+                      size={14}
+                      className="text-brand-orange mt-0.5 shrink-0"
+                    />
                     <span>{f}</span>
                   </li>
                 ))}
@@ -356,8 +367,14 @@ const Plans = () => {
               ? selection[0].features
               : featuresByType[selectedType] || []
             ).map((f) => (
-              <li key={f} className="flex items-start gap-2 text-sm text-brand-blue/70">
-                <Check size={16} className="text-brand-orange mt-0.5 shrink-0" />
+              <li
+                key={f}
+                className="flex items-start gap-2 text-sm text-brand-blue/70"
+              >
+                <Check
+                  size={16}
+                  className="text-brand-orange mt-0.5 shrink-0"
+                />
                 <span>{f}</span>
               </li>
             ))}
@@ -370,7 +387,9 @@ const Plans = () => {
           variant={isPopular ? "primary" : "secondary"}
           className="w-full"
         >
-          {checkingOutDuration === duration ? "Redirecting..." : "Pay with Card"}
+          {checkingOutDuration === duration
+            ? "Redirecting..."
+            : "Pay with Card"}
         </Button>
         <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
           Instant Access
@@ -395,145 +414,148 @@ const Plans = () => {
   };
 
   return (
-    <section className="max-w-5xl mx-auto px-6 py-20">
-      <motion.h1
-        className="font-display text-3xl md:text-4xl text-brand-blue text-center mb-4"
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-      >
-        {packageLabels[selectedType]?.toUpperCase() || "PACKAGES"}
-      </motion.h1>
-      <p className="text-brand-blue/70 text-center mb-4">
-        Choose the duration that works for you.
-      </p>
-      <div className="flex justify-center mb-6">
-        <CurrencySwitcher />
-      </div>
-
-      <div className="flex justify-center gap-2 mb-8 flex-wrap">
-        {packageTabs.map((tab) => (
-          <button
-            key={tab.type}
-            onClick={() => setSearchParams({ type: tab.type })}
-            className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
-              selectedType === tab.type
-                ? "bg-brand-blue text-white"
-                : "bg-brand-blue-pale text-brand-blue hover:bg-brand-blue-pale/70"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="max-w-sm mx-auto mb-14">
-        {appliedCoupon ? (
-          <div className="flex items-center justify-between gap-3 bg-brand-blue-pale/50 border border-brand-blue-pale rounded-full px-4 py-2.5">
-            <span className="flex items-center gap-2 text-sm text-brand-blue font-medium">
-              <Tag size={15} className="text-brand-orange" />
-              {appliedCoupon.code} — {appliedCoupon.discount_percent}% off
-              applied
-            </span>
-            <button
-              onClick={handleRemoveCoupon}
-              className="text-brand-blue/50 hover:text-red-500 transition-colors rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
-              title="Remove coupon"
-              aria-label="Remove coupon"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        ) : (
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={couponInput}
-              onChange={(e) => setCouponInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()}
-              placeholder="Have a coupon code?"
-              className="flex-1 border border-brand-blue-pale rounded-full px-4 py-2.5 text-sm text-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-orange"
-            />
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleApplyCoupon}
-              disabled={couponChecking || !couponInput.trim()}
-            >
-              {couponChecking ? "Checking..." : "Apply"}
-            </Button>
-          </div>
-        )}
-        {couponError && (
-          <p className="text-red-500 text-xs text-center mt-2">
-            {couponError}
-          </p>
-        )}
-      </div>
-
-      {error && (
-        <p className="text-red-500 text-center text-sm mb-8">{error}</p>
-      )}
-
-      {loading ? (
-        <Loader />
-      ) : durations.length === 0 ? (
-        <p className="text-center text-brand-blue/60">
-          No {packageLabels[selectedType] || ""} packages are available right now.
+    <>
+      <section className="max-w-5xl mx-auto px-6 pt-20 pb-4">
+        <motion.h1
+          className="font-display text-3xl md:text-4xl text-brand-blue text-center mb-4"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          {packageLabels[selectedType]?.toUpperCase() || "PACKAGES"}
+        </motion.h1>
+        <p className="text-brand-blue/70 text-center mb-4">
+          Choose the duration that works for you.
         </p>
-      ) : (
-        <>
-          {/* Tablet and up: a centred row that wraps, so any number of
-              admin-defined durations lays out without a stranded gap. */}
-          <div className="hidden md:flex md:flex-wrap md:justify-center gap-8 pt-4">
-            {durations.map((duration, i) => (
-              <motion.div
-                key={duration}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
-                className={`md:w-[calc((100%-2rem)/2)] lg:w-[calc((100%-4rem)/3)] ${
-                  liftPopular && popular[i] ? "lg:-mt-4" : ""
-                }`}
+        <div className="flex justify-center mb-6">
+          <CurrencySwitcher />
+        </div>
+
+        <div className="flex justify-center gap-2 mb-8 flex-wrap">
+          {packageTabs.map((tab) => (
+            <button
+              key={tab.type}
+              onClick={() => setSearchParams({ type: tab.type })}
+              className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
+                selectedType === tab.type
+                  ? "bg-brand-blue text-white"
+                  : "bg-brand-blue-pale text-brand-blue hover:bg-brand-blue-pale/70"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="max-w-sm mx-auto mb-14">
+          {appliedCoupon ? (
+            <div className="flex items-center justify-between gap-3 bg-brand-blue-pale/50 border border-brand-blue-pale rounded-full px-4 py-2.5">
+              <span className="flex items-center gap-2 text-sm text-brand-blue font-medium">
+                <Tag size={15} className="text-brand-orange" />
+                {appliedCoupon.code} — {appliedCoupon.discount_percent}% off
+                applied
+              </span>
+              <button
+                onClick={handleRemoveCoupon}
+                className="text-brand-blue/50 hover:text-red-500 transition-colors rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                title="Remove coupon"
+                aria-label="Remove coupon"
               >
-                {renderCard(duration, i, false)}
-              </motion.div>
-            ))}
-          </div>
+                <X size={16} />
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={couponInput}
+                onChange={(e) => setCouponInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()}
+                placeholder="Have a coupon code?"
+                className="flex-1 border border-brand-blue-pale rounded-full px-4 py-2.5 text-sm text-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-orange"
+              />
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleApplyCoupon}
+                disabled={couponChecking || !couponInput.trim()}
+              >
+                {couponChecking ? "Checking..." : "Apply"}
+              </Button>
+            </div>
+          )}
+          {couponError && (
+            <p className="text-red-500 text-xs text-center mt-2">
+              {couponError}
+            </p>
+          )}
+        </div>
 
-          {/* Phones: one card at a time; keyed by tab so switching package
-              type starts again from the first card. */}
-          <CardSlider
-            key={selectedType}
-            className="md:hidden"
-            items={durations}
-            getKey={(duration) => duration}
-            getLabel={(duration) => `${duration}-day package`}
-            itemName="package"
-            renderItem={(duration, i) => renderCard(duration, i, true)}
-          />
-        </>
-      )}
-
-      <Modal
-        isOpen={!!manualPayFor}
-        onClose={() => setManualPayFor(null)}
-        title="Manual Payment"
-      >
-        {manualPayFor && (
-          <ManualPaymentPanel
-            methods={manualMethods}
-            type="package"
-            planIds={manualPayFor.planIds}
-            couponCode={appliedCoupon?.code}
-            itemLabel={`${packageLabels[selectedType]} (${manualPayFor.duration} Days)`}
-            amountLabel={manualPayFor.amountLabel}
-            currencyCode={currency.code}
-          />
+        {error && (
+          <p className="text-red-500 text-center text-sm mb-8">{error}</p>
         )}
-      </Modal>
-    </section>
+
+        {loading ? (
+          <Loader />
+        ) : durations.length === 0 ? (
+          <p className="text-center text-brand-blue/60">
+            No {packageLabels[selectedType] || ""} packages are available right
+            now.
+          </p>
+        ) : (
+          <>
+            {/* Tablet and up: a centred row, which becomes a slider with
+              arrows once there are more durations than fit (3 on desktop,
+              2 on tablets); keyed by tab so each type starts at its first. */}
+            <CardRow
+              key={`row-${selectedType}`}
+              className="hidden md:block"
+              items={durations}
+              getKey={(duration) => duration}
+              getLabel={(duration) => `the ${duration}-day package`}
+              itemName="package"
+              renderItem={(duration, i) => renderCard(duration, i, false)}
+            />
+
+            {/* Phones: one card at a time; keyed by tab so switching package
+              type starts again from the first card. */}
+            <CardSlider
+              key={selectedType}
+              className="md:hidden"
+              items={durations}
+              getKey={(duration) => duration}
+              getLabel={(duration) => `${duration}-day package`}
+              itemName="package"
+              renderItem={(duration, i) => renderCard(duration, i, true)}
+            />
+          </>
+        )}
+
+        <Modal
+          isOpen={!!manualPayFor}
+          onClose={() => setManualPayFor(null)}
+          title="Manual Payment"
+        >
+          {manualPayFor && (
+            <ManualPaymentPanel
+              methods={manualMethods}
+              type="package"
+              planIds={manualPayFor.planIds}
+              couponCode={appliedCoupon?.code}
+              itemLabel={`${packageLabels[selectedType]} (${manualPayFor.duration} Days)`}
+              amountLabel={manualPayFor.amountLabel}
+              currencyCode={currency.code}
+            />
+          )}
+        </Modal>
+      </section>
+      {/* Answers to what people ask before choosing a package — also in
+          the page's FAQPage structured data (seo/build.js). */}
+      <FaqSection
+        items={plansFaqs}
+        intro="What's included, how classes work, and how to pay."
+      />
+    </>
   );
 };
 

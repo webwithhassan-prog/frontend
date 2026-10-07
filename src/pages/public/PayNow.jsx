@@ -143,7 +143,7 @@ const PayNow = () => {
             <PhoneInput
               value={formData.client_phone}
               onChange={(v) => setFormData({ ...formData, client_phone: v })}
-              placeholder="Phone (optional)"
+              placeholder="WhatsApp number (optional)"
             />
 
             {error && <p className="text-red-500 text-sm">{error}</p>}

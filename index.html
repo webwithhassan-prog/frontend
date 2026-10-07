@@ -41,47 +41,26 @@
     content="Customized dietplans and home workouts — one platform, no WhatsApp groups, no missed links." />
   <meta name="twitter:image" content="https://fitnesszone.ltd/og-image.png?v=2" />
 
-  <!-- Who runs the site, for Google's knowledge panel and result details. -->
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "FITNESSZONE OFFICIAL LTD",
-      "alternateName": "Fitness Zone",
-      "url": "https://fitnesszone.ltd/",
-      "logo": "https://fitnesszone.ltd/icon-512.png",
-      "sameAs": ["https://www.instagram.com/fitness_zone5566"]
-    }
-  </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <!-- The homepage hero photo is the page's LCP element, but its URL only
-       becomes known after this API call resolves (it's admin-editable
-       content, not a static asset) — normally that means the browser
-       can't even start fetching it until the JS bundle has loaded, parsed,
-       and run. Preconnecting gets the connection to the backend warmed up
-       immediately, and preloading the request itself means the data is
-       already in flight (often already cached) by the time React's own
-       fetch call runs, instead of starting from zero. On mobile's slow
-       simulated network this one dependency chain was costing 10+ seconds
-       of LCP. -->
+  <!-- The app calls the API and loads photos from Cloudinary right away —
+       warming both connections early saves a round trip on each. (The
+       homepage hero photo itself is preloaded by the build, which bakes the
+       banner data into the homepage HTML — see seo/build.js.) -->
   <link rel="preconnect" href="https://fitnesszone-backend.onrender.com" crossorigin />
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
-  <link rel="preload" as="fetch"
-    href="https://fitnesszone-backend.onrender.com/api/hero-banners/public"
-    crossorigin="anonymous" />
   <!-- Loaded non-blocking (preload + swap-on-load) — a synchronous
        stylesheet link here was the page's single biggest render-blocking
        request. The <noscript> fallback covers non-JS clients. -->
   <link
     rel="preload" as="style"
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500..800&family=Manrope:wght@400..800&display=swap"
     onload="this.onload=null;this.rel='stylesheet'" crossorigin="anonymous" />
   <noscript>
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500..800&family=Manrope:wght@400..800&display=swap"
       rel="stylesheet" crossorigin="anonymous" />
   </noscript>
 </head>

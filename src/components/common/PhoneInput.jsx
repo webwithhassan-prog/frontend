@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronDown, Search, Globe } from "lucide-react";
 import { COUNTRY_CODES, flagEmoji } from "../../utils/countryCodes";
+import WhatsAppIcon from "./WhatsAppIcon";
 
 const DEFAULT_COUNTRY = COUNTRY_CODES.find((c) => c.iso === "PK");
 
@@ -36,11 +37,19 @@ const parseValue = (value) => {
 // submit (rather than navigating away) needs to force this back to its
 // default by remounting it: pass a `key` that changes on reset, e.g.
 // `key={resetCount}`.
+//
+// The team reaches clients on WhatsApp, so every phone field carries a note
+// asking for a number that's active there. `hint` swaps the wording for
+// the context (e.g. admin forms), and `hint={null}` hides it.
+export const WHATSAPP_HINT =
+  "Use your active WhatsApp number — our team contacts you there.";
+
 const PhoneInput = ({
   value,
   onChange,
   required,
-  placeholder = "Phone Number",
+  placeholder = "WhatsApp number",
+  hint = WHATSAPP_HINT,
   className = "",
 }) => {
   const initial = parseValue(value);
@@ -83,102 +92,110 @@ const PhoneInput = ({
     : COUNTRY_CODES;
 
   return (
-    <div
-      className={`relative flex w-full border border-brand-blue-pale rounded-lg focus-within:ring-2 focus-within:ring-brand-orange ${className}`}
-    >
-      <div className="flex items-center pl-2.5 pr-1 border-r border-brand-blue-pale shrink-0 rounded-l-lg">
-        <button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          title="Choose country"
-          aria-label={`Choose country, current: ${matchedCountry ? matchedCountry.name : "unknown"}`}
-          className="flex items-center text-brand-blue/60 hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
-        >
-          {matchedCountry ? (
-            <span className="text-base leading-none">
-              {flagEmoji(matchedCountry.iso)}
-            </span>
-          ) : (
-            <Globe size={15} />
-          )}
-          <ChevronDown
-            size={12}
-            className={`ml-0.5 transition-transform ${isOpen ? "rotate-180" : ""}`}
+    <div className="w-full">
+      <div
+        className={`relative flex w-full border border-brand-blue-pale rounded-lg focus-within:ring-2 focus-within:ring-brand-orange ${className}`}
+      >
+        <div className="flex items-center pl-2.5 pr-1 border-r border-brand-blue-pale shrink-0 rounded-l-lg">
+          <button
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            title="Choose country"
+            aria-label={`Choose country, current: ${matchedCountry ? matchedCountry.name : "unknown"}`}
+            className="flex items-center text-brand-blue/60 hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+          >
+            {matchedCountry ? (
+              <span className="text-base leading-none">
+                {flagEmoji(matchedCountry.iso)}
+              </span>
+            ) : (
+              <Globe size={15} />
+            )}
+            <ChevronDown
+              size={12}
+              className={`ml-0.5 transition-transform ${isOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+          <span className="text-brand-blue text-sm ml-1.5">+</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={dial}
+            onChange={handleDialChange}
+            aria-label="Country dial code"
+            className="w-9 text-brand-blue text-sm py-3 pl-0.5 focus:outline-none bg-transparent"
           />
-        </button>
-        <span className="text-brand-blue text-sm ml-1.5">+</span>
+        </div>
         <input
-          type="text"
+          type="tel"
           inputMode="numeric"
-          value={dial}
-          onChange={handleDialChange}
-          aria-label="Country dial code"
-          className="w-9 text-brand-blue text-sm py-3 pl-0.5 focus:outline-none bg-transparent"
+          placeholder={placeholder}
+          value={number}
+          onChange={handleNumberChange}
+          required={required}
+          className="flex-1 min-w-0 px-3 py-3 rounded-r-lg focus:outline-none"
         />
-      </div>
-      <input
-        type="tel"
-        inputMode="numeric"
-        placeholder={placeholder}
-        value={number}
-        onChange={handleNumberChange}
-        required={required}
-        className="flex-1 min-w-0 px-3 py-3 rounded-r-lg focus:outline-none"
-      />
 
-      {isOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-10"
-            onClick={() => {
-              setIsOpen(false);
-              setQuery("");
-            }}
-          />
-          <div className="absolute left-0 top-full mt-2 w-72 bg-white rounded-xl shadow-lg border border-brand-blue-pale py-1.5 z-20">
-            <div className="px-2 pb-1.5 mb-1 border-b border-brand-blue-pale/60 relative">
-              <Search
-                size={13}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-blue/40"
-              />
-              <input
-                autoFocus
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search country or code..."
-                className="w-full pl-6 pr-2 py-1.5 text-sm text-brand-blue outline-none"
-              />
+        {isOpen && (
+          <>
+            <div
+              className="fixed inset-0 z-10"
+              onClick={() => {
+                setIsOpen(false);
+                setQuery("");
+              }}
+            />
+            <div className="absolute left-0 top-full mt-2 w-72 bg-white rounded-xl shadow-lg border border-brand-blue-pale py-1.5 z-20">
+              <div className="px-2 pb-1.5 mb-1 border-b border-brand-blue-pale/60 relative">
+                <Search
+                  size={13}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-blue/40"
+                />
+                <input
+                  autoFocus
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search country or code..."
+                  className="w-full pl-6 pr-2 py-1.5 text-sm text-brand-blue outline-none"
+                />
+              </div>
+              <div className="max-h-56 overflow-y-auto">
+                {filtered.length > 0 ? (
+                  filtered.map((c) => (
+                    <button
+                      key={c.iso}
+                      type="button"
+                      onClick={() => handleSelectCountry(c)}
+                      className={`flex items-center justify-between w-full text-left px-4 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:bg-brand-blue-pale ${
+                        dial === c.dial
+                          ? "text-brand-orange font-semibold"
+                          : "text-brand-blue hover:bg-brand-blue-pale"
+                      }`}
+                    >
+                      <span className="truncate">
+                        {flagEmoji(c.iso)} {c.name}
+                      </span>
+                      <span className="text-brand-blue/50 shrink-0 ml-2">
+                        +{c.dial}
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <p className="px-4 py-2 text-sm text-brand-blue/50">
+                    No match found.
+                  </p>
+                )}
+              </div>
             </div>
-            <div className="max-h-56 overflow-y-auto">
-              {filtered.length > 0 ? (
-                filtered.map((c) => (
-                  <button
-                    key={c.iso}
-                    type="button"
-                    onClick={() => handleSelectCountry(c)}
-                    className={`flex items-center justify-between w-full text-left px-4 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:bg-brand-blue-pale ${
-                      dial === c.dial
-                        ? "text-brand-orange font-semibold"
-                        : "text-brand-blue hover:bg-brand-blue-pale"
-                    }`}
-                  >
-                    <span className="truncate">
-                      {flagEmoji(c.iso)} {c.name}
-                    </span>
-                    <span className="text-brand-blue/50 shrink-0 ml-2">
-                      +{c.dial}
-                    </span>
-                  </button>
-                ))
-              ) : (
-                <p className="px-4 py-2 text-sm text-brand-blue/50">
-                  No match found.
-                </p>
-              )}
-            </div>
-          </div>
-        </>
+          </>
+        )}
+      </div>
+      {hint && (
+        <p className="flex items-start gap-1.5 mt-1.5 text-xs leading-snug text-brand-blue/60">
+          <WhatsAppIcon size={13} className="mt-px shrink-0 text-[#25D366]" />
+          <span>{hint}</span>
+        </p>
       )}
     </div>
   );

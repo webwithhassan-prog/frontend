@@ -8,6 +8,8 @@ const SWIPE_VELOCITY = 400;
 const arrowClass =
   "absolute top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white border border-brand-blue-pale shadow-md text-brand-blue hover:text-brand-orange transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange";
 
+const MAX_DOTS = 7;
+
 // Inactive dot colour per background the slider sits on.
 const dotTones = {
   light: "bg-brand-blue-pale",
@@ -140,20 +142,37 @@ const CardSlider = ({
         )}
       </div>
 
-      {hasMany && (
-        <div className="flex justify-center gap-2 mt-4">
+      {/* Dots for a handful of items, each with a 24px tap target around
+          the small visible dot; past that a dot row would overflow a phone,
+          so it becomes a "3 / 15" counter. */}
+      {hasMany && count <= MAX_DOTS && (
+        <div className="flex justify-center mt-2">
           {items.map((item, i) => (
             <button
               key={getKey(item)}
               onClick={() => goTo(i, i > current ? 1 : -1)}
               aria-label={`Show ${getLabel(item, i)}`}
               aria-current={i === current}
-              className={`h-2 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
-                i === current ? "w-6 bg-brand-orange" : `w-2 ${dotTones[tone]}`
-              }`}
-            />
+              className="h-6 min-w-6 px-1 flex items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+            >
+              <span
+                className={`block h-2 rounded-full transition-all ${
+                  i === current ? "w-6 bg-brand-orange" : `w-2 ${dotTones[tone]}`
+                }`}
+              />
+            </button>
           ))}
         </div>
+      )}
+      {hasMany && count > MAX_DOTS && (
+        <p
+          className={`text-center text-sm font-semibold tabular-nums mt-3 ${
+            tone === "dark" ? "text-white/80" : "text-brand-blue/70"
+          }`}
+          aria-live="polite"
+        >
+          {current + 1} / {count}
+        </p>
       )}
     </div>
   );
