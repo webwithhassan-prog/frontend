@@ -19,6 +19,13 @@ const quickLinks = [
   { label: "Contact", href: "/contact" },
 ];
 
+// The program pages, linked with the words people search for.
+const programLinks = [
+  { label: "Online Diet Plan for Women", href: "/online-diet-plan" },
+  { label: "Live Online Workout Classes", href: "/online-workout-classes" },
+  { label: "Postpartum Weight Loss", href: "/postpartum-weight-loss" },
+];
+
 const legalLinks = [
   { label: "Privacy Policy", href: "/privacy-policy" },
   { label: "Terms of Service", href: "/terms" },
@@ -30,13 +37,17 @@ const Footer = () => {
 
   return (
     <footer className="bg-brand-blue text-white">
-      <div className="max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <div>
           <div className="flex items-center gap-2 mb-3">
             {/* A white disc, not the logo's own white square: the mark's
                 dark lettering needs a light ground on the navy footer. */}
             <span className="h-10 w-10 rounded-full bg-white flex items-center justify-center shrink-0">
-              <img src={logo} alt="Fitness Zone" className="h-8 w-8 object-contain" />
+              <img
+                src={logo}
+                alt="Fitness Zone"
+                className="h-8 w-8 object-contain"
+              />
             </span>
             <span className="font-display text-white text-sm tracking-wide">
               FITNESS <span className="text-brand-orange">ZONE</span>
@@ -78,6 +89,24 @@ const Footer = () => {
         </div>
 
         <div>
+          <h2 className="font-display text-sm mb-4 tracking-wide">PROGRAMS</h2>
+          <ul className="space-y-2 text-sm">
+            {programLinks.map((link) => (
+              <li key={link.href}>
+                <MotionLink
+                  to={link.href}
+                  className="text-brand-blue-pale/70 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                  whileHover={{ x: 4, color: "#F76B1C" }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {link.label}
+                </MotionLink>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
           <h2 className="font-display text-sm mb-4 tracking-wide">
             GET IN TOUCH
           </h2>
@@ -86,7 +115,7 @@ const Footer = () => {
               href={`https://wa.me/${settings.whatsapp_general}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-brand-orange px-5 py-2 rounded-full font-semibold text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-blue"
+              className="inline-flex items-center gap-2 bg-brand-orange text-brand-blue px-5 py-2 rounded-full font-semibold text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-blue"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -115,7 +144,7 @@ const Footer = () => {
               {i > 0 && <span aria-hidden="true">·</span>}
               <Link
                 to={link.href}
-                className="hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                className="inline-block py-1 hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
               >
                 {link.label}
               </Link>
@@ -123,7 +152,7 @@ const Footer = () => {
           ))}
           <span className="flex gap-4">
             <span aria-hidden="true">·</span>
-            <ReportIssue className="hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange" />
+            <ReportIssue className="inline-block py-1 hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange" />
           </span>
         </div>
       </div>

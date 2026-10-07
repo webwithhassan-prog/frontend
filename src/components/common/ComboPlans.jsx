@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Check } from "lucide-react";
 import toast from "react-hot-toast";
@@ -9,7 +9,9 @@ import CardSlider from "./CardSlider";
 import CardRow from "./CardRow";
 import CurrencySwitcher from "./CurrencySwitcher";
 import Modal from "../admin/Modal";
-import ManualPaymentPanel from "./ManualPaymentPanel";
+// Loaded only when someone opens manual payment — it carries the full
+// country list for the phone field, which the homepage doesn't need up front.
+const ManualPaymentPanel = lazy(() => import("./ManualPaymentPanel"));
 import { useCurrency } from "../../context/CurrencyContext";
 import { CURRENCY_TO_COUNTRY } from "../../utils/currencyToCountry";
 import { getErrorMessage } from "../../utils/errors";
@@ -337,14 +339,22 @@ const ComboPlans = () => {
         title="Manual Payment"
       >
         {manualPayFor && (
-          <ManualPaymentPanel
-            methods={manualMethods}
-            type="package"
-            planIds={[manualPayFor.plan._id]}
-            itemLabel={`Both Combined (${manualPayFor.plan.duration_days} Days)`}
-            amountLabel={manualPayFor.amountLabel}
-            currencyCode={currency.code}
-          />
+          <Suspense
+            fallback={
+              <p className="text-sm text-brand-blue/60 py-6 text-center">
+                Loading payment details…
+              </p>
+            }
+          >
+            <ManualPaymentPanel
+              methods={manualMethods}
+              type="package"
+              planIds={[manualPayFor.plan._id]}
+              itemLabel={`Both Combined (${manualPayFor.plan.duration_days} Days)`}
+              amountLabel={manualPayFor.amountLabel}
+              currencyCode={currency.code}
+            />
+          </Suspense>
         )}
       </Modal>
     </section>

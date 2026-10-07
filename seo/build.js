@@ -17,6 +17,7 @@
 // if the API can't be reached, pages are built from the static copy only.
 import { getPageMeta, pageMeta, SITE_ORIGIN } from "../src/utils/pageMeta.js";
 import { faqs, plansFaqs } from "../src/content/faq.js";
+import { programs } from "../src/content/programs.js";
 import { optimizeCloudinaryUrl } from "../src/utils/cloudinary.js";
 
 const API = process.env.SEO_API_URL || "https://fitnesszone-backend.onrender.com/api";
@@ -211,7 +212,10 @@ ${week.length ? `<h2>Weekly plan</h2>${ul(week.map((w) => `${w.day}: ${w.type}`)
     }`,
 
   "/success-stories": () =>
-    `<p>${esc(pageMeta["/success-stories"].description)}</p><p>Members share check-ins and progress after following their Fitness Zone diet plan and live home workouts.</p>`,
+    `<p>${esc(pageMeta["/success-stories"].description)}</p>
+<p>These weight loss success stories are real check-ins shared by Fitness Zone members — women following a customized diet plan built from their own home food, live online workout classes with female trainers, or both together.</p>
+<p>Diet plan members track their meals daily and check in with our team every week, so progress is followed, not guessed.</p>
+<p><a href="/online-diet-plan">How the diet plan works</a> · <a href="/online-workout-classes">Live workout classes</a> · <a href="/plans">Packages and prices</a></p>`,
 
   "/ebooks": (data) => {
     const items = [...data.ebooks.map((e) => ["E-book", e]), ...data.courses.map((c) => ["Course", c])];
@@ -246,8 +250,25 @@ ${week.length ? `<h2>Weekly plan</h2>${ul(week.map((w) => `${w.day}: ${w.type}`)
     `<p>${esc(pageMeta["/careers"].description)}</p><p>Trainers lead live, 50–55 minute online home workout classes for women. Apply through the form on this page.</p>`,
 };
 
+// Program pages (content/programs.js): the same sections the page shows.
+const programContent = (program) =>
+  `<p>${esc(program.intro)}</p>${program.sections
+    .map(
+      (sec) =>
+        `<h2>${esc(sec.heading)}</h2>${sec.lead ? `<p>${esc(sec.lead)}</p>` : ""}${(sec.paragraphs || [])
+          .map((p) => `<p>${esc(p)}</p>`)
+          .join("")}${sec.bullets ? ul(sec.bullets) : ""}${
+          sec.steps ? `<ol>${sec.steps.map(([t, d]) => `<li><strong>${esc(t)}</strong> — ${esc(d)}</li>`).join("")}</ol>` : ""
+        }${(sec.links || []).map(([label, to]) => `<p><a href="${esc(to)}">${esc(label)}</a></p>`).join("")}`,
+    )
+    .join("")}${faqSection(program.faqs)}<p><a href="/plans?type=${program.packageType}">See packages and prices</a></p>`;
+
 const readableContent = (path, meta, data) => {
-  const body = pageContent[path] ? pageContent[path](data) : `<p>${esc(meta.description)}</p>`;
+  const body = programs[path]
+    ? programContent(programs[path])
+    : pageContent[path]
+      ? pageContent[path](data)
+      : `<p>${esc(meta.description)}</p>`;
   const h1 = path === "/" ? "Fitness Zone — Online Diet Plans & Live Home Workouts for Women" : pageName(meta.title);
   // Visually hidden: the app replaces #root's contents as soon as it runs.
   return `<div style="position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);border:0"><main><h1>${esc(
@@ -345,7 +366,8 @@ const jsonLd = (path, meta, data) => {
     });
   }
   graph.push(page);
-  const pageFaqs = path === "/" ? faqs : path === "/plans" ? plansFaqs : null;
+  const pageFaqs =
+    path === "/" ? faqs : path === "/plans" ? plansFaqs : programs[path]?.faqs || null;
   if (pageFaqs) {
     graph.push({
       "@type": "FAQPage",
@@ -358,6 +380,20 @@ const jsonLd = (path, meta, data) => {
     });
   }
   if (path === "/" || path === "/plans") graph.push(...serviceNodes(data));
+  if (programs[path]) {
+    const program = programs[path];
+    graph.push({
+      "@type": "Service",
+      "@id": `${url}#service`,
+      name: program.title,
+      serviceType: program.serviceType,
+      description: program.intro,
+      provider: { "@id": `${SITE_ORIGIN}/#organization` },
+      areaServed: "Worldwide",
+      audience: { "@type": "PeopleAudience", audienceType: "Women" },
+      url,
+    });
+  }
   if (path === "/trainers" && data.trainers.length) {
     graph.push({
       "@type": "ItemList",
@@ -423,13 +459,28 @@ const heroHead = (banners) => {
   <script>window.__HERO_BANNERS__ = ${json};</script>`;
 };
 
+// A static first frame for the homepage, so something meaningful paints
+// before the app's JavaScript has downloaded and run (Lighthouse measured
+// ~3.8s to first paint on mobile): an empty navbar bar, the activity strip
+// and the hero photo with its shading — at exactly the sizes the app then
+// renders in their place (navbar 77px, 81px on desktop; same hero box
+// classes as Home.jsx), so the swap doesn't shift anything. The photo is
+// the same preloaded srcset, so it's downloaded once and paints early.
+const homeShell = (banners) => {
+  if (!banners.length) return "";
+  const first = banners[0].image_url;
+  const srcset = HERO_WIDTHS.map((w) => `${optimizeCloudinaryUrl(first, w)} ${w}w`).join(", ");
+  return `<div aria-hidden="true"><div class="h-[77px] lg:h-[81px] bg-white border-b border-brand-blue-pale/60"></div><div class="bg-brand-blue h-10"></div><section class="relative bg-brand-blue overflow-hidden"><div class="relative w-full aspect-square sm:aspect-[3/2] lg:aspect-[2/1] lg:max-h-[560px]"><img src="${esc(optimizeCloudinaryUrl(first, 1200))}" srcset="${esc(srcset)}" sizes="100vw" alt="" fetchpriority="high" class="absolute inset-0 w-full h-full object-cover object-center" /><div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 via-55% to-black/5 lg:bg-gradient-to-r lg:from-black/85 lg:via-black/50 lg:via-50% lg:to-transparent"></div></div></section></div>`;
+};
+
 const buildPage = (base, path, meta, data) => {
   let html = withPageTags(base, path, meta);
   if (meta.noindex) return html;
   if (path === "/") html = html.replace("</head>", () => `  ${heroHead(data.heroBanners)}
 </head>`);
   html = html.replace("</head>", () => `  ${jsonLd(path, meta, data)}\n</head>`);
-  html = html.replace('<div id="root"></div>', () => `<div id="root">${readableContent(path, meta, data)}</div>`);
+  const shell = path === "/" ? homeShell(data.heroBanners) : "";
+  html = html.replace('<div id="root"></div>', () => `<div id="root">${shell}${readableContent(path, meta, data)}</div>`);
   return html;
 };
 

@@ -425,7 +425,8 @@ const Plans = () => {
           {packageLabels[selectedType]?.toUpperCase() || "PACKAGES"}
         </motion.h1>
         <p className="text-brand-blue/70 text-center mb-4">
-          Choose the duration that works for you.
+          Customized diet plans, live online workout classes, or both
+          combined — choose the length that works for you.
         </p>
         <div className="flex justify-center mb-6">
           <CurrencySwitcher />

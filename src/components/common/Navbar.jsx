@@ -22,6 +22,13 @@ import { useAuth } from "../../context/AuthContext";
 import { useSettings } from "../../context/SettingsContext";
 import useLockBodyScroll from "../../hooks/useLockBodyScroll";
 
+// Program pages, listed under the packages in the Packages menu.
+const programOptions = [
+  { label: "Online Diet Plan", href: "/online-diet-plan" },
+  { label: "Live Workout Classes", href: "/online-workout-classes" },
+  { label: "Postpartum Weight Loss", href: "/postpartum-weight-loss" },
+];
+
 const packageOptions = [
   { label: "Customized Dietplan", type: "dietplan" },
   { label: "Home Workouts", type: "workout" },
@@ -228,6 +235,19 @@ const Navbar = () => {
                         <Link
                           key={opt.type}
                           to={`/plans?type=${opt.type}`}
+                          onClick={() => setIsPackagesOpen(false)}
+                          className="block px-4 py-2.5 text-sm text-brand-blue hover:bg-brand-blue-pale hover:text-brand-orange transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                        >
+                          {opt.label}
+                        </Link>
+                      ))}
+                      <p className="px-4 pt-3 pb-1 mt-1 border-t border-brand-blue-pale text-[11px] font-bold uppercase tracking-wider text-brand-blue/60">
+                        Programs
+                      </p>
+                      {programOptions.map((opt) => (
+                        <Link
+                          key={opt.href}
+                          to={opt.href}
                           onClick={() => setIsPackagesOpen(false)}
                           className="block px-4 py-2.5 text-sm text-brand-blue hover:bg-brand-blue-pale hover:text-brand-orange transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                         >
@@ -508,6 +528,16 @@ const Navbar = () => {
                           <Link
                             key={opt.type}
                             to={`/plans?type=${opt.type}`}
+                            className="text-brand-blue/70 text-base py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded-lg"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            {opt.label}
+                          </Link>
+                        ))}
+                        {programOptions.map((opt) => (
+                          <Link
+                            key={opt.href}
+                            to={opt.href}
                             className="text-brand-blue/70 text-base py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded-lg"
                             onClick={() => setIsOpen(false)}
                           >

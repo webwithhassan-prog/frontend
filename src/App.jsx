@@ -36,6 +36,7 @@ const About = lazy(() => import("./pages/public/About"));
 const PrivacyPolicy = lazy(() => import("./pages/public/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/public/TermsOfService"));
 const RefundPolicy = lazy(() => import("./pages/public/RefundPolicy"));
+const ProgramPage = lazy(() => import("./pages/public/ProgramPage"));
 
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
 const Enrollments = lazy(() => import("./pages/admin/Enrollments"));
@@ -148,6 +149,30 @@ function AppRoutes() {
           element={
             <PublicLayout>
               <RefundPolicy />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/online-diet-plan"
+          element={
+            <PublicLayout>
+              <ProgramPage />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/online-workout-classes"
+          element={
+            <PublicLayout>
+              <ProgramPage />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/postpartum-weight-loss"
+          element={
+            <PublicLayout>
+              <ProgramPage />
             </PublicLayout>
           }
         />

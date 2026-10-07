@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Sunrise, Sun, Sunset, Moon } from "lucide-react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import Card from "../../components/common/Card";
 
@@ -59,8 +60,13 @@ const PAKISTAN_OFFSET_MS = 5 * 60 * 60 * 1000;
 const slotInstant = (hour, minute) => {
   const pkt = new Date(Date.now() + PAKISTAN_OFFSET_MS);
   return new Date(
-    Date.UTC(pkt.getUTCFullYear(), pkt.getUTCMonth(), pkt.getUTCDate(), hour, minute) -
-      PAKISTAN_OFFSET_MS,
+    Date.UTC(
+      pkt.getUTCFullYear(),
+      pkt.getUTCMonth(),
+      pkt.getUTCDate(),
+      hour,
+      minute,
+    ) - PAKISTAN_OFFSET_MS,
   );
 };
 
@@ -127,7 +133,11 @@ const TimetableSchedule = () => {
       slots: timeSlots
         .map((slot) => {
           const local = localParts(slot.hour, slot.minute);
-          return { ...slot, local, sortKey: ((local.hour + 20) % 24) * 60 + local.minute };
+          return {
+            ...slot,
+            local,
+            sortKey: ((local.hour + 20) % 24) * 60 + local.minute,
+          };
         })
         .filter((slot) => periodFor(slot.local.hour) === period)
         .sort((a, b) => a.sortKey - b.sortKey),
@@ -164,7 +174,14 @@ const TimetableSchedule = () => {
         TIME SLOTS
       </motion.h1>
       <p className="text-brand-blue/70 text-center text-sm md:text-base mb-4">
-        The same slots run every day — join from your Profile once active.
+        Live online workout classes for women, led by female trainers. The same
+        slots run every day — join from your Profile once active.{" "}
+        <Link
+          to="/online-workout-classes"
+          className="font-semibold text-brand-blue-light hover:text-brand-orange rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+        >
+          About the classes
+        </Link>
       </p>
 
       <div className="flex flex-col items-center gap-1.5 mb-6 md:mb-8">

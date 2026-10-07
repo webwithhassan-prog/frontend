@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import axios from 'axios';
-import Card from '../../components/common/Card';
-import Loader from '../../components/common/Loader';
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import axios from "axios";
+import Card from "../../components/common/Card";
+import Loader from "../../components/common/Loader";
 
 const Trainers = () => {
   const [trainers, setTrainers] = useState([]);
@@ -11,7 +11,9 @@ const Trainers = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/trainers/public`);
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/trainers/public`,
+        );
         setTrainers(res.data);
       } catch (err) {
         console.error(err);
@@ -25,19 +27,26 @@ const Trainers = () => {
   return (
     <section className="max-w-6xl mx-auto px-6 py-20">
       <motion.h1
-        className="font-display text-3xl md:text-4xl text-brand-blue text-center mb-14"
+        className="font-display text-3xl md:text-4xl text-brand-blue text-center mb-4"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
       >
         MEET THE TEAM
       </motion.h1>
+      <p className="text-brand-blue/75 text-center max-w-2xl mx-auto mb-12">
+        Our female fitness trainers lead every live online workout class — yoga,
+        strength training, tabata, abs and full-body sessions, six days a week,
+        from home.
+      </p>
 
       {loading ? (
         <Loader />
       ) : (
         <>
-          <h2 className="font-display text-lg text-brand-blue mb-6">TRAINERS</h2>
+          <h2 className="font-display text-lg text-brand-blue mb-6">
+            TRAINERS
+          </h2>
           {trainers.length === 0 ? (
             <p className="text-brand-blue/60 text-sm">
               No trainers added yet — check back soon.
@@ -46,8 +55,12 @@ const Trainers = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {trainers.map((t) => (
                 <Card key={t._id}>
-                  <h3 className="font-display text-brand-blue text-base">{t.name}</h3>
-                  <p className="text-brand-blue/70 text-sm mt-1">{t.specialty}</p>
+                  <h3 className="font-display text-brand-blue text-base">
+                    {t.name}
+                  </h3>
+                  <p className="text-brand-blue/70 text-sm mt-1">
+                    {t.specialty}
+                  </p>
                 </Card>
               ))}
             </div>

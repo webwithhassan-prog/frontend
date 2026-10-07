@@ -25,7 +25,7 @@ export const pageMeta = {
       "Since 2023, Fitness Zone has helped women build lasting health with real-food diet plans and home workouts — no powders, pills or shortcuts. Meet us.",
   },
   "/trainers": {
-    title: `Female Fitness Trainers | ${siteName}`,
+    title: `Female Fitness Trainers Online | ${siteName}`,
     description:
       "Meet the female fitness trainers who lead Fitness Zone's live online home workout classes, six days a week. Find a class time that suits you.",
   },
@@ -43,6 +43,21 @@ export const pageMeta = {
     title: `Weight Loss Success Stories | ${siteName}`,
     description:
       "Real check-ins and results from women on Fitness Zone diet plans and live home workouts. Read their stories and start your own.",
+  },
+  "/online-diet-plan": {
+    title: `Customized Online Diet Plan for Women | ${siteName}`,
+    description:
+      "A customized diet plan for weight loss, built by a dietitian around your health and the home food you eat — no supplements. Get your plan within 24 hours.",
+  },
+  "/online-workout-classes": {
+    title: `Live Online Workout Classes for Women | ${siteName}`,
+    description:
+      "Live online home workout classes for women with female trainers — 50–55 minutes, six days a week, several times a day, with recordings. See class times.",
+  },
+  "/postpartum-weight-loss": {
+    title: `Postpartum Weight Loss Program for New Moms | ${siteName}`,
+    description:
+      "Lose weight after pregnancy at home: a routine-friendly customized diet plan and doctor-safe live workouts with female trainers, built around your baby.",
   },
   "/careers": {
     title: `Careers — Join Our Trainer Team | ${siteName}`,
