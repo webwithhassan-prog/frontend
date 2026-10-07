@@ -24,15 +24,14 @@ import useLockBodyScroll from "../../hooks/useLockBodyScroll";
 
 // Program pages, listed under the packages in the Packages menu.
 const programOptions = [
-  { label: "Online Diet Plan", href: "/online-diet-plan" },
-  { label: "Live Workout Classes", href: "/online-workout-classes" },
-  { label: "Postpartum Weight Loss", href: "/postpartum-weight-loss" },
+  { label: "Hormonal Im-Balances", href: "/postpartum-weight-loss" },
 ];
 
 const packageOptions = [
-  { label: "Customized Dietplan", type: "dietplan" },
-  { label: "Home Workouts", type: "workout" },
   { label: "Both Combined", type: "combo" },
+  { label: "Customized Dietplan Only", type: "dietplan" },
+  { label: "live Workouts Only", type: "workout" },
+  
 ];
 
 const navLinks = [
