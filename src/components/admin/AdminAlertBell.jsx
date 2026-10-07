@@ -97,7 +97,10 @@ const AdminAlertBell = ({ onOpenIssuesChange, className = "" }) => {
   };
 
   return (
-    <div className={`relative ${className}`}>
+    // Position comes entirely from className (the layout passes `fixed`):
+    // a hard-coded `relative` here won the CSS cascade over it, dropping the
+    // bell into the page's flex row and pushing the whole panel right.
+    <div className={className || "relative"}>
       <button
         onClick={toggle}
         className="relative w-10 h-10 flex items-center justify-center rounded-full bg-white text-brand-blue shadow-md border border-brand-blue-pale hover:text-brand-orange transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
