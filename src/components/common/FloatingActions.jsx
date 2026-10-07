@@ -51,18 +51,28 @@ const FloatingActions = () => {
           <User size={20} />
         </motion.a>
       )}
-      <motion.a
-        href={whatsappLink}
-        target="_blank"
-        rel="noopener noreferrer"
+      <motion.div
+        className="relative"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] text-white shadow-lg hover:scale-105 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
-        title="Chat on WhatsApp"
-        aria-label="Chat on WhatsApp"
       >
-        <WhatsAppIcon size={26} />
-      </motion.a>
+        {/* A soft ripple pulsing out from behind the button draws the eye
+            without moving the button itself (off for reduced motion). */}
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 rounded-full bg-[#25D366] animate-wa-ring"
+        />
+        <a
+          href={whatsappLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="relative flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] text-white shadow-lg ring-4 ring-white hover:scale-105 transition-transform focus-visible:outline-none focus-visible:ring-brand-orange"
+          title="Chat on WhatsApp"
+          aria-label="Chat on WhatsApp"
+        >
+          <WhatsAppIcon size={26} />
+        </a>
+      </motion.div>
     </div>
   );
 };
