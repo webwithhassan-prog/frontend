@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import {
   Star,
   ArrowRight,
@@ -53,24 +52,6 @@ const steps = [
     n: "03",
     title: "Join your workout",
     desc: "Join from your dashboard — no links to hunt for, no groups to scroll through.",
-  },
-];
-
-const programCards = [
-  {
-    title: "Customized Online Diet Plan",
-    desc: "A diet plan for weight loss built by a dietitian around your home food — your plan within 24 hours.",
-    to: "/online-diet-plan",
-  },
-  {
-    title: "Live Online Workout Classes",
-    desc: "Home workouts for women with female trainers — six days a week, several times a day.",
-    to: "/online-workout-classes",
-  },
-  {
-    title: "Postpartum Weight Loss",
-    desc: "For new moms: a routine-friendly diet and doctor-safe home workouts, around your baby.",
-    to: "/postpartum-weight-loss",
   },
 ];
 
@@ -573,31 +554,6 @@ const Home = () => {
                   </div>
                 </motion.div>
               </motion.div>
-            ))}
-          </div>
-
-          {/* Find your program — links to the program pages, worded the way
-              women search for them. */}
-          <h2 className="font-display text-xl md:text-2xl text-brand-blue text-center mt-16 mb-6">
-            FIND YOUR PROGRAM
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {programCards.map((card) => (
-              <Link
-                key={card.to}
-                to={card.to}
-                className="group flex flex-col bg-white border border-brand-blue-pale rounded-2xl shadow-sm hover:shadow-md p-5 transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
-              >
-                <span className="font-display text-brand-blue text-base mb-1.5">
-                  {card.title}
-                </span>
-                <span className="text-sm text-brand-blue/75 leading-relaxed mb-3">
-                  {card.desc}
-                </span>
-                <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-brand-blue-light group-hover:text-brand-orange">
-                  Learn more <ArrowRight size={15} />
-                </span>
-              </Link>
             ))}
           </div>
         </div>
