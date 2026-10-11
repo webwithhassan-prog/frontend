@@ -24,13 +24,15 @@ import useLockBodyScroll from "../../hooks/useLockBodyScroll";
 
 // Program pages, listed under the packages in the Packages menu.
 const programOptions = [
-  { label: "Post-partum", href: "/postpartum-weight-loss" },
+  { label: "Post-Partum", href: "/postpartum-weight-loss" },
+  { label: "PCOS-PCOD Thyroid", href: "/combo" },
+  { label: "Menopause & Insulin Resistance", href: "/combo" },
 ];
 
 const packageOptions = [
   { label: "Both Combined", type: "combo" },
   { label: "Customized Dietplan Only", type: "dietplan" },
-  { label: "live Workouts Only", type: "workout" },
+  { label: "Live Workouts Only", type: "workout" },
   
 ];
 
