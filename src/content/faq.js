@@ -35,7 +35,7 @@ export const faqs = [
   {
     q: "How can I pay?",
     onPlans: true,
-    a: "Pay by card through secure Stripe checkout for instant access. In some countries you can also pay through local methods — for example bank transfer, JazzCash or Easypaisa in Pakistan — and access starts once our team verifies the payment.",
+    a: "Pay by card through secure Stripe checkout for instant access. In some countries you can also pay through local methods - and access starts once our team verifies the payment.",
   },
 ];
 
