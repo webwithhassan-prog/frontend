@@ -25,7 +25,7 @@ import useLockBodyScroll from "../../hooks/useLockBodyScroll";
 // Program pages, listed under the packages in the Packages menu.
 const programOptions = [
   { label: "Post-Partum", href: "/postpartum-weight-loss" },
-  { label: "PCOS-PCOD Thyroid", href: "/plans?type=dietpland" },
+  { label: "PCOS-PCOD Thyroid", href: "/plans?type=dietplan" },
   { label: "Menopause & Insulin Resistance", href: "/plans?type=dietplan" },
 ];
 
