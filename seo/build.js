@@ -18,6 +18,7 @@
 import { getPageMeta, pageMeta, SITE_ORIGIN } from "../src/utils/pageMeta.js";
 import { faqs, plansFaqs } from "../src/content/faq.js";
 import { programs } from "../src/content/programs.js";
+import { trainersIntro, trainersSections, trainersLinks, trainersFaqs } from "../src/content/trainers.js";
 import { optimizeCloudinaryUrl } from "../src/utils/cloudinary.js";
 
 const API = process.env.SEO_API_URL || "https://fitnesszone-backend.onrender.com/api";
@@ -205,11 +206,22 @@ ${week.length ? `<h2>Weekly plan</h2>${ul(week.map((w) => `${w.day}: ${w.type}`)
   },
 
   "/trainers": (data) =>
-    `<p>${esc(pageMeta["/trainers"].description)}</p>${
+    `<p>${esc(trainersIntro)}</p>${
       data.trainers.length
-        ? ul(data.trainers.map((t) => (t.specialty ? `${t.name} — ${t.specialty.replace(/\|+$/, "")}` : t.name)))
+        ? `<h2>Our female trainers</h2>${ul(
+            data.trainers.map((t) => (t.specialty ? `${t.name} — ${t.specialty.replace(/\|+$/, "")}` : t.name)),
+          )}`
         : ""
-    }`,
+    }${trainersSections
+      .map(
+        (sec) =>
+          `<h2>${esc(sec.heading)}</h2>${(sec.paragraphs || []).map((p) => `<p>${esc(p)}</p>`).join("")}${
+            sec.bullets ? ul(sec.bullets) : ""
+          }`,
+      )
+      .join("")}${trainersLinks.map(([label, to]) => `<p><a href="${esc(to)}">${esc(label)}</a></p>`).join("")}${faqSection(
+      trainersFaqs,
+    )}`,
 
   "/success-stories": () =>
     `<p>${esc(pageMeta["/success-stories"].description)}</p>
@@ -367,7 +379,13 @@ const jsonLd = (path, meta, data) => {
   }
   graph.push(page);
   const pageFaqs =
-    path === "/" ? faqs : path === "/plans" ? plansFaqs : programs[path]?.faqs || null;
+    path === "/"
+      ? faqs
+      : path === "/plans"
+        ? plansFaqs
+        : path === "/trainers"
+          ? trainersFaqs
+          : programs[path]?.faqs || null;
   if (pageFaqs) {
     graph.push({
       "@type": "FAQPage",

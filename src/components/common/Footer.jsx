@@ -23,6 +23,9 @@ const quickLinks = [
 const programLinks = [
   { label: "Online Diet Plan for Women", href: "/online-diet-plan" },
   { label: "Live Online Workout Classes", href: "/online-workout-classes" },
+  { label: "Home Workouts for Women", href: "/home-workout-for-women" },
+  { label: "PCOS & Thyroid Diet Plan", href: "/pcos-diet-plan" },
+  { label: "Menopause Weight Loss", href: "/menopause-weight-loss" },
   { label: "Postpartum Weight Loss", href: "/postpartum-weight-loss" },
 ];
 

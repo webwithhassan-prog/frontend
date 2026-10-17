@@ -6,7 +6,7 @@ import { programs } from "../../content/programs";
 import NotFound from "./NotFound";
 
 // One template for the program pages (online diet plan, live workout
-// classes, postpartum weight loss). Content lives in content/programs.js,
+// classes, home workouts, postpartum, PCOS/thyroid, menopause). Content lives in content/programs.js,
 // which the build also turns into the crawler-readable HTML and FAQ/Service
 // structured data, so what people read and what search engines read match.
 const ProgramPage = () => {
@@ -114,7 +114,10 @@ const ProgramPage = () => {
 
       <FaqSection
         items={program.faqs}
-        intro={`Common questions about our ${program.title.toLowerCase()}.`}
+        intro={
+          program.faqIntro ||
+          `Common questions about our ${program.title.toLowerCase()}.`
+        }
       />
 
       <section className="bg-brand-blue py-14">

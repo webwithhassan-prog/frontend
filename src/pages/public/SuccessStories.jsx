@@ -71,13 +71,11 @@ const SuccessStories = () => {
         </p>
       </div>
 
+      {/* Nothing in place of an empty or unreachable list: a "no stories
+          yet" message is what got this page reported as a soft 404. */}
       {loading ? (
         <Loader />
-      ) : images.length === 0 ? (
-        <p className="text-center text-brand-blue/50 text-sm">
-          No stories added yet — check back soon.
-        </p>
-      ) : (
+      ) : images.length === 0 ? null : (
         <div className="columns-1 sm:columns-2 md:columns-3 gap-6 space-y-6">
           {images.map((src, i) => (
             <motion.img
