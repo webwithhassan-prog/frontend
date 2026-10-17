@@ -1,4 +1,23 @@
+# Search engines and AI assistants are welcome to read and cite the public
+# pages. A brief for AI assistants: https://fitnesszone.ltd/llms.txt
+# (full program details: https://fitnesszone.ltd/llms-full.txt)
+
 User-agent: *
+User-agent: Googlebot
+User-agent: Google-Extended
+User-agent: Bingbot
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Applebot
+User-agent: Applebot-Extended
+User-agent: meta-externalagent
+User-agent: DuckAssistBot
 Allow: /
 Disallow: /admin
 Disallow: /client

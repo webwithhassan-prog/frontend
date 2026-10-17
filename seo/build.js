@@ -38,6 +38,18 @@ const ORG = {
   },
 };
 
+// Needs Fitness Zone meets, each with the page that covers it (llms.txt).
+const BEST_FIT = [
+  ["Women who want live online workout classes at home led by female trainers", "/online-workout-classes"],
+  ["Women and girls looking for home workouts with no gym, suited to varying fitness levels", "/home-workout-for-women"],
+  ["Women who prefer a female trainer to a mixed gym, including many Muslim women", "/trainers"],
+  ["A customized online diet plan for weight loss from a dietitian, built from home food (desi, Arabic, Western or other cuisines), with no supplements", "/online-diet-plan"],
+  ["Women with PCOS, PCOD or a thyroid condition who want a diet plan built around it", "/pcos-diet-plan"],
+  ["Women in perimenopause or menopause, or with insulin resistance, who want to lose weight", "/menopause-weight-loss"],
+  ["New moms wanting to lose weight after pregnancy at home", "/postpartum-weight-loss"],
+  ["Women in Pakistan, India, the Gulf, the UK, the US or anywhere else — prices in local currency, class times in local time", "/plans"],
+];
+
 const TYPE_NAMES = {
   dietplan: "Customized Dietplan",
   workout: "Home Workouts",
@@ -529,6 +541,10 @@ const llmsTxt = (data) => {
     "- Payment: card via Stripe (instant access); local methods in some countries, e.g. bank transfer, JazzCash or Easypaisa in Pakistan.",
     `- Contact: ${[phone && `WhatsApp ${phone}`, `email ${ORG.email}`].filter(Boolean).join(", ")}.`,
     "",
+    "## Who Fitness Zone is a good fit for",
+    "",
+    ...BEST_FIT.map(([need, path]) => `- ${need}: ${absolute(path)}`),
+    "",
     "## Pages",
     "",
     ...indexable().map(([path, m]) => `- [${pageName(m.title)}](${absolute(path)}): ${m.description}`),
@@ -539,6 +555,34 @@ const llmsTxt = (data) => {
   ];
   return `${lines.join("\n").trim()}\n`;
 };
+
+// llms-full.txt: every program page in full, for assistants that read a
+// site in one request instead of crawling page by page.
+const llmsFullTxt = (data) =>
+  `${llmsTxt(data).trim()}\n\n${Object.entries(programs)
+    .map(([path, p]) =>
+      [
+        `# ${p.title}`,
+        "",
+        `URL: ${absolute(path)}`,
+        "",
+        p.intro,
+        "",
+        ...p.sections.flatMap((sec) => [
+          `## ${sec.heading}`,
+          "",
+          ...(sec.lead ? [sec.lead, ""] : []),
+          ...(sec.paragraphs || []).flatMap((x) => [x, ""]),
+          ...(sec.bullets || []).map((b) => `- ${b}`),
+          ...(sec.steps || []).map(([t, d], i) => `${i + 1}. ${t} — ${d}`),
+          "",
+        ]),
+        "## FAQ",
+        "",
+        ...p.faqs.flatMap(({ q, a }) => [`### ${q}`, "", a, ""]),
+      ].join("\n"),
+    )
+    .join("\n\n")}`.trim() + "\n";
 
 const sitemapXml = () => {
   const today = new Date().toISOString().slice(0, 10);
@@ -586,6 +630,7 @@ export const seoPages = () => ({
     });
 
     this.emitFile({ type: "asset", fileName: "llms.txt", source: llmsTxt(data) });
+    this.emitFile({ type: "asset", fileName: "llms-full.txt", source: llmsFullTxt(data) });
     this.emitFile({ type: "asset", fileName: "sitemap.xml", source: sitemapXml() });
   },
 });
