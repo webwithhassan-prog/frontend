@@ -20,6 +20,7 @@ import AnimatedCounter from "../../components/common/AnimatedCounter";
 import TestimonialsSlider from "../../components/common/TestimonialsSlider";
 import AchievementMarquee from "../../components/common/AchievementMarquee";
 import ComboPlans from "../../components/common/ComboPlans";
+import QuickLinks from "../../components/common/QuickLinks";
 import FaqSection from "../../components/common/FaqSection";
 import CardSlider from "../../components/common/CardSlider";
 import YouTubeFacade from "../../components/common/YouTubeFacade";
@@ -443,13 +444,17 @@ const Home = () => {
           ))}
         </div>
       </section>
+      <QuickLinks />
       <ComboPlans />
       {/* Session Demos — blue background to keep the page's alternating
           light/blue rhythm after the light Combo Plans section. */}
       {/* Shown (with a placeholder) while the videos load, so the sections
           below don't jump down when they arrive. */}
       {(demoLoading || demoVideos.length > 0) && (
-        <section className="bg-brand-blue py-16 md:py-20">
+        <section
+          id="demo-sessions"
+          className="bg-brand-blue py-16 md:py-20 scroll-mt-20"
+        >
           <div className="max-w-6xl mx-auto px-6">
             <motion.h2
               className="font-display text-2xl md:text-3xl text-white text-center mb-3"

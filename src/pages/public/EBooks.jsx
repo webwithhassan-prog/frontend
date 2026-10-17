@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { BookOpen, GraduationCap, Video } from "lucide-react";
 import api from "../../services/api";
@@ -11,7 +11,7 @@ import { getErrorMessage } from "../../utils/errors";
 import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
 import Modal from "../../components/admin/Modal";
 import ManualPaymentPanel from "../../components/common/ManualPaymentPanel";
-import { CURRENCY_TO_COUNTRY } from "../../utils/currencyToCountry";
+import { useAskCountryWhenVisible } from "../../hooks/useAskCountryWhenVisible";
 
 const EBooks = () => {
   const [ebooks, setEbooks] = useState([]);
@@ -19,7 +19,10 @@ const EBooks = () => {
   const [loading, setLoading] = useState(true);
   const [buyingId, setBuyingId] = useState(null);
   const [error, setError] = useState("");
-  const { format, currency } = useCurrency();
+  const { format, currency, paymentCountry } = useCurrency();
+  // Asks "Where are you joining from?" once these prices are on screen.
+  const pricingRef = useRef(null);
+  useAskCountryWhenVisible(pricingRef);
   const [manualMethods, setManualMethods] = useState([]);
   const [manualPayFor, setManualPayFor] = useState(null); // { type, id, itemLabel, amountLabel }
 
@@ -46,14 +49,16 @@ const EBooks = () => {
   // admin-managed, see admin/ManualPaymentMethods.jsx. Tied to the
   // currency (not the raw geo-detected country) so switching currency
   // manually also switches which methods show.
-  const manualMethodsCountry = CURRENCY_TO_COUNTRY[currency.code];
+  const manualMethodsCountry = paymentCountry;
   useEffect(() => {
     if (!manualMethodsCountry) {
       setManualMethods([]);
       return;
     }
     api
-      .get("/manual-payment-methods/public", { params: { country: manualMethodsCountry } })
+      .get("/manual-payment-methods/public", {
+        params: { country: manualMethodsCountry },
+      })
       .then((res) => setManualMethods(res.data))
       .catch((err) => console.error(err));
   }, [manualMethodsCountry]);
@@ -96,7 +101,7 @@ const EBooks = () => {
   };
 
   return (
-    <section className="max-w-5xl mx-auto px-6 py-20">
+    <section ref={pricingRef} className="max-w-5xl mx-auto px-6 py-20">
       <motion.h1
         className="font-display text-3xl md:text-4xl text-brand-blue text-center mb-4"
         initial={{ opacity: 0, y: 20 }}
@@ -151,7 +156,10 @@ const EBooks = () => {
                           />
                         </a>
                       ) : (
-                        <BookOpen className="text-brand-orange mb-3" size={28} />
+                        <BookOpen
+                          className="text-brand-orange mb-3"
+                          size={28}
+                        />
                       )}
                       <h3 className="font-display text-brand-blue text-base mb-2">
                         {ebook.title}
@@ -166,7 +174,9 @@ const EBooks = () => {
                         onClick={() => handleBuyEbook(ebook)}
                         disabled={buyingId === ebook._id}
                       >
-                        {buyingId === ebook._id ? "Redirecting..." : "Pay with Card"}
+                        {buyingId === ebook._id
+                          ? "Redirecting..."
+                          : "Pay with Card"}
                       </Button>
                       <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
                         Instant Access
@@ -188,7 +198,8 @@ const EBooks = () => {
                             {manualMethods.map((m) => m.name).join(" / ")}
                           </Button>
                           <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
-                            Instant Access (once your payment is verified by our team)
+                            Instant Access (once your payment is verified by our
+                            team)
                           </p>
                         </>
                       )}
@@ -230,7 +241,10 @@ const EBooks = () => {
                           />
                         </a>
                       ) : (
-                        <GraduationCap className="text-brand-blue-light mb-3" size={28} />
+                        <GraduationCap
+                          className="text-brand-blue-light mb-3"
+                          size={28}
+                        />
                       )}
                       <h3 className="font-display text-brand-blue text-base mb-2">
                         {course.title}
@@ -249,7 +263,9 @@ const EBooks = () => {
                         onClick={() => handleBuyCourse(course)}
                         disabled={buyingId === course._id}
                       >
-                        {buyingId === course._id ? "Redirecting..." : "Pay with Card"}
+                        {buyingId === course._id
+                          ? "Redirecting..."
+                          : "Pay with Card"}
                       </Button>
                       <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
                         Instant Access
@@ -271,7 +287,8 @@ const EBooks = () => {
                             {manualMethods.map((m) => m.name).join(" / ")}
                           </Button>
                           <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
-                            Instant Access (once your payment is verified by our team)
+                            Instant Access (once your payment is verified by our
+                            team)
                           </p>
                         </>
                       )}
@@ -299,8 +316,12 @@ const EBooks = () => {
           <ManualPaymentPanel
             methods={manualMethods}
             type={manualPayFor.type}
-            ebookId={manualPayFor.type === "ebook" ? manualPayFor.id : undefined}
-            courseId={manualPayFor.type === "course" ? manualPayFor.id : undefined}
+            ebookId={
+              manualPayFor.type === "ebook" ? manualPayFor.id : undefined
+            }
+            courseId={
+              manualPayFor.type === "course" ? manualPayFor.id : undefined
+            }
             itemLabel={manualPayFor.itemLabel}
             amountLabel={manualPayFor.amountLabel}
             currencyCode={currency.code}

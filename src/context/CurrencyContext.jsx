@@ -1,9 +1,40 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useState,
+  useEffect,
+} from "react";
 import api from "../services/api";
+import { CURRENCY_TO_COUNTRY } from "../utils/currencyToCountry";
 
 const CurrencyContext = createContext();
 
 const DEFAULT_CURRENCY = { code: "INR", symbol: "₹", rate: 1 };
+
+// The visitor's own answer to "Where are you joining from?" (asked the first
+// time they reach prices — see CountryPrompt). IP/timezone detection guesses
+// wrong for VPN users and travellers, and sometimes fails outright, so once
+// a visitor has answered, their answer wins over detection on every visit.
+// { country: ISO code or null, currency: code }.
+const CHOICE_KEY = "country_choice";
+
+const readChoice = () => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(CHOICE_KEY));
+    return parsed && typeof parsed.currency === "string" ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
+const saveChoice = (choice) => {
+  try {
+    localStorage.setItem(CHOICE_KEY, JSON.stringify(choice));
+  } catch {
+    // private mode etc. — the choice just lasts for this visit
+  }
+};
 
 // The browser's own timezone is a free, unlimited country signal the server
 // uses before falling back to a rate-limited IP lookup.
@@ -20,6 +51,9 @@ export const CurrencyProvider = ({ children }) => {
   const [currencies, setCurrencies] = useState([DEFAULT_CURRENCY]);
   const [rates, setRates] = useState({ INR: 1 });
   const [countryCode, setCountryCode] = useState(null);
+  const [choice, setChoice] = useState(readChoice);
+  const [ready, setReady] = useState(false);
+  const [promptOpen, setPromptOpen] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -45,38 +79,66 @@ export const CurrencyProvider = ({ children }) => {
       if (detectResult.status === "fulfilled") {
         setCountryCode(detectResult.value.data.country_code || null);
       }
+      setReady(true);
 
-      // Location-detected currency takes priority on each fresh visit — a
-      // manual pick from the switcher still works immediately for that
-      // browsing session, but reverts to the visitor's real location on
-      // their next visit rather than sticking forever. The saved choice is
-      // kept only as a fallback for when detection itself fails (lookup
-      // error, or a country with no supported currency).
-      if (detectResult.status === "fulfilled" && detectResult.value.data.show_conversion) {
+      // 1. The visitor's own answer, if they've given one.
+      const saved = readChoice();
+      const chosen =
+        saved && fetchedCurrencies.find((c) => c.code === saved.currency);
+      if (chosen) {
+        setCurrencyState(chosen);
+        return;
+      }
+
+      // 2. Otherwise the detected location's currency — a starting guess,
+      //    which the visitor confirms or corrects when asked.
+      if (
+        detectResult.status === "fulfilled" &&
+        detectResult.value.data.show_conversion
+      ) {
         const match = fetchedCurrencies.find(
           (c) => c.code === detectResult.value.data.currency_code,
         );
-        if (match) {
-          setCurrencyState(match);
-          return;
-        }
-      }
-
-      const saved = localStorage.getItem("selected_currency");
-      if (saved) {
-        const match = fetchedCurrencies.find((c) => c.code === saved);
         if (match) setCurrencyState(match);
       }
     };
     init();
   }, []);
 
+  // The visitor answered "Where are you joining from?".
+  const chooseCountry = useCallback(
+    ({ country, currency: code }) => {
+      const match = currencies.find((c) => c.code === code);
+      if (match) setCurrencyState(match);
+      const next = { country: country ?? null, currency: code };
+      setChoice(next);
+      saveChoice(next);
+      setPromptOpen(false);
+    },
+    [currencies],
+  );
+
+  // A pick from the currency dropdown counts as an answer too, with the
+  // country taken from the currency where there's a clear match.
   const setCurrency = (code) => {
     const match = currencies.find((c) => c.code === code);
     if (!match) return;
     setCurrencyState(match);
-    localStorage.setItem("selected_currency", code);
+    const next = { country: CURRENCY_TO_COUNTRY[code] ?? null, currency: code };
+    setChoice(next);
+    saveChoice(next);
   };
+
+  // Called by the pricing sections when a visitor reaches them: asks once,
+  // only after currencies have loaded, and never again once answered.
+  const requestCountryChoice = useCallback(() => {
+    if (ready && !readChoice()) setPromptOpen(true);
+  }, [ready]);
+
+  // Which country's local (manual) payment methods to show.
+  const paymentCountry = choice
+    ? choice.country
+    : (CURRENCY_TO_COUNTRY[currency.code] ?? null);
 
   // Every price in the app is stored/entered in INR — this converts to
   // whichever currency is currently selected for display only.
@@ -103,7 +165,20 @@ export const CurrencyProvider = ({ children }) => {
 
   return (
     <CurrencyContext.Provider
-      value={{ currency, currencies, setCurrency, format, rates, countryCode }}
+      value={{
+        currency,
+        currencies,
+        setCurrency,
+        format,
+        rates,
+        countryCode,
+        choice,
+        chooseCountry,
+        paymentCountry,
+        requestCountryChoice,
+        promptOpen,
+        setPromptOpen,
+      }}
     >
       {children}
     </CurrencyContext.Provider>

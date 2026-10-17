@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Check, Tag, X } from "lucide-react";
 import toast from "react-hot-toast";
@@ -17,7 +17,8 @@ import { plansFaqs } from "../../content/faq";
 import ManualPaymentPanel from "../../components/common/ManualPaymentPanel";
 import CardSlider from "../../components/common/CardSlider";
 import CardRow from "../../components/common/CardRow";
-import { CURRENCY_TO_COUNTRY } from "../../utils/currencyToCountry";
+import ClassTimesLink from "../../components/common/ClassTimesLink";
+import { useAskCountryWhenVisible } from "../../hooks/useAskCountryWhenVisible";
 import { durationsForType, popularFlags } from "../../utils/packages";
 
 const packageLabels = {
@@ -62,7 +63,10 @@ const Plans = () => {
   const [checkingOutDuration, setCheckingOutDuration] = useState(null);
   const [error, setError] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
-  const { format, currency } = useCurrency();
+  const { format, currency, paymentCountry } = useCurrency();
+  // Asks "Where are you joining from?" once these prices are on screen.
+  const pricingRef = useRef(null);
+  useAskCountryWhenVisible(pricingRef);
 
   const [couponInput, setCouponInput] = useState("");
   const [couponChecking, setCouponChecking] = useState(false);
@@ -81,7 +85,7 @@ const Plans = () => {
   // manually also switches which methods show — a client can deliberately
   // reveal a country's methods by picking its currency, same as they'd
   // pick it to see prices in that currency.
-  const manualMethodsCountry = CURRENCY_TO_COUNTRY[currency.code];
+  const manualMethodsCountry = paymentCountry;
   useEffect(() => {
     if (!manualMethodsCountry) {
       setManualMethods([]);
@@ -409,13 +413,16 @@ const Plans = () => {
             </p>
           </>
         )}
+
+        {/* Diet plans alone have no classes to time. */}
+        {selectedType !== "dietplan" && <ClassTimesLink className="mt-3" />}
       </Card>
     );
   };
 
   return (
     <>
-      <section className="max-w-5xl mx-auto px-6 pt-20 pb-4">
+      <section ref={pricingRef} className="max-w-5xl mx-auto px-6 pt-20 pb-4">
         <motion.h1
           className="font-display text-3xl md:text-4xl text-brand-blue text-center mb-4"
           initial={{ opacity: 0, y: 20 }}
@@ -425,8 +432,8 @@ const Plans = () => {
           {packageLabels[selectedType]?.toUpperCase() || "PACKAGES"}
         </motion.h1>
         <p className="text-brand-blue/70 text-center mb-4">
-          Customized diet plans, live online workout classes, or both
-          combined — choose the length that works for you.
+          Customized diet plans, live online workout classes, or both combined —
+          choose the length that works for you.
         </p>
         <div className="flex justify-center mb-6">
           <CurrencySwitcher />

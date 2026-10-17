@@ -10,8 +10,9 @@ import {
   Check,
   UtensilsCrossed,
   Bell,
+  ArrowRight,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
@@ -20,7 +21,11 @@ import WhatsAppIcon from "../../components/common/WhatsAppIcon";
 import Modal from "../../components/admin/Modal";
 import { useSettings } from "../../context/SettingsContext";
 import { getErrorMessage } from "../../utils/errors";
-import { getPushStatus, subscribeToPush, unsubscribeFromPush } from "../../utils/push";
+import {
+  getPushStatus,
+  subscribeToPush,
+  unsubscribeFromPush,
+} from "../../utils/push";
 import YouTubeFacade from "../../components/common/YouTubeFacade";
 
 const statusColors = {
@@ -447,6 +452,7 @@ const Profile = () => {
   const checkinDue = daysSinceCheckin === null || daysSinceCheckin >= 7;
   const daysUntilCheckin =
     daysSinceCheckin === null ? 0 : Math.max(0, 7 - daysSinceCheckin);
+  const hasLibrary = ebooks.length + courses.length > 0;
   const services = [
     {
       key: "workout",
@@ -508,8 +514,8 @@ const Profile = () => {
                     key={p._id}
                     className="text-brand-blue/70 text-xs leading-relaxed"
                   >
-                    {p.item_label} — {p.currency_code} {p.amount.toLocaleString()}{" "}
-                    via {p.method_name}
+                    {p.item_label} — {p.currency_code}{" "}
+                    {p.amount.toLocaleString()} via {p.method_name}
                   </li>
                 ))}
               </ul>
@@ -888,8 +894,8 @@ const Profile = () => {
                       TIME FOR YOUR NEW DIETPLAN
                     </p>
                     <p className="text-brand-blue/70 text-sm">
-                      It's been 15 days — your next diet plan is ready. Our
-                      team will reach out to you on WhatsApp shortly.
+                      It's been 15 days — your next diet plan is ready. Our team
+                      will reach out to you on WhatsApp shortly.
                     </p>
                   </div>
                 </div>
@@ -904,76 +910,63 @@ const Profile = () => {
             </motion.div>
           )}
 
-          {/* Services grid */}
-          <h2 className="font-display text-sm text-brand-blue/60 tracking-wide mb-4">
+          {/* Services — compact tiles, two per row on phones. The whole
+              tile is the button: it jumps to that section, or to the
+              matching package when the service isn't active. */}
+          <h2 className="font-display text-sm text-brand-blue/60 tracking-wide mb-3">
             YOUR SERVICES
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-            {services.map((s) => (
-              <Card
-                key={s.key}
-                className={`flex flex-col h-full ${!s.active ? "opacity-70" : ""} ${
-                  s.key === "followup" && hasDietplan && checkinDue
-                    ? "border-brand-orange border-2"
-                    : ""
-                }`}
-              >
-                <div className="flex-1">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-10">
+            {services.map((s) => {
+              const overdue = s.key === "followup" && hasDietplan && checkinDue;
+              const open = () => {
+                if (!s.active) {
+                  if (s.key === "ebooks") navigate("/ebooks");
+                  else navigate(`/plans?type=${s.upgradeType}`);
+                  return;
+                }
+                const target = {
+                  workout: "upcoming-classes",
+                  ebooks: "my-ebooks",
+                  followup: "weekly-progress",
+                  dailylog: "daily-log",
+                }[s.key];
+                document
+                  .getElementById(target)
+                  ?.scrollIntoView({ behavior: "smooth" });
+              };
+              return (
+                <button
+                  key={s.key}
+                  type="button"
+                  onClick={open}
+                  className={`flex flex-col text-left rounded-xl bg-white shadow-sm hover:shadow-md p-3 sm:p-4 transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
+                    overdue
+                      ? "border-2 border-brand-orange"
+                      : "border border-brand-blue-pale"
+                  }`}
+                >
                   {s.active ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full mb-3">
+                    <span className="self-start inline-flex items-center gap-1 text-[10px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
                       <Check size={10} /> ACTIVE
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-brand-blue-light bg-brand-blue-pale px-2 py-0.5 rounded-full mb-3">
+                    <span className="self-start inline-flex items-center gap-1 text-[10px] font-bold text-brand-blue-light bg-brand-blue-pale px-2 py-0.5 rounded-full">
                       <Lock size={10} /> LOCKED
                     </span>
                   )}
-                  <p className="font-display text-brand-blue text-xs leading-snug mb-2">
+                  <span className="font-display text-brand-blue text-xs sm:text-sm leading-snug mt-2">
                     {s.label}
-                  </p>
-                  <p className="text-brand-blue/60 text-xs leading-snug">
+                  </span>
+                  <span className="flex-1 text-brand-blue/70 text-[11px] sm:text-xs leading-snug mt-1">
                     {s.subtitle}
-                  </p>
-                </div>
-                {s.active ? (
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      if (s.key === "workout")
-                        document
-                          .getElementById("upcoming-classes")
-                          ?.scrollIntoView({ behavior: "smooth" });
-                      if (s.key === "ebooks")
-                        document
-                          .getElementById("my-ebooks")
-                          ?.scrollIntoView({ behavior: "smooth" });
-                      if (s.key === "followup")
-                        document
-                          .getElementById("weekly-progress")
-                          ?.scrollIntoView({ behavior: "smooth" });
-                      if (s.key === "dailylog")
-                        document
-                          .getElementById("daily-log")
-                          ?.scrollIntoView({ behavior: "smooth" });
-                    }}
-                    className="w-full mt-4"
-                  >
-                    View
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      if (s.key === "ebooks") navigate("/ebooks");
-                      else navigate(`/plans?type=${s.upgradeType}`);
-                    }}
-                    className="w-full mt-4"
-                  >
-                    Upgrade to Unlock
-                  </Button>
-                )}
-              </Card>
-            ))}
+                  </span>
+                  <span className="inline-flex items-center gap-1 mt-2.5 text-[11px] sm:text-xs font-semibold text-brand-blue-light">
+                    {s.active ? "View" : "Unlock"} <ArrowRight size={12} />
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Upcoming classes + daily log + recorded gallery — workout clients only */}
@@ -985,15 +978,15 @@ const Profile = () => {
                 </h2>
               </div>
               <p className="text-brand-blue/50 text-xs mb-4">
-                Class times are the same every day — join links are added
-                fresh before each session.
+                Class times are the same every day — join links are added fresh
+                before each session.
               </p>
 
               {client?.status !== "active" ? (
                 <Card className="mb-12 border-brand-orange border-2 text-center max-w-lg">
                   <p className="text-brand-blue font-semibold mb-4">
-                    Your Workout package isn't active — reactivate it to see
-                    and join your home workouts.
+                    Your Workout package isn't active — reactivate it to see and
+                    join your home workouts.
                   </p>
                   <Button onClick={() => navigate("/plans?type=workout")}>
                     View Workout Packages
@@ -1054,7 +1047,10 @@ const Profile = () => {
           {/* Today's Log — open to every client, active or not, and
               regardless of purchased service (steps/water tracking isn't
               tied to a package). */}
-          <h2 id="daily-log" className="font-display text-lg text-brand-blue mb-4">
+          <h2
+            id="daily-log"
+            className="font-display text-lg text-brand-blue mb-4"
+          >
             TODAY'S LOG
           </h2>
           <Card className="max-w-md mb-12">
@@ -1091,329 +1087,349 @@ const Profile = () => {
             </form>
           </Card>
 
-          {/* My E-Books */}
-          <h2
-            id="my-ebooks"
-            className="font-display text-lg text-brand-blue mb-4"
-          >
-            MY E-BOOKS
-          </h2>
-          {ebooks.length === 0 ? (
-            <p className="text-brand-blue/70 mb-12">
-              No e-books purchased yet — check the E-Books page to browse.
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-              {ebooks.map((ebook) => (
-                <Card key={ebook._id}>
-                  <h3 className="font-display text-brand-blue text-sm mb-1">
-                    {ebook.title}
-                  </h3>
-                  <p className="text-brand-blue/70 text-xs mb-4">
-                    {ebook.description}
-                  </p>
-                  <a
-                    href={ebook.pdf_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full bg-brand-orange/10 text-brand-orange hover:bg-brand-orange/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
-                  >
-                    <Download size={14} /> Download
-                  </a>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          {/* My Courses — paired with E-Books since the public E-Books &
-              Courses page sells them the same way */}
-          <h2
-            id="my-courses"
-            className="font-display text-lg text-brand-blue mb-4"
-          >
-            MY COURSES
-          </h2>
-          {courses.length === 0 ? (
-            <p className="text-brand-blue/70 mb-12">
-              No courses purchased yet — check the E-Books & Courses page to
-              browse.
-            </p>
-          ) : (
-            <div className="space-y-8 mb-12">
-              {courses.map((course) => (
-                <div key={course._id}>
-                  <h3 className="font-display text-brand-blue text-sm mb-1">
-                    {course.title}
-                  </h3>
-                  <p className="text-brand-blue/70 text-xs mb-4">
-                    {course.description}
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {course.lessons.map((lesson, i) => (
-                      <Card key={i}>
-                        <div className="aspect-video mb-3 rounded-lg overflow-hidden bg-brand-blue-pale">
-                          <YouTubeFacade
-                            link={lesson.youtube_link}
-                            title={lesson.title}
-                            className="w-full h-full"
-                          />
-                        </div>
-                        <h4 className="font-display text-brand-blue text-sm">
-                          {lesson.title}
-                        </h4>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
           {/* Weekly Progress form — dietplan clients only */}
           {hasDietplan && (
-          <>
-          <h2
-            id="weekly-progress"
-            className="font-display text-lg text-brand-blue mb-2 mt-12"
-          >
-            WEEKLY PROGRESS CHECK-IN
-          </h2>
-          <p className="text-brand-blue/70 text-sm mb-6">
-            Fill this in weekly to track your progress — nothing here is saved
-            on our servers except the date of your last check-in (so we can
-            remind you). Save the image and send it to us on WhatsApp.
-          </p>
-
-          <AnimatePresence mode="wait">
-            {!progressImageGenerated ? (
-              <motion.div
-                key="progress-form"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ duration: 0.3 }}
+            <>
+              <h2
+                id="weekly-progress"
+                className="font-display text-lg text-brand-blue mb-2 mt-12"
               >
-                <Card className="max-w-xl">
-                  <form onSubmit={handleProgressSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3">
-                      <input
-                        type="number"
-                        name="starting_weight"
-                        placeholder="Starting Weight (kg)"
-                        value={progressForm.starting_weight}
-                        onChange={handleProgressChange}
-                        required
-                        className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                      />
-                      <input
-                        type="number"
-                        name="current_weight"
-                        placeholder="Today's Weight (kg)"
-                        value={progressForm.current_weight}
-                        onChange={handleProgressChange}
-                        required
-                        className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                      />
-                    </div>
-                    <input
-                      type="text"
-                      name="inch_loss"
-                      placeholder="Total Inch Loss This Week (if any)"
-                      value={progressForm.inch_loss}
-                      onChange={handleProgressChange}
-                      className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                    />
+                WEEKLY PROGRESS CHECK-IN
+              </h2>
+              <p className="text-brand-blue/70 text-sm mb-6">
+                Fill this in weekly to track your progress — nothing here is
+                saved on our servers except the date of your last check-in (so
+                we can remind you). Save the image and send it to us on
+                WhatsApp.
+              </p>
 
-                    <div>
-                      <label className="text-sm text-brand-blue/60 mb-2 block">
-                        Progress Photo (optional) or note how your clothes fit
-                      </label>
-                      <div className="flex items-center gap-4 mb-2">
-                        <label className="cursor-pointer text-sm font-semibold text-brand-orange">
-                          {progressPhoto ? "Change Photo" : "Upload Photo"}
+              <AnimatePresence mode="wait">
+                {!progressImageGenerated ? (
+                  <motion.div
+                    key="progress-form"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Card className="max-w-xl">
+                      <form
+                        onSubmit={handleProgressSubmit}
+                        className="space-y-4"
+                      >
+                        <div className="grid grid-cols-2 gap-3">
                           <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleProgressPhotoSelect}
-                            className="hidden"
+                            type="number"
+                            name="starting_weight"
+                            placeholder="Starting Weight (kg)"
+                            value={progressForm.starting_weight}
+                            onChange={handleProgressChange}
+                            required
+                            className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
                           />
-                        </label>
-                        {progressPhotoPreview && (
-                          <img
-                            src={progressPhotoPreview}
-                            alt="Preview"
-                            className="w-12 h-12 rounded-lg object-cover"
+                          <input
+                            type="number"
+                            name="current_weight"
+                            placeholder="Today's Weight (kg)"
+                            value={progressForm.current_weight}
+                            onChange={handleProgressChange}
+                            required
+                            className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
                           />
+                        </div>
+                        <input
+                          type="text"
+                          name="inch_loss"
+                          placeholder="Total Inch Loss This Week (if any)"
+                          value={progressForm.inch_loss}
+                          onChange={handleProgressChange}
+                          className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                        />
+
+                        <div>
+                          <label className="text-sm text-brand-blue/60 mb-2 block">
+                            Progress Photo (optional) or note how your clothes
+                            fit
+                          </label>
+                          <div className="flex items-center gap-4 mb-2">
+                            <label className="cursor-pointer text-sm font-semibold text-brand-orange">
+                              {progressPhoto ? "Change Photo" : "Upload Photo"}
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleProgressPhotoSelect}
+                                className="hidden"
+                              />
+                            </label>
+                            {progressPhotoPreview && (
+                              <img
+                                src={progressPhotoPreview}
+                                alt="Preview"
+                                className="w-12 h-12 rounded-lg object-cover"
+                              />
+                            )}
+                          </div>
+                          <input
+                            type="text"
+                            name="cloth_fit_note"
+                            placeholder="How do your clothes fit this week?"
+                            value={progressForm.cloth_fit_note}
+                            onChange={handleProgressChange}
+                            className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <input
+                            type="text"
+                            name="sleep_hours"
+                            placeholder="Hours of Sleep"
+                            value={progressForm.sleep_hours}
+                            onChange={handleProgressChange}
+                            required
+                            className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                          />
+                          <input
+                            type="text"
+                            name="sleep_quality"
+                            placeholder="Sleep Quality"
+                            value={progressForm.sleep_quality}
+                            onChange={handleProgressChange}
+                            required
+                            className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                          />
+                        </div>
+
+                        <input
+                          type="text"
+                          name="water_intake"
+                          placeholder="Water Intake (liters/day)"
+                          value={progressForm.water_intake}
+                          onChange={handleProgressChange}
+                          required
+                          className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                        />
+
+                        <textarea
+                          name="energy_feedback"
+                          placeholder="Energy levels, feedback, or questions"
+                          value={progressForm.energy_feedback}
+                          onChange={handleProgressChange}
+                          rows={3}
+                          className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                        />
+
+                        <Button type="submit" className="w-full">
+                          Generate Image
+                        </Button>
+                      </form>
+                    </Card>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="progress-image"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    <div
+                      ref={progressCardRef}
+                      className="max-w-xl bg-white border-2 border-brand-blue rounded-2xl p-8"
+                    >
+                      <h2 className="font-display text-brand-blue text-lg mb-4">
+                        WEEKLY PROGRESS
+                      </h2>
+                      <div className="space-y-2 text-sm">
+                        <p>
+                          <span className="text-brand-blue/60">
+                            Starting Weight:
+                          </span>{" "}
+                          <span className="text-brand-blue font-medium">
+                            {progressForm.starting_weight} kg
+                          </span>
+                        </p>
+                        <p>
+                          <span className="text-brand-blue/60">
+                            Today's Weight:
+                          </span>{" "}
+                          <span className="text-brand-blue font-medium">
+                            {progressForm.current_weight} kg
+                          </span>
+                        </p>
+                        {progressForm.inch_loss && (
+                          <p>
+                            <span className="text-brand-blue/60">
+                              Inch Loss:
+                            </span>{" "}
+                            <span className="text-brand-blue font-medium">
+                              {progressForm.inch_loss}
+                            </span>
+                          </p>
+                        )}
+                        {progressForm.cloth_fit_note && (
+                          <p>
+                            <span className="text-brand-blue/60">
+                              Clothes Fit:
+                            </span>{" "}
+                            <span className="text-brand-blue font-medium">
+                              {progressForm.cloth_fit_note}
+                            </span>
+                          </p>
+                        )}
+                        <p>
+                          <span className="text-brand-blue/60">Sleep:</span>{" "}
+                          <span className="text-brand-blue font-medium">
+                            {progressForm.sleep_hours} hrs —{" "}
+                            {progressForm.sleep_quality}
+                          </span>
+                        </p>
+                        <p>
+                          <span className="text-brand-blue/60">
+                            Water Intake:
+                          </span>{" "}
+                          <span className="text-brand-blue font-medium">
+                            {progressForm.water_intake} L/day
+                          </span>
+                        </p>
+                        {progressForm.energy_feedback && (
+                          <p>
+                            <span className="text-brand-blue/60">
+                              Energy & Feedback:
+                            </span>{" "}
+                            <span className="text-brand-blue font-medium">
+                              {progressForm.energy_feedback}
+                            </span>
+                          </p>
                         )}
                       </div>
-                      <input
-                        type="text"
-                        name="cloth_fit_note"
-                        placeholder="How do your clothes fit this week?"
-                        value={progressForm.cloth_fit_note}
-                        onChange={handleProgressChange}
-                        className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                      />
+
+                      {progressPhotoPreview && (
+                        <img
+                          src={progressPhotoPreview}
+                          alt="Progress"
+                          className="w-full rounded-xl mt-4 max-h-64 object-cover"
+                        />
+                      )}
+
+                      <div className="mt-6 text-xs text-brand-orange font-semibold">
+                        FITNESS ZONE • Weekly Progress
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <input
-                        type="text"
-                        name="sleep_hours"
-                        placeholder="Hours of Sleep"
-                        value={progressForm.sleep_hours}
-                        onChange={handleProgressChange}
-                        required
-                        className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                      />
-                      <input
-                        type="text"
-                        name="sleep_quality"
-                        placeholder="Sleep Quality"
-                        value={progressForm.sleep_quality}
-                        onChange={handleProgressChange}
-                        required
-                        className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                      />
+                    <div className="flex flex-wrap gap-4 mt-6">
+                      <Button onClick={handleSaveProgressImage}>
+                        Save Image
+                      </Button>
+                      <a
+                        href={dietWhatsappLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 bg-[#25D366] text-white font-semibold rounded-full px-6 py-3 hover:brightness-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
+                      >
+                        <WhatsAppIcon size={16} />
+                        Send to Dietician
+                      </a>
+                      <button
+                        onClick={handleProgressReset}
+                        className="text-sm font-semibold text-brand-blue/60 hover:text-brand-blue rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                      >
+                        Start Over
+                      </button>
                     </div>
 
-                    <input
-                      type="text"
-                      name="water_intake"
-                      placeholder="Water Intake (liters/day)"
-                      value={progressForm.water_intake}
-                      onChange={handleProgressChange}
-                      required
-                      className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                    />
+                    <p className="text-brand-blue/70 text-sm mt-6">
+                      Save the image above, then tap "Send to Dietician" and
+                      attach it — your next reminder will show up in 7 days.
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
+          )}
 
-                    <textarea
-                      name="energy_feedback"
-                      placeholder="Energy levels, feedback, or questions"
-                      value={progressForm.energy_feedback}
-                      onChange={handleProgressChange}
-                      rows={3}
-                      className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                    />
-
-                    <Button type="submit" className="w-full">
-                      Generate Image
-                    </Button>
-                  </form>
-                </Card>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="progress-image"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4 }}
+          {/* E-books and courses — after the services clients use daily.
+              Clients who own none get a single line at the very bottom of
+              the page instead (below). */}
+          {hasLibrary && (
+            <div className="mt-12">
+              {/* My E-Books */}
+              <h2
+                id="my-ebooks"
+                className="font-display text-lg text-brand-blue mb-4"
               >
-                <div
-                  ref={progressCardRef}
-                  className="max-w-xl bg-white border-2 border-brand-blue rounded-2xl p-8"
-                >
-                  <h2 className="font-display text-brand-blue text-lg mb-4">
-                    WEEKLY PROGRESS
-                  </h2>
-                  <div className="space-y-2 text-sm">
-                    <p>
-                      <span className="text-brand-blue/60">
-                        Starting Weight:
-                      </span>{" "}
-                      <span className="text-brand-blue font-medium">
-                        {progressForm.starting_weight} kg
-                      </span>
-                    </p>
-                    <p>
-                      <span className="text-brand-blue/60">
-                        Today's Weight:
-                      </span>{" "}
-                      <span className="text-brand-blue font-medium">
-                        {progressForm.current_weight} kg
-                      </span>
-                    </p>
-                    {progressForm.inch_loss && (
-                      <p>
-                        <span className="text-brand-blue/60">Inch Loss:</span>{" "}
-                        <span className="text-brand-blue font-medium">
-                          {progressForm.inch_loss}
-                        </span>
-                      </p>
-                    )}
-                    {progressForm.cloth_fit_note && (
-                      <p>
-                        <span className="text-brand-blue/60">Clothes Fit:</span>{" "}
-                        <span className="text-brand-blue font-medium">
-                          {progressForm.cloth_fit_note}
-                        </span>
-                      </p>
-                    )}
-                    <p>
-                      <span className="text-brand-blue/60">Sleep:</span>{" "}
-                      <span className="text-brand-blue font-medium">
-                        {progressForm.sleep_hours} hrs —{" "}
-                        {progressForm.sleep_quality}
-                      </span>
-                    </p>
-                    <p>
-                      <span className="text-brand-blue/60">Water Intake:</span>{" "}
-                      <span className="text-brand-blue font-medium">
-                        {progressForm.water_intake} L/day
-                      </span>
-                    </p>
-                    {progressForm.energy_feedback && (
-                      <p>
-                        <span className="text-brand-blue/60">
-                          Energy & Feedback:
-                        </span>{" "}
-                        <span className="text-brand-blue font-medium">
-                          {progressForm.energy_feedback}
-                        </span>
-                      </p>
-                    )}
-                  </div>
-
-                  {progressPhotoPreview && (
-                    <img
-                      src={progressPhotoPreview}
-                      alt="Progress"
-                      className="w-full rounded-xl mt-4 max-h-64 object-cover"
-                    />
-                  )}
-
-                  <div className="mt-6 text-xs text-brand-orange font-semibold">
-                    FITNESS ZONE • Weekly Progress
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-4 mt-6">
-                  <Button onClick={handleSaveProgressImage}>Save Image</Button>
-                  <a
-                    href={dietWhatsappLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 bg-[#25D366] text-white font-semibold rounded-full px-6 py-3 hover:brightness-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
-                  >
-                    <WhatsAppIcon size={16} />
-                    Send to Dietician
-                  </a>
-                  <button
-                    onClick={handleProgressReset}
-                    className="text-sm font-semibold text-brand-blue/60 hover:text-brand-blue rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
-                  >
-                    Start Over
-                  </button>
-                </div>
-
-                <p className="text-brand-blue/70 text-sm mt-6">
-                  Save the image above, then tap "Send to Dietician" and
-                  attach it — your next reminder will show up in 7 days.
+                MY E-BOOKS
+              </h2>
+              {ebooks.length === 0 ? (
+                <p className="text-brand-blue/70 mb-12">
+                  No e-books purchased yet — check the E-Books page to browse.
                 </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          </>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                  {ebooks.map((ebook) => (
+                    <Card key={ebook._id}>
+                      <h3 className="font-display text-brand-blue text-sm mb-1">
+                        {ebook.title}
+                      </h3>
+                      <p className="text-brand-blue/70 text-xs mb-4">
+                        {ebook.description}
+                      </p>
+                      <a
+                        href={ebook.pdf_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full bg-brand-orange/10 text-brand-orange hover:bg-brand-orange/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                      >
+                        <Download size={14} /> Download
+                      </a>
+                    </Card>
+                  ))}
+                </div>
+              )}
+
+              {/* My Courses — paired with E-Books since the public E-Books &
+              Courses page sells them the same way */}
+              <h2
+                id="my-courses"
+                className="font-display text-lg text-brand-blue mb-4"
+              >
+                MY COURSES
+              </h2>
+              {courses.length === 0 ? (
+                <p className="text-brand-blue/70 mb-12">
+                  No courses purchased yet — check the E-Books & Courses page to
+                  browse.
+                </p>
+              ) : (
+                <div className="space-y-8 mb-12">
+                  {courses.map((course) => (
+                    <div key={course._id}>
+                      <h3 className="font-display text-brand-blue text-sm mb-1">
+                        {course.title}
+                      </h3>
+                      <p className="text-brand-blue/70 text-xs mb-4">
+                        {course.description}
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {course.lessons.map((lesson, i) => (
+                          <Card key={i}>
+                            <div className="aspect-video mb-3 rounded-lg overflow-hidden bg-brand-blue-pale">
+                              <YouTubeFacade
+                                link={lesson.youtube_link}
+                                title={lesson.title}
+                                className="w-full h-full"
+                              />
+                            </div>
+                            <h4 className="font-display text-brand-blue text-sm">
+                              {lesson.title}
+                            </h4>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </>
       )}
@@ -1456,7 +1472,11 @@ const Profile = () => {
                 {pushBusy ? "Turning off..." : "Turn Off"}
               </Button>
             ) : (
-              <Button size="sm" onClick={handleEnableNotifications} disabled={pushBusy}>
+              <Button
+                size="sm"
+                onClick={handleEnableNotifications}
+                disabled={pushBusy}
+              >
                 {pushBusy ? "Enabling..." : "Enable Notifications"}
               </Button>
             )}
@@ -1494,6 +1514,27 @@ const Profile = () => {
           <Button type="submit">Update Password</Button>
         </form>
       </Card>
+
+      {!loading && !hasLibrary && (
+        <>
+          <h2
+            id="my-ebooks"
+            className="font-display text-lg text-brand-blue mb-2 mt-12"
+          >
+            MY E-BOOKS &amp; COURSES
+          </h2>
+          <p className="text-brand-blue/70 text-sm">
+            Nothing purchased yet —{" "}
+            <Link
+              to="/ebooks"
+              className="font-semibold text-brand-blue-light hover:text-brand-orange rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+            >
+              browse e-books &amp; courses
+            </Link>
+            .
+          </p>
+        </>
+      )}
     </div>
   );
 };
