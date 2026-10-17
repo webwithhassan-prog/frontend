@@ -21,6 +21,7 @@ import Card from "../../components/common/Card";
 import SkeletonTable from "../../components/common/SkeletonTable";
 import Button from "../../components/common/Button";
 import PhoneInput from "../../components/common/PhoneInput";
+import Modal from "../../components/admin/Modal";
 import { getErrorMessage } from "../../utils/errors";
 
 const statusColors = {
@@ -30,6 +31,31 @@ const statusColors = {
 };
 
 const PAGE_SIZE = 15;
+
+// Diet plans renew every 15 days (see the backend's dietplan scheduler), so
+// extending access by N days needs about N / 15 more plans to match.
+const DAYS_PER_DIET_PLAN = 15;
+const dietPlansForDays = (days) =>
+  days > 0 ? Math.ceil(days / DAYS_PER_DIET_PLAN) : 0;
+
+const formatDate = (date) =>
+  date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
+// Where access would end after adding `days` — counted from the current
+// expiry, or from today if that's already passed (same rule as the server).
+const expiryAfter = (client, days) => {
+  const now = new Date();
+  const current = client.access_expires_at
+    ? new Date(client.access_expires_at)
+    : null;
+  const base = current && current > now ? current : now;
+  base.setDate(base.getDate() + days);
+  return base;
+};
 
 // Converts any ISO 3166-1 alpha-2 code (e.g. "PK") into its flag emoji via
 // the Unicode regional indicator symbols — works for every country, not
@@ -45,10 +71,112 @@ const sortAccessors = {
   days_remaining: (c) => c.days_remaining ?? -Infinity,
 };
 
+const fieldClass =
+  "w-full border border-brand-blue-pale rounded-lg px-3 py-2.5 text-sm text-brand-blue tabular-nums focus:outline-none focus:ring-2 focus:ring-brand-orange";
+
+// Days and diet plans to add for one client, with what each will come to.
+const ExtendForm = ({ form, setForm, extending, onSubmit, onCancel }) => {
+  const { client } = form;
+  const days = Math.max(0, Number(form.days) || 0);
+  const dietPlans = Math.max(0, Number(form.dietPlans) || 0);
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-4">
+      <label className="block">
+        <span className="block text-sm font-semibold text-brand-blue mb-1">
+          Days to add
+        </span>
+        <input
+          type="number"
+          min="0"
+          step="1"
+          inputMode="numeric"
+          value={form.days}
+          onChange={(e) => {
+            const value = e.target.value;
+            setForm((f) => ({
+              ...f,
+              days: value,
+              // Plans follow the days until the admin sets them by hand.
+              dietPlans: f.dietTouched
+                ? f.dietPlans
+                : String(dietPlansForDays(Number(value) || 0)),
+            }));
+          }}
+          className={fieldClass}
+        />
+        <span className="block text-xs text-brand-blue-light mt-1">
+          {days
+            ? `Access until ${formatDate(expiryAfter(client, days))}`
+            : "Access end date stays the same"}
+        </span>
+      </label>
+
+      <label className="block">
+        <span className="block text-sm font-semibold text-brand-blue mb-1">
+          Diet plans to add
+        </span>
+        <input
+          type="number"
+          min="0"
+          step="1"
+          inputMode="numeric"
+          value={form.dietPlans}
+          onChange={(e) =>
+            setForm((f) => ({
+              ...f,
+              dietPlans: e.target.value,
+              dietTouched: true,
+            }))
+          }
+          className={fieldClass}
+        />
+        <span className="block text-xs text-brand-blue-light mt-1">
+          One new diet plan every {DAYS_PER_DIET_PLAN} days
+          {days ? ` — ${days} days needs ${dietPlansForDays(days)}` : ""}.
+        </span>
+      </label>
+
+      <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm bg-brand-blue-pale/40 rounded-xl px-4 py-3 tabular-nums">
+        <dt className="text-brand-blue-light">Diet plans now</dt>
+        <dd className="text-brand-blue text-right">
+          {client.diet_plans_used} of {client.diet_plans_total} used
+        </dd>
+        <dt className="text-brand-blue-light">After this</dt>
+        <dd className="font-semibold text-brand-blue text-right">
+          {client.diet_plans_used} of {client.diet_plans_total + dietPlans} used
+        </dd>
+      </dl>
+
+      <div className="flex items-center gap-3 pt-1">
+        <Button
+          type="button"
+          variant="secondary"
+          className="flex-1"
+          onClick={onCancel}
+        >
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          className="flex-1"
+          disabled={extending || (!days && !dietPlans)}
+        >
+          {extending ? "Saving..." : "Confirm"}
+        </Button>
+      </div>
+    </form>
+  );
+};
+
 const Enrollments = () => {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [extendDays, setExtendDays] = useState({});
+  // The "Extend" dialog: { client, days, dietPlans, dietTouched } — opens
+  // for diet-plan clients so their plan quota can grow with their access.
+  const [extendForm, setExtendForm] = useState(null);
+  const [extending, setExtending] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
   const [sortField, setSortField] = useState(null);
@@ -162,17 +290,62 @@ const Enrollments = () => {
     }
   };
 
-  const handleExtend = async (id) => {
-    const days = Number(extendDays[id] || 0);
-    if (!days) return;
+  const submitExtend = async (client, days, dietPlans) => {
+    setExtending(true);
     try {
-      await api.put(`/clients/${id}/extend`, { days });
-      toast.success(`Extended by ${days} day(s)`);
-      setExtendDays({ ...extendDays, [id]: "" });
+      await api.put(`/clients/${client._id}/extend`, {
+        days,
+        diet_plans: dietPlans,
+      });
+      const added = [
+        days && `${days} day${days === 1 ? "" : "s"}`,
+        dietPlans && `${dietPlans} diet plan${dietPlans === 1 ? "" : "s"}`,
+      ].filter(Boolean);
+      toast.success(`Added ${added.join(" and ")} for ${client.name}`);
+      setExtendDays((prev) => ({ ...prev, [client._id]: "" }));
+      setExtendForm(null);
       fetchClients();
     } catch (err) {
       toast.error(getErrorMessage(err, "Failed to extend access"));
+    } finally {
+      setExtending(false);
     }
+  };
+
+  // Diet-plan clients get the dialog, pre-filled with one plan per 15 days;
+  // everyone else is extended straight away, as before.
+  const handleExtend = (client) => {
+    const days = Number(extendDays[client._id] || 0);
+    if (!days) return;
+    if (client.has_dietplan) {
+      setExtendForm({
+        client,
+        days: String(days),
+        dietPlans: String(dietPlansForDays(days)),
+        dietTouched: false,
+      });
+      return;
+    }
+    submitExtend(client, days, 0);
+  };
+
+  // "Add plans" in the Diet Plans column: the same dialog, without days.
+  const openAddDietPlans = (client) =>
+    setExtendForm({ client, days: "", dietPlans: "1", dietTouched: true });
+
+  const closeExtend = () => {
+    if (!extending) setExtendForm(null);
+  };
+
+  const handleExtendSubmit = (e) => {
+    e.preventDefault();
+    const days = Number(extendForm.days || 0);
+    const dietPlans = Number(extendForm.dietPlans || 0);
+    if (!days && !dietPlans) {
+      toast.error("Enter days or diet plans to add");
+      return;
+    }
+    submitExtend(extendForm.client, days, dietPlans);
   };
 
   const handleBan = async (client) => {
@@ -453,6 +626,12 @@ const Enrollments = () => {
                         >
                           Deliver Diet Plan
                         </button>
+                        <button
+                          onClick={() => openAddDietPlans(client)}
+                          className="text-xs font-semibold px-3 py-1 rounded-full bg-brand-blue-pale text-brand-blue hover:bg-brand-blue-pale/70 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                        >
+                          + Add plans
+                        </button>
                       </div>
                     ) : (
                       <span className="text-xs text-brand-blue-light/50">
@@ -490,7 +669,7 @@ const Enrollments = () => {
                         }
                         className="w-14 shrink-0 border border-brand-blue-pale rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-orange"
                       />
-                      <Button size="sm" onClick={() => handleExtend(client._id)}>
+                      <Button size="sm" onClick={() => handleExtend(client)}>
                         Extend
                       </Button>
 
@@ -583,6 +762,22 @@ const Enrollments = () => {
           )}
         </>
       )}
+
+      <Modal
+        isOpen={!!extendForm}
+        onClose={closeExtend}
+        title={extendForm ? `Extend ${extendForm.client.name}` : ""}
+      >
+        {extendForm && (
+          <ExtendForm
+            form={extendForm}
+            setForm={setExtendForm}
+            extending={extending}
+            onSubmit={handleExtendSubmit}
+            onCancel={closeExtend}
+          />
+        )}
+      </Modal>
 
       <AnimatePresence>
         {showAddModal && (
