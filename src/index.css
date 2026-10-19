@@ -13,6 +13,14 @@
   --font-body: "Manrope", sans-serif;
 }
 
+/* A plain colour rather than Tailwind's color-mix() default: some phone and
+   in-app browsers drop that rule and show no placeholder text at all, leaving
+   forms as rows of blank boxes. */
+::placeholder {
+  color: #6b7591;
+  opacity: 1;
+}
+
 body {
   background-color: #fcfcfc;
   color: var(--color-brand-blue);

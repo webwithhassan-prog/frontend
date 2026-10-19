@@ -552,15 +552,21 @@ const Profile = () => {
                         onSubmit={handleOnboardingSubmit}
                         className="space-y-4"
                       >
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <input
-                            type="date"
-                            name="starting_date"
-                            value={onboardingForm.starting_date}
-                            onChange={handleOnboardingChange}
-                            required
-                            className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                          />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+                          {/* Date fields show no placeholder, so it gets a label. */}
+                          <label className="block">
+                            <span className="block text-xs text-brand-blue/70 mb-1">
+                              Starting date
+                            </span>
+                            <input
+                              type="date"
+                              name="starting_date"
+                              value={onboardingForm.starting_date}
+                              onChange={handleOnboardingChange}
+                              required
+                              className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                            />
+                          </label>
                           <input
                             type="text"
                             name="full_name"
