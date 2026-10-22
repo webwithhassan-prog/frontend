@@ -38,6 +38,8 @@ const PrivacyPolicy = lazy(() => import("./pages/public/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/public/TermsOfService"));
 const RefundPolicy = lazy(() => import("./pages/public/RefundPolicy"));
 const ProgramPage = lazy(() => import("./pages/public/ProgramPage"));
+const BlogIndex = lazy(() => import("./pages/public/BlogIndex"));
+const BlogPost = lazy(() => import("./pages/public/BlogPost"));
 import { programPaths } from "./content/programs";
 
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
@@ -152,6 +154,22 @@ function AppRoutes() {
           element={
             <PublicLayout>
               <RefundPolicy />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/blog"
+          element={
+            <PublicLayout>
+              <BlogIndex />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/blog/:slug"
+          element={
+            <PublicLayout>
+              <BlogPost />
             </PublicLayout>
           }
         />

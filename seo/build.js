@@ -18,6 +18,7 @@
 import { getPageMeta, pageMeta, SITE_ORIGIN } from "../src/utils/pageMeta.js";
 import { faqs, plansFaqs } from "../src/content/faq.js";
 import { programs } from "../src/content/programs.js";
+import { posts, postBySlug, postPath, sectionId } from "../src/content/blog.js";
 import { trainersIntro, trainersSections, trainersLinks, trainersFaqs } from "../src/content/trainers.js";
 import { optimizeCloudinaryUrl } from "../src/utils/cloudinary.js";
 
@@ -289,13 +290,47 @@ const programContent = (program) =>
     )
     .join("")}${faqSection(program.faqs)}<p><a href="/plans?type=${program.packageType}">See packages and prices</a></p>`;
 
+// Blog posts: the full guide, as the page shows it.
+const postContent = (post) =>
+  `<p>By ${esc(post.author)} · Updated ${esc(post.updated)}</p><p>${esc(post.intro)}</p>${post.sections
+    .map(
+      (sec) =>
+        `<h2 id="${sectionId(sec.heading)}">${esc(sec.heading)}</h2>${(sec.paragraphs || []).map((p) => `<p>${esc(p)}</p>`).join("")}${
+          sec.bullets ? ul(sec.bullets) : ""
+        }${
+          sec.table
+            ? `<table><thead><tr>${sec.table.head.map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${sec.table.rows
+                .map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`)
+                .join("")}</tbody></table>`
+            : ""
+        }${sec.note ? `<p>${esc(sec.note)}</p>` : ""}`,
+    )
+    .join("")}<p><a href="${esc(post.program[0])}">${esc(post.program[1])}</a></p>${faqSection(post.faqs)}`;
+
+const blogIndexContent = () =>
+  `<p>${esc(pageMeta["/blog"].description)}</p>${posts
+    .map((p) => `<h2><a href="${postPath(p)}">${esc(p.title)}</a></h2><p>${esc(p.description)}</p>`)
+    .join("")}`;
+
+const postForPath = (path) => (path.startsWith("/blog/") ? postBySlug[path.slice(6)] : null);
+
 const readableContent = (path, meta, data) => {
-  const body = programs[path]
+  const post = postForPath(path);
+  const body = post
+    ? postContent(post)
+    : path === "/blog"
+      ? blogIndexContent()
+      : programs[path]
     ? programContent(programs[path])
     : pageContent[path]
       ? pageContent[path](data)
       : `<p>${esc(meta.description)}</p>`;
-  const h1 = path === "/" ? "Fitness Zone — Online Diet Plans & Live Home Workouts for Women" : pageName(meta.title);
+  const h1 =
+    path === "/"
+      ? "Fitness Zone — Online Diet Plans & Live Home Workouts for Women"
+      : post
+        ? post.title
+        : pageName(meta.title);
   // Visually hidden: the app replaces #root's contents as soon as it runs.
   return `<div style="position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);border:0"><main><h1>${esc(
     h1,
@@ -383,7 +418,7 @@ const serviceNodes = (data) => {
     }));
 };
 
-const PAGE_TYPES = { "/about": "AboutPage", "/contact": "ContactPage", "/plans": "CollectionPage" };
+const PAGE_TYPES = { "/about": "AboutPage", "/contact": "ContactPage", "/plans": "CollectionPage", "/blog": "CollectionPage" };
 
 const jsonLd = (path, meta, data) => {
   const url = absolute(path);
@@ -403,10 +438,16 @@ const jsonLd = (path, meta, data) => {
     graph.push({
       "@type": "BreadcrumbList",
       "@id": `${url}#breadcrumb`,
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_ORIGIN}/` },
-        { "@type": "ListItem", position: 2, name: pageName(meta.title), item: url },
-      ],
+      itemListElement: postForPath(path)
+        ? [
+            { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_ORIGIN}/` },
+            { "@type": "ListItem", position: 2, name: "Guides", item: absolute("/blog") },
+            { "@type": "ListItem", position: 3, name: postForPath(path).title, item: url },
+          ]
+        : [
+            { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_ORIGIN}/` },
+            { "@type": "ListItem", position: 2, name: pageName(meta.title), item: url },
+          ],
     });
   }
   graph.push(page);
@@ -417,7 +458,7 @@ const jsonLd = (path, meta, data) => {
         ? plansFaqs
         : path === "/trainers"
           ? trainersFaqs
-          : programs[path]?.faqs || null;
+          : postForPath(path)?.faqs || programs[path]?.faqs || null;
   if (pageFaqs) {
     graph.push({
       "@type": "FAQPage",
@@ -430,6 +471,24 @@ const jsonLd = (path, meta, data) => {
     });
   }
   if (path === "/" || path === "/plans") graph.push(...serviceNodes(data));
+  const post = postForPath(path);
+  if (post) {
+    graph.push({
+      "@type": "BlogPosting",
+      "@id": `${url}#article`,
+      headline: post.title,
+      description: post.description,
+      datePublished: post.date,
+      dateModified: post.updated,
+      author: { "@type": "Organization", name: post.author, url: `${SITE_ORIGIN}/` },
+      ...(post.reviewedBy ? { reviewedBy: { "@type": "Person", name: post.reviewedBy } } : {}),
+      publisher: { "@id": `${SITE_ORIGIN}/#organization` },
+      mainEntityOfPage: { "@id": `${url}#webpage` },
+      image: `${SITE_ORIGIN}/og-image.png`,
+      articleSection: post.category,
+      inLanguage: "en",
+    });
+  }
   if (programs[path]) {
     const program = programs[path];
     graph.push({
@@ -595,6 +654,29 @@ const llmsFullTxt = (data) =>
           ...(sec.paragraphs || []).flatMap((x) => [x, ""]),
           ...(sec.bullets || []).map((b) => `- ${b}`),
           ...(sec.steps || []).map(([t, d], i) => `${i + 1}. ${t} — ${d}`),
+          "",
+        ]),
+        "## FAQ",
+        "",
+        ...p.faqs.flatMap(({ q, a }) => [`### ${q}`, "", a, ""]),
+      ].join("\n"),
+    )
+    .join("\n\n")}\n\n${posts
+    .map((p) =>
+      [
+        `# ${p.title}`,
+        "",
+        `URL: ${absolute(postPath(p))}`,
+        "",
+        p.intro,
+        "",
+        ...p.sections.flatMap((sec) => [
+          `## ${sec.heading}`,
+          "",
+          ...(sec.paragraphs || []).flatMap((x) => [x, ""]),
+          ...(sec.bullets || []).map((b) => `- ${b}`),
+          ...(sec.table ? sec.table.rows.map((r) => `- ${r.join(" — ")}`) : []),
+          ...(sec.note ? ["", sec.note] : []),
           "",
         ]),
         "## FAQ",

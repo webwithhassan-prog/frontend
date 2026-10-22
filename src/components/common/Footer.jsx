@@ -13,6 +13,7 @@ const quickLinks = [
   { label: "Time Slots", href: "/timetable" },
   { label: "Trainers", href: "/trainers" },
   { label: "Success Stories", href: "/success-stories" },
+  { label: "Guides & Blog", href: "/blog" },
   { label: "E-Books & Courses", href: "/ebooks" },
   { label: "About Us", href: "/about" },
   { label: "Careers", href: "/careers" },

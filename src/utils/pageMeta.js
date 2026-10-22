@@ -1,3 +1,5 @@
+import { posts } from "../content/blog.js";
+
 export const SITE_ORIGIN = "https://fitnesszone.ltd";
 const siteName = "Fitness Zone";
 const defaultDescription =
@@ -74,6 +76,17 @@ export const pageMeta = {
     description:
       "Lose weight after pregnancy at home: a routine-friendly customized diet plan and doctor-safe live workouts with female trainers, built around your baby.",
   },
+  "/blog": {
+    title: `Diet & Home Workout Guides for Women | ${siteName}`,
+    description:
+      "Practical guides on PCOS diets, postpartum weight loss, Pakistani diet plans and home workouts for women — built around desi food and real routines.",
+  },
+  ...Object.fromEntries(
+    posts.map((p) => [
+      `/blog/${p.slug}`,
+      { title: `${p.metaTitle} | ${siteName}`, description: p.description },
+    ]),
+  ),
   "/careers": {
     title: `Careers — Join Our Trainer Team | ${siteName}`,
     description:

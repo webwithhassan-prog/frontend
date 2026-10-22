@@ -3,6 +3,7 @@ import { ArrowRight, Check } from "lucide-react";
 import Button from "../../components/common/Button";
 import FaqSection from "../../components/common/FaqSection";
 import { programs } from "../../content/programs";
+import { posts, postPath } from "../../content/blog";
 import NotFound from "./NotFound";
 
 // One template for the program pages (online diet plan, live workout
@@ -13,6 +14,7 @@ const ProgramPage = () => {
   const { pathname } = useLocation();
   const program = programs[pathname];
   if (!program) return <NotFound />;
+  const guides = posts.filter((p) => p.program[0] === pathname);
 
   return (
     <>
@@ -111,6 +113,26 @@ const ProgramPage = () => {
           </section>
         ))}
       </div>
+
+      {guides.length > 0 && (
+        <section className="max-w-3xl mx-auto px-6 pt-4">
+          <h2 className="font-display text-xl text-brand-blue mb-3">
+            Free guides
+          </h2>
+          <ul className="space-y-2">
+            {guides.map((g) => (
+              <li key={g.slug}>
+                <Link
+                  to={postPath(g)}
+                  className="inline-flex items-center gap-1.5 py-1 font-semibold text-brand-blue-light hover:text-brand-orange rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                >
+                  {g.title} <ArrowRight size={16} className="shrink-0" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <FaqSection
         items={program.faqs}
