@@ -43,9 +43,7 @@ const navLinks = [
   { label: "E-Books & Courses", href: "/ebooks" },
 ];
 
-// `keywords` widen what a search query matches without cluttering the
-// label shown in results — e.g. searching "diet plan" or "workout" should
-// find the pricing page even though its label is "Packages & Pricing".
+
 const searchablePages = [
   { label: "Home", href: "/" },
   {
