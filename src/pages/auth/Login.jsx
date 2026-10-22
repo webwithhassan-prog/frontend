@@ -172,20 +172,40 @@ const Login = () => {
 
       <Card>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-          />
+          {/* Email or the WhatsApp number on the account. Phone keyboards
+              must not capitalise or autocorrect either field — a shown
+              password is a plain text field, and "Secret" ≠ "secret". */}
+          <label className="block">
+            <span className="block text-sm font-semibold text-brand-blue mb-1">
+              Email or WhatsApp number
+            </span>
+            <input
+              type="text"
+              name="email"
+              inputMode="email"
+              autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              placeholder="you@example.com or +92…"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+            />
+          </label>
+          <label className="block">
+            <span className="block text-sm font-semibold text-brand-blue mb-1">
+              Password
+            </span>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
               name="password"
-              placeholder="Password"
+              autoComplete="current-password"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               value={formData.password}
               onChange={handleChange}
               required
@@ -201,6 +221,7 @@ const Login = () => {
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
+          </label>
           <div className="text-right">
             <a
               href="/forgot-password"

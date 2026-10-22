@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -14,6 +15,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Copy,
+  Pencil,
+  MinusCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../../services/api";
@@ -22,6 +25,7 @@ import SkeletonTable from "../../components/common/SkeletonTable";
 import Button from "../../components/common/Button";
 import PhoneInput from "../../components/common/PhoneInput";
 import Modal from "../../components/admin/Modal";
+import EditClientForm from "../../components/admin/EditClientForm";
 import { getErrorMessage } from "../../utils/errors";
 
 const statusColors = {
@@ -57,6 +61,13 @@ const expiryAfter = (client, days) => {
   return base;
 };
 
+// Where access would end after deducting `days` from the current expiry.
+const expiryBefore = (client, days) => {
+  const base = new Date(client.access_expires_at);
+  base.setDate(base.getDate() - days);
+  return base;
+};
+
 // Converts any ISO 3166-1 alpha-2 code (e.g. "PK") into its flag emoji via
 // the Unicode regional indicator symbols — works for every country, not
 // just a hardcoded shortlist.
@@ -74,17 +85,69 @@ const sortAccessors = {
 const fieldClass =
   "w-full border border-brand-blue-pale rounded-lg px-3 py-2.5 text-sm text-brand-blue tabular-nums focus:outline-none focus:ring-2 focus:ring-brand-orange";
 
-// Days and diet plans to add for one client, with what each will come to.
+// Days and diet plans to add or deduct for one client, with what each will
+// come to. Numbers are always entered as positive; the mode sets the sign.
 const ExtendForm = ({ form, setForm, extending, onSubmit, onCancel }) => {
-  const { client } = form;
+  const { client, mode } = form;
+  const deducting = mode === "deduct";
   const days = Math.max(0, Number(form.days) || 0);
   const dietPlans = Math.max(0, Number(form.dietPlans) || 0);
+  const unusedPlans = client.diet_plans_total - client.diet_plans_used;
+  const tooManyPlans = deducting && dietPlans > unusedPlans;
+  const noAccessToDeduct = deducting && days > 0 && !client.access_expires_at;
+  const verb = deducting ? "deduct" : "add";
+
+  const setMode = (next) =>
+    setForm((f) => ({
+      ...f,
+      mode: next,
+      // Plans only follow the days when adding.
+      dietPlans:
+        next === "deduct" ? "0" : String(dietPlansForDays(Number(f.days) || 0)),
+      dietTouched: next === "deduct",
+    }));
+
+  const expiryNote = !days
+    ? "Access end date stays the same"
+    : noAccessToDeduct
+      ? "This client has no access days to deduct"
+      : `Access until ${formatDate(
+          deducting ? expiryBefore(client, days) : expiryAfter(client, days),
+        )}`;
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
+      <div
+        role="radiogroup"
+        aria-label="Add or deduct"
+        className="grid grid-cols-2 gap-1 p-1 rounded-full bg-brand-blue-pale/60"
+      >
+        {[
+          ["add", "Add"],
+          ["deduct", "Deduct"],
+        ].map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            role="radio"
+            aria-checked={mode === value}
+            onClick={() => setMode(value)}
+            className={`py-1.5 rounded-full text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
+              mode === value
+                ? value === "deduct"
+                  ? "bg-red-600 text-white"
+                  : "bg-brand-blue-light text-white"
+                : "text-brand-blue hover:bg-white"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       <label className="block">
         <span className="block text-sm font-semibold text-brand-blue mb-1">
-          Days to add
+          Days to {verb}
         </span>
         <input
           type="number"
@@ -105,16 +168,16 @@ const ExtendForm = ({ form, setForm, extending, onSubmit, onCancel }) => {
           }}
           className={fieldClass}
         />
-        <span className="block text-xs text-brand-blue-light mt-1">
-          {days
-            ? `Access until ${formatDate(expiryAfter(client, days))}`
-            : "Access end date stays the same"}
+        <span
+          className={`block text-xs mt-1 ${noAccessToDeduct ? "text-red-600" : "text-brand-blue-light"}`}
+        >
+          {expiryNote}
         </span>
       </label>
 
       <label className="block">
         <span className="block text-sm font-semibold text-brand-blue mb-1">
-          Diet plans to add
+          Diet plans to {verb}
         </span>
         <input
           type="number"
@@ -131,9 +194,12 @@ const ExtendForm = ({ form, setForm, extending, onSubmit, onCancel }) => {
           }
           className={fieldClass}
         />
-        <span className="block text-xs text-brand-blue-light mt-1">
-          One new diet plan every {DAYS_PER_DIET_PLAN} days
-          {days ? ` — ${days} days needs ${dietPlansForDays(days)}` : ""}.
+        <span
+          className={`block text-xs mt-1 ${tooManyPlans ? "text-red-600" : "text-brand-blue-light"}`}
+        >
+          {deducting
+            ? `Up to ${unusedPlans} unused plan${unusedPlans === 1 ? "" : "s"} can be deducted.`
+            : `One new diet plan every ${DAYS_PER_DIET_PLAN} days${days ? ` — ${days} days needs ${dietPlansForDays(days)}` : ""}.`}
         </span>
       </label>
 
@@ -144,7 +210,8 @@ const ExtendForm = ({ form, setForm, extending, onSubmit, onCancel }) => {
         </dd>
         <dt className="text-brand-blue-light">After this</dt>
         <dd className="font-semibold text-brand-blue text-right">
-          {client.diet_plans_used} of {client.diet_plans_total + dietPlans} used
+          {client.diet_plans_used} of{" "}
+          {client.diet_plans_total + (deducting ? -dietPlans : dietPlans)} used
         </dd>
       </dl>
 
@@ -160,9 +227,14 @@ const ExtendForm = ({ form, setForm, extending, onSubmit, onCancel }) => {
         <Button
           type="submit"
           className="flex-1"
-          disabled={extending || (!days && !dietPlans)}
+          disabled={
+            extending ||
+            (!days && !dietPlans) ||
+            tooManyPlans ||
+            noAccessToDeduct
+          }
         >
-          {extending ? "Saving..." : "Confirm"}
+          {extending ? "Saving..." : deducting ? "Deduct" : "Confirm"}
         </Button>
       </div>
     </form>
@@ -177,8 +249,13 @@ const Enrollments = () => {
   // for diet-plan clients so their plan quota can grow with their access.
   const [extendForm, setExtendForm] = useState(null);
   const [extending, setExtending] = useState(false);
+  // The client open in the "Edit details" dialog.
+  const [editingClient, setEditingClient] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
+  // Where the open row menu sits on screen (fixed position, beside its
+  // button; opens upward when there is no room below).
+  const [menuPos, setMenuPos] = useState(null);
   const [sortField, setSortField] = useState(null);
   const [sortDir, setSortDir] = useState("asc");
   const [page, setPage] = useState(1);
@@ -201,7 +278,8 @@ const Enrollments = () => {
     return clients.filter((c) => {
       const name = (c.name || "").toLowerCase();
       const phone = (c.phone_number || "").toLowerCase();
-      return name.includes(q) || phone.includes(q);
+      const email = (c.email || "").toLowerCase();
+      return name.includes(q) || phone.includes(q) || email.includes(q);
     });
   }, [clients, searchQuery]);
 
@@ -255,6 +333,35 @@ const Enrollments = () => {
     );
   };
 
+  const MENU_HEIGHT = 190;
+  const toggleMenu = (id, e) => {
+    if (openMenuId === id) {
+      setOpenMenuId(null);
+      return;
+    }
+    const r = e.currentTarget.getBoundingClientRect();
+    const up = r.bottom + MENU_HEIGHT + 8 > window.innerHeight;
+    setMenuPos({
+      right: Math.max(8, window.innerWidth - r.right),
+      ...(up
+        ? { bottom: window.innerHeight - r.top + 4 }
+        : { top: r.bottom + 4 }),
+    });
+    setOpenMenuId(id);
+  };
+
+  // A fixed menu would drift away from its row on scroll — close it instead.
+  useEffect(() => {
+    if (!openMenuId) return;
+    const close = () => setOpenMenuId(null);
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
+    return () => {
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
+    };
+  }, [openMenuId]);
+
   const fetchClients = async () => {
     try {
       const res = await api.get("/clients");
@@ -297,11 +404,15 @@ const Enrollments = () => {
         days,
         diet_plans: dietPlans,
       });
-      const added = [
-        days && `${days} day${days === 1 ? "" : "s"}`,
-        dietPlans && `${dietPlans} diet plan${dietPlans === 1 ? "" : "s"}`,
+      const changed = [
+        days && `${Math.abs(days)} day${Math.abs(days) === 1 ? "" : "s"}`,
+        dietPlans &&
+          `${Math.abs(dietPlans)} diet plan${Math.abs(dietPlans) === 1 ? "" : "s"}`,
       ].filter(Boolean);
-      toast.success(`Added ${added.join(" and ")} for ${client.name}`);
+      const deducted = days < 0 || dietPlans < 0;
+      toast.success(
+        `${deducted ? "Deducted" : "Added"} ${changed.join(" and ")} ${deducted ? "from" : "for"} ${client.name}`,
+      );
       setExtendDays((prev) => ({ ...prev, [client._id]: "" }));
       setExtendForm(null);
       fetchClients();
@@ -320,6 +431,7 @@ const Enrollments = () => {
     if (client.has_dietplan) {
       setExtendForm({
         client,
+        mode: "add",
         days: String(days),
         dietPlans: String(dietPlansForDays(days)),
         dietTouched: false,
@@ -331,7 +443,30 @@ const Enrollments = () => {
 
   // "Add plans" in the Diet Plans column: the same dialog, without days.
   const openAddDietPlans = (client) =>
-    setExtendForm({ client, days: "", dietPlans: "1", dietTouched: true });
+    setExtendForm({
+      client,
+      mode: "add",
+      days: "",
+      dietPlans: "1",
+      dietTouched: true,
+    });
+
+  // "Deduct days or plans" in the row menu: the same dialog, deducting.
+  const openDeduct = (client) => {
+    setOpenMenuId(null);
+    setExtendForm({
+      client,
+      mode: "deduct",
+      days: "",
+      dietPlans: "0",
+      dietTouched: true,
+    });
+  };
+
+  const openEdit = (client) => {
+    setOpenMenuId(null);
+    setEditingClient(client);
+  };
 
   const closeExtend = () => {
     if (!extending) setExtendForm(null);
@@ -339,10 +474,11 @@ const Enrollments = () => {
 
   const handleExtendSubmit = (e) => {
     e.preventDefault();
-    const days = Number(extendForm.days || 0);
-    const dietPlans = Number(extendForm.dietPlans || 0);
+    const sign = extendForm.mode === "deduct" ? -1 : 1;
+    const days = Math.abs(Number(extendForm.days || 0)) * sign;
+    const dietPlans = Math.abs(Number(extendForm.dietPlans || 0)) * sign;
     if (!days && !dietPlans) {
-      toast.error("Enter days or diet plans to add");
+      toast.error("Enter days or diet plans");
       return;
     }
     submitExtend(extendForm.client, days, dietPlans);
@@ -477,7 +613,7 @@ const Enrollments = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by name or phone..."
+            placeholder="Search by name, phone or email..."
             className="w-full border border-brand-blue-pale rounded-full pl-10 pr-9 py-2.5 text-sm text-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-orange"
           />
           {searchQuery && (
@@ -675,11 +811,7 @@ const Enrollments = () => {
 
                       <div className="relative shrink-0 ml-auto">
                         <button
-                          onClick={() =>
-                            setOpenMenuId(
-                              openMenuId === client._id ? null : client._id,
-                            )
-                          }
+                          onClick={(e) => toggleMenu(client._id, e)}
                           title="More actions"
                           aria-label="More actions"
                           className="w-7 h-7 flex items-center justify-center rounded-full text-brand-blue-light hover:bg-brand-blue-pale transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
@@ -687,20 +819,37 @@ const Enrollments = () => {
                           <MoreVertical size={16} />
                         </button>
 
+                        {/* Portaled to <body> and placed beside the button: inside
+                            the scrolling table it was cut off at the bottom
+                            edge, hiding Ban and Delete. */}
+                        {createPortal(
                         <AnimatePresence>
-                          {openMenuId === client._id && (
+                          {openMenuId === client._id && menuPos && (
                             <>
                               <div
-                                className="fixed inset-0 z-10"
+                                className="fixed inset-0 z-[60]"
                                 onClick={() => setOpenMenuId(null)}
                               />
                               <motion.div
-                                initial={{ opacity: 0, y: -6 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -6 }}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
                                 transition={{ duration: 0.15 }}
-                                className="absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-lg border border-brand-blue-pale py-1.5 z-20"
+                                style={menuPos}
+                                className="fixed w-52 bg-white rounded-xl shadow-lg border border-brand-blue-pale py-1.5 z-[61]"
                               >
+                                <button
+                                  onClick={() => openEdit(client)}
+                                  className="flex items-center gap-2 w-full text-left px-4 py-2 text-xs font-medium text-brand-blue hover:bg-brand-blue-pale transition-colors"
+                                >
+                                  <Pencil size={14} /> Edit details
+                                </button>
+                                <button
+                                  onClick={() => openDeduct(client)}
+                                  className="flex items-center gap-2 w-full text-left px-4 py-2 text-xs font-medium text-brand-blue hover:bg-brand-blue-pale transition-colors"
+                                >
+                                  <MinusCircle size={14} /> Deduct days or plans
+                                </button>
                                 {client.banned ? (
                                   <button
                                     onClick={() => handleUnban(client._id)}
@@ -726,6 +875,7 @@ const Enrollments = () => {
                             </>
                           )}
                         </AnimatePresence>
+                        , document.body)}
                       </div>
                     </div>
                   </td>
@@ -766,7 +916,11 @@ const Enrollments = () => {
       <Modal
         isOpen={!!extendForm}
         onClose={closeExtend}
-        title={extendForm ? `Extend ${extendForm.client.name}` : ""}
+        title={
+          extendForm
+            ? `${extendForm.mode === "deduct" ? "Deduct from" : "Extend"} ${extendForm.client.name}`
+            : ""
+        }
       >
         {extendForm && (
           <ExtendForm
@@ -775,6 +929,24 @@ const Enrollments = () => {
             extending={extending}
             onSubmit={handleExtendSubmit}
             onCancel={closeExtend}
+          />
+        )}
+      </Modal>
+
+      <Modal
+        isOpen={!!editingClient}
+        onClose={() => setEditingClient(null)}
+        title={editingClient ? `Edit ${editingClient.name}` : ""}
+      >
+        {editingClient && (
+          <EditClientForm
+            key={editingClient._id}
+            client={editingClient}
+            onSaved={() => {
+              setEditingClient(null);
+              fetchClients();
+            }}
+            onCancel={() => setEditingClient(null)}
           />
         )}
       </Modal>

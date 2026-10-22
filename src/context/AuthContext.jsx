@@ -8,7 +8,14 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const storedRole = localStorage.getItem("role");
-    if (storedRole) setRole(storedRole);
+    // A role without its token isn't a session — clear it so the login
+    // page shows instead of bouncing to a dashboard that can't load.
+    if (storedRole && !localStorage.getItem("token")) {
+      localStorage.removeItem("role");
+      localStorage.removeItem("client_id");
+    } else if (storedRole) {
+      setRole(storedRole);
+    }
     setLoading(false);
   }, []);
 
