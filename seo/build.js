@@ -19,6 +19,7 @@ import { getPageMeta, pageMeta, SITE_ORIGIN } from "../src/utils/pageMeta.js";
 import { faqs, plansFaqs } from "../src/content/faq.js";
 import { programs } from "../src/content/programs.js";
 import { posts, postBySlug, postPath, sectionId } from "../src/content/blog.js";
+import { dietitian, reviewers } from "../src/content/team.js";
 import { trainersIntro, trainersSections, trainersLinks, trainersFaqs } from "../src/content/trainers.js";
 import { optimizeCloudinaryUrl } from "../src/utils/cloudinary.js";
 
@@ -258,7 +259,8 @@ ${week.length ? `<h2>Weekly plan</h2>${ul(week.map((w) => `${w.day}: ${w.type}`)
       "Interactive home workouts, guided and tailored to varying fitness levels and health conditions.",
       "Sustainable energy and balance: steady, whole-body wellness rather than quick weight loss.",
     ])}
-<h2>Our philosophy</h2><p>No supplements, no shortcuts — just real food, structured movement, and lasting results.</p>`,
+<h2>Our philosophy</h2><p>No supplements, no shortcuts — just real food, structured movement, and lasting results.</p>
+<h2 id="dietitian">Our dietitian</h2><p>${esc(dietitian.name)} — ${esc(dietitian.role)}, ${esc(dietitian.credential)}. ${esc(dietitian.bio)}</p>`,
 
   "/contact": (data) => {
     const general = formatPhone(data.settings.whatsapp_general);
@@ -292,7 +294,7 @@ const programContent = (program) =>
 
 // Blog posts: the full guide, as the page shows it.
 const postContent = (post) =>
-  `<p>By ${esc(post.author)} · Updated ${esc(post.updated)}</p><p>${esc(post.intro)}</p>${post.sections
+  `<p>By ${esc(post.author)}${reviewers[post.reviewedBy] ? ` · Reviewed by ${esc(reviewers[post.reviewedBy].name)}, ${esc(reviewers[post.reviewedBy].credential)}` : ""} · Updated ${esc(post.updated)}</p><p>${esc(post.intro)}</p>${post.sections
     .map(
       (sec) =>
         `<h2 id="${sectionId(sec.heading)}">${esc(sec.heading)}</h2>${(sec.paragraphs || []).map((p) => `<p>${esc(p)}</p>`).join("")}${
@@ -384,6 +386,22 @@ const orgNode = (data) => {
   };
 };
 
+const personId = (person) => `${SITE_ORIGIN}/about#${person.id}`;
+const personNode = (person) => ({
+  "@type": "Person",
+  "@id": personId(person),
+  name: person.name,
+  jobTitle: person.role,
+  description: person.bio,
+  hasCredential: {
+    "@type": "EducationalOccupationalCredential",
+    credentialCategory: "degree",
+    name: person.credential,
+  },
+  worksFor: { "@id": `${SITE_ORIGIN}/#organization` },
+  url: `${SITE_ORIGIN}/about#dietitian`,
+});
+
 const websiteNode = {
   "@type": "WebSite",
   "@id": `${SITE_ORIGIN}/#website`,
@@ -472,6 +490,14 @@ const jsonLd = (path, meta, data) => {
   }
   if (path === "/" || path === "/plans") graph.push(...serviceNodes(data));
   const post = postForPath(path);
+  const reviewer = post && reviewers[post.reviewedBy];
+  if (reviewer) {
+    // reviewedBy / lastReviewed belong on the page (schema.org WebPage).
+    page.reviewedBy = { "@id": personId(reviewer) };
+    if (post.reviewed) page.lastReviewed = post.reviewed;
+    graph.push(personNode(reviewer));
+  }
+  if (path === "/about") graph.push(personNode(dietitian));
   if (post) {
     graph.push({
       "@type": "BlogPosting",
@@ -481,7 +507,6 @@ const jsonLd = (path, meta, data) => {
       datePublished: post.date,
       dateModified: post.updated,
       author: { "@type": "Organization", name: post.author, url: `${SITE_ORIGIN}/` },
-      ...(post.reviewedBy ? { reviewedBy: { "@type": "Person", name: post.reviewedBy } } : {}),
       publisher: { "@id": `${SITE_ORIGIN}/#organization` },
       mainEntityOfPage: { "@id": `${url}#webpage` },
       image: `${SITE_ORIGIN}/og-image.png`,

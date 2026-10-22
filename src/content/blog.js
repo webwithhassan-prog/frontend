@@ -9,8 +9,9 @@
 // Rendered by BlogPost and, word for word, into the crawler-readable HTML,
 // BlogPosting and FAQPage data by seo/build.js. Health guidance here stays
 // with mainstream, widely published advice and always points to a doctor
-// for medical decisions. `reviewedBy` stays null until a named dietitian has
-// actually reviewed the post — never fill it in for them.
+// for medical decisions. `reviewedBy` is the id of the person in
+// content/team.js who reviewed the post, and `reviewed` the date — set only
+// once they actually have; never fill it in for them.
 //
 // Section shape: { heading, paragraphs?, bullets?, table?: { head, rows },
 // note? }.
@@ -27,7 +28,8 @@ export const posts = [
     date: "2026-10-22",
     updated: "2026-10-22",
     author: "Fitness Zone Team",
-    reviewedBy: null,
+    reviewedBy: "sobia-sadia",
+    reviewed: "2026-10-22",
     program: ["/pcos-diet-plan", "PCOS, PCOD & thyroid diet plan"],
     intro:
       "You don't need imported superfoods or a diet that bans roti to manage PCOS. Most women with PCOS can make real progress with the food already cooked at home — by changing what goes on the plate, how much, and when. This guide shows how, using desi food.",
@@ -169,7 +171,8 @@ export const posts = [
     date: "2026-10-22",
     updated: "2026-10-22",
     author: "Fitness Zone Team",
-    reviewedBy: null,
+    reviewedBy: "sobia-sadia",
+    reviewed: "2026-10-22",
     program: ["/postpartum-weight-loss", "Postpartum weight loss program"],
     intro:
       "After having a baby, the pressure to 'get your body back' can start in the hospital. But losing weight while breastfeeding is something to do slowly and safely — for you and for your milk supply. Here's what's realistic, with food you already eat.",
@@ -291,7 +294,8 @@ export const posts = [
     date: "2026-10-22",
     updated: "2026-10-22",
     author: "Fitness Zone Team",
-    reviewedBy: null,
+    reviewedBy: "sobia-sadia",
+    reviewed: "2026-10-22",
     program: ["/online-diet-plan", "Customized online diet plan"],
     intro:
       "Most weight loss plans fail in Pakistani homes for one reason: they ask you to eat food nobody else in the family is eating. You don't need a separate pot. These simple rules work with the same roti, daal and salan the whole family eats.",
@@ -411,7 +415,8 @@ export const posts = [
     date: "2026-10-22",
     updated: "2026-10-22",
     author: "Fitness Zone Team",
-    reviewedBy: null,
+    reviewedBy: "sobia-sadia",
+    reviewed: "2026-10-22",
     program: ["/home-workout-for-women", "Live home workouts for women"],
     intro:
       "You don't need a gym or equipment to get fitter at home. A week that trains something different each day keeps your whole body working and stops it feeling repetitive. This is the same weekly structure our live classes follow, written out so you can start on your own.",

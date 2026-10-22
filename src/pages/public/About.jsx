@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { dietitian } from "../../content/team";
 
 const About = () => {
   return (
@@ -19,16 +20,15 @@ const About = () => {
         <div className="space-y-4">
           <p>
             Since 2023, FITNESSZONE OFFICIAL LIMITED has been dedicated to
-            helping women take control of their health and well-being. We
-            focus on the everyday effects of modern, sedentary lifestyles —
-            low energy, stubborn weight, and inconsistent routines — through
+            helping women take control of their health and well-being. We focus
+            on the everyday effects of modern, sedentary lifestyles — low
+            energy, stubborn weight, and inconsistent routines — through
             sustainable nutrition and movement, not quick fixes.
           </p>
           <p>
-            We believe lasting change shouldn't require harsh starvation
-            diets, shortcuts, or long lists of supplements. Real, sustainable
-            results begin right in your kitchen and through consistent
-            movement.
+            We believe lasting change shouldn't require harsh starvation diets,
+            shortcuts, or long lists of supplements. Real, sustainable results
+            begin right in your kitchen and through consistent movement.
           </p>
         </div>
 
@@ -43,10 +43,10 @@ const About = () => {
               </h3>
               <p>
                 No powders, pills, or artificial products — ever. We design
-                sustainable nutrition plans based entirely on real, whole
-                foods. We cater to every cuisine, dietary preference, and
-                cultural background, ensuring your meal plan is enjoyable,
-                effective, and easy to follow.
+                sustainable nutrition plans based entirely on real, whole foods.
+                We cater to every cuisine, dietary preference, and cultural
+                background, ensuring your meal plan is enjoyable, effective, and
+                easy to follow.
               </p>
             </div>
             <div>
@@ -54,9 +54,9 @@ const About = () => {
                 Interactive Home Workouts
               </h3>
               <p>
-                Stay active, energized, and accountable from the comfort of
-                your home with our guided home workouts tailored to
-                fit varying fitness levels and health conditions.
+                Stay active, energized, and accountable from the comfort of your
+                home with our guided home workouts tailored to fit varying
+                fitness levels and health conditions.
               </p>
             </div>
             <div>
@@ -64,9 +64,9 @@ const About = () => {
                 Sustainable Energy &amp; Balance
               </h3>
               <p>
-                We focus on steady, whole-body wellness rather than quick
-                weight loss — helping you build energy, feel more balanced,
-                and move through your day with confidence.
+                We focus on steady, whole-body wellness rather than quick weight
+                loss — helping you build energy, feel more balanced, and move
+                through your day with confidence.
               </p>
             </div>
           </div>
@@ -77,15 +77,41 @@ const About = () => {
             Our Philosophy
           </h2>
           <blockquote className="border-l-4 border-brand-orange pl-5 italic text-brand-blue mb-4">
-            "No supplements, no shortcuts — just real food, structured
-            movement, and lasting results."
+            "No supplements, no shortcuts — just real food, structured movement,
+            and lasting results."
           </blockquote>
           <p>
-            Every woman's body is unique. Our mission is to guide you toward
-            a healthier, more active lifestyle through a personalized
-            approach that seamlessly integrates into your daily routine
-            without feeling like a burden.
+            Every woman's body is unique. Our mission is to guide you toward a
+            healthier, more active lifestyle through a personalized approach
+            that seamlessly integrates into your daily routine without feeling
+            like a burden.
           </p>
+        </div>
+
+        <div id="dietitian" className="scroll-mt-24">
+          <h2 className="font-display text-brand-blue text-xl md:text-2xl mb-4">
+            Our Dietitian
+          </h2>
+          <div className="flex items-start gap-4">
+            <span
+              aria-hidden="true"
+              className="shrink-0 w-12 h-12 rounded-full bg-brand-orange/15 text-brand-orange-dark font-display flex items-center justify-center"
+            >
+              {dietitian.name
+                .split(" ")
+                .map((w) => w[0])
+                .join("")}
+            </span>
+            <div>
+              <h3 className="font-semibold text-brand-blue">
+                {dietitian.name}
+              </h3>
+              <p className="text-sm text-brand-blue/70 mb-2">
+                {dietitian.role} · {dietitian.credential}
+              </p>
+              <p>{dietitian.bio}</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>

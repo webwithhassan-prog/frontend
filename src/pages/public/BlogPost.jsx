@@ -9,6 +9,7 @@ import {
   readingMinutes,
   sectionId,
 } from "../../content/blog";
+import { reviewers } from "../../content/team";
 import NotFound from "./NotFound";
 
 const formatDate = (iso) =>
@@ -26,6 +27,7 @@ const BlogPost = () => {
   if (!post) return <NotFound />;
 
   const [programPath, programLabel] = post.program;
+  const reviewer = reviewers[post.reviewedBy];
   const related = posts.filter((p) => p.slug !== post.slug).slice(0, 2);
 
   return (
@@ -58,7 +60,19 @@ const BlogPost = () => {
         </h1>
         <p className="text-sm text-brand-blue-light mb-6">
           By {post.author}
-          {post.reviewedBy && <> · Reviewed by {post.reviewedBy}</>} · Updated{" "}
+          {reviewer && (
+            <>
+              {" "}
+              · Reviewed by{" "}
+              <Link
+                to="/about#dietitian"
+                className="font-semibold underline decoration-brand-blue-light/40 underline-offset-2 hover:text-brand-orange rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+              >
+                {reviewer.name}, {reviewer.credential}
+              </Link>
+            </>
+          )}{" "}
+          · Updated{" "}
           <time dateTime={post.updated}>{formatDate(post.updated)}</time> ·{" "}
           {readingMinutes(post)} min read
         </p>
@@ -196,6 +210,42 @@ const BlogPost = () => {
             </Button>
           </div>
         </aside>
+
+        {reviewer && (
+          <section
+            aria-label="Reviewed by"
+            className="mt-10 flex items-start gap-4 border border-brand-blue-pale rounded-2xl p-5"
+          >
+            <span
+              aria-hidden="true"
+              className="shrink-0 w-11 h-11 rounded-full bg-brand-orange/15 text-brand-orange-dark font-display flex items-center justify-center"
+            >
+              {reviewer.name
+                .split(" ")
+                .map((w) => w[0])
+                .join("")}
+            </span>
+            <div className="text-sm">
+              <p className="text-xs font-semibold tracking-wide text-brand-blue-light mb-0.5">
+                REVIEWED BY
+              </p>
+              <p className="font-display text-brand-blue text-base">
+                {reviewer.name}
+              </p>
+              <p className="text-brand-blue/75">
+                {reviewer.role} · {reviewer.credential}
+              </p>
+              {post.reviewed && (
+                <p className="text-brand-blue/60 text-xs mt-1">
+                  Reviewed on{" "}
+                  <time dateTime={post.reviewed}>
+                    {formatDate(post.reviewed)}
+                  </time>
+                </p>
+              )}
+            </div>
+          </section>
+        )}
 
         <p className="mt-8 text-xs text-brand-blue/60 leading-relaxed">
           This guide is general information, not medical advice. Talk to your
