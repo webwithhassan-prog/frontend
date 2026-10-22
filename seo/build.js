@@ -25,11 +25,13 @@ const API = process.env.SEO_API_URL || "https://fitnesszone-backend.onrender.com
 
 const ORG = {
   name: "Fitness Zone",
-  legalName: "FITNESSZONE OFFICIAL LTD",
+  legalName: "FITNESSZONE OFFICIAL LIMITED",
+  companyNumber: "17430269",
   founded: "2023",
   founder: "M Abu Bakar Siddique",
   email: "fitnesszoneofficial.uk26@gmail.com",
   instagram: "https://www.instagram.com/fitness_zone5566",
+  companiesHouse: "https://find-and-update.company-information.service.gov.uk/company/17430269",
   address: {
     streetAddress: "Office 20790, 182–184 High Street North",
     addressLocality: "London",
@@ -249,7 +251,7 @@ ${week.length ? `<h2>Weekly plan</h2>${ul(week.map((w) => `${w.day}: ${w.type}`)
   },
 
   "/about": () =>
-    `<p>Since 2023, ${ORG.legalName} has been dedicated to helping women take control of their health and well-being — the everyday effects of sedentary lifestyles such as low energy, stubborn weight and inconsistent routines — through sustainable nutrition and movement, not quick fixes.</p>
+    `<p>Since 2023, ${ORG.name} has been dedicated to helping women take control of their health and well-being — the everyday effects of sedentary lifestyles such as low energy, stubborn weight and inconsistent routines — through sustainable nutrition and movement, not quick fixes.</p>
 <h2>What we offer</h2>${ul([
       "100% natural, fully customized diet plans built on real, whole foods — no powders, pills or artificial products — for every cuisine, dietary preference and cultural background.",
       "Interactive home workouts, guided and tailored to varying fitness levels and health conditions.",
@@ -325,7 +327,25 @@ const orgNode = (data) => {
       ...(phone && { telephone: phone }),
       areaServed: "Worldwide",
     },
-    sameAs: [ORG.instagram],
+    // Every other name people search for it by, and the official company
+    // record — so "fitnesszone" and "Fitness Zone" resolve to this business
+    // rather than the many gyms with the same name.
+    alternateName: ["FitnessZone", "Fitness Zone Official", "FITNESSZONE OFFICIAL LTD"],
+    sameAs: [ORG.instagram, ORG.companiesHouse],
+    identifier: {
+      "@type": "PropertyValue",
+      propertyID: "UK Companies House company number",
+      value: ORG.companyNumber,
+    },
+    areaServed: "Worldwide",
+    knowsAbout: [
+      "Online diet plans for women",
+      "Home workouts for women",
+      "Live online fitness classes",
+      "PCOS and thyroid diet plans",
+      "Postpartum weight loss",
+      "Menopause weight loss",
+    ],
   };
 };
 

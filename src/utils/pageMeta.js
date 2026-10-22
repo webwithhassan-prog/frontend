@@ -67,7 +67,7 @@ export const pageMeta = {
   "/menopause-weight-loss": {
     title: `Menopause & Insulin Resistance Weight Loss | ${siteName}`,
     description:
-      "Lose weight in menopause or with insulin resistance: a customized diet plan from your own food, plus home workouts for women over 40 and 50 — no pills or powders.",
+      "Lose weight in menopause or with insulin resistance: a customized diet plan from your own food, plus home workouts for women over 40 and 50 — no pills.",
   },
   "/postpartum-weight-loss": {
     title: `Postpartum Weight Loss Program for New Moms | ${siteName}`,

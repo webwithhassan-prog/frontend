@@ -141,6 +141,21 @@ const Footer = () => {
 
       <div className="border-t border-white/10 text-center py-4 text-xs text-brand-blue-pale/75">
         © {new Date().getFullYear()} Fitness Zone. All rights reserved.
+        {/* Registered company details — required on a UK company's website,
+            and they tie this site to the registered business for search
+            engines. */}
+        <p className="mt-1 px-4">
+          FITNESSZONE OFFICIAL LIMITED · Registered in England and Wales ·
+          Company no.{" "}
+          <a
+            href="https://find-and-update.company-information.service.gov.uk/company/17430269"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-white rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+          >
+            17430269
+          </a>
+        </p>
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-2 px-4 text-xs text-brand-blue-pale/75">
           {legalLinks.map((link, i) => (
             <span key={link.href} className="flex gap-4">
