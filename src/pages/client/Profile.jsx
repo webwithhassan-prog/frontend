@@ -17,7 +17,7 @@ import api from "../../services/api";
 import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
-import WhatsAppIcon from "../../components/common/WhatsAppIcon";
+import FormImageActions from "../../components/client/FormImageActions";
 import Modal from "../../components/admin/Modal";
 import { useSettings } from "../../context/SettingsContext";
 import { getErrorMessage } from "../../utils/errors";
@@ -283,14 +283,8 @@ const Profile = () => {
     setProgressImageGenerated(true);
   };
 
-  const handleSaveProgressImage = async () => {
-    if (!progressCardRef.current) return;
-    const dataUrl = await toPng(progressCardRef.current, { pixelRatio: 2 });
-    const link = document.createElement("a");
-    link.download = "weekly-progress.png";
-    link.href = dataUrl;
-    link.click();
-
+  // The client has the check-in image (saved, shared or screenshotted).
+  const recordProgressCheckin = async () => {
     try {
       const clientId = localStorage.getItem("client_id");
       await api.put(`/clients/${clientId}/progress-checkin`);
@@ -319,18 +313,14 @@ const Profile = () => {
     setOnboardingImageGenerated(true);
   };
 
-  const handleSaveOnboardingImage = async () => {
-    if (!onboardingCardRef.current) return;
-    const dataUrl = await toPng(onboardingCardRef.current, { pixelRatio: 2 });
-    const link = document.createElement("a");
-    link.download = "day1-onboarding.png";
-    link.href = dataUrl;
-    link.click();
-
+  // The client has the onboarding image. Recorded on the server only: the
+  // form stays on screen until they leave the page — updating it here hid
+  // the whole section, "Send to Dietician" button included, the moment
+  // they saved.
+  const recordOnboardingDone = async () => {
     try {
       const clientId = localStorage.getItem("client_id");
       await api.put(`/clients/${clientId}/onboarding-complete`);
-      setClient((prev) => ({ ...prev, onboarding_completed: true }));
     } catch (err) {
       console.error(err);
     }
@@ -832,25 +822,13 @@ const Profile = () => {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-4 mt-6">
-                      <Button onClick={handleSaveOnboardingImage}>
-                        Save Image
-                      </Button>
-                      <a
-                        href={dietWhatsappLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 bg-[#25D366] text-white font-semibold rounded-full px-6 py-3 hover:brightness-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
-                      >
-                        <WhatsAppIcon size={16} />
-                        Send to Dietician
-                      </a>
-                    </div>
-
-                    <p className="text-brand-blue/70 text-sm mt-6">
-                      Save the image above, then tap "Send to Dietician" and
-                      attach it — welcome aboard!
-                    </p>
+                    <FormImageActions
+                      cardRef={onboardingCardRef}
+                      fileName="day1-onboarding.png"
+                      whatsappLink={dietWhatsappLink}
+                      shareText="Hi! Here's my Day 1 onboarding form."
+                      onSaved={recordOnboardingDone}
+                    />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -1322,30 +1300,23 @@ const Profile = () => {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-4 mt-6">
-                      <Button onClick={handleSaveProgressImage}>
-                        Save Image
-                      </Button>
-                      <a
-                        href={dietWhatsappLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 bg-[#25D366] text-white font-semibold rounded-full px-6 py-3 hover:brightness-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
-                      >
-                        <WhatsAppIcon size={16} />
-                        Send to Dietician
-                      </a>
+                    <FormImageActions
+                      cardRef={progressCardRef}
+                      fileName="weekly-progress.png"
+                      whatsappLink={dietWhatsappLink}
+                      shareText="Hi! Here's my weekly progress check-in."
+                      onSaved={recordProgressCheckin}
+                    >
                       <button
                         onClick={handleProgressReset}
                         className="text-sm font-semibold text-brand-blue/60 hover:text-brand-blue rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                       >
                         Start Over
                       </button>
-                    </div>
+                    </FormImageActions>
 
-                    <p className="text-brand-blue/70 text-sm mt-6">
-                      Save the image above, then tap "Send to Dietician" and
-                      attach it — your next reminder will show up in 7 days.
+                    <p className="text-brand-blue/60 text-xs mt-4">
+                      Your next check-in reminder will show up in 7 days.
                     </p>
                   </motion.div>
                 )}
