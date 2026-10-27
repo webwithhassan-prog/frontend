@@ -160,15 +160,27 @@ const Profile = () => {
     }
   };
 
+  // Everything the dashboard needs, requested at once. It used to be a
+  // chain of four steps, each waiting for the last — and with the server
+  // far from the database each step took most of a second. Parts that
+  // fail just stay empty; only the client profile itself is required.
   const fetchData = async () => {
+    const clientId = localStorage.getItem("client_id");
+    const settle = (promise) => promise.then((res) => res.data).catch((err) => {
+      console.error(err);
+      return null;
+    });
     try {
-      const clientId = localStorage.getItem("client_id");
-      const [clientRes, classesRes, ebooksRes] = await Promise.all([
-        api.get(`/clients/${clientId}`),
-        api.get("/classes/public?scope=today"),
-        api.get("/ebooks/public"),
-      ]);
-      setClient(clientRes.data);
+      const [clientData, classes, allEbooks, clientCourses, gallery, todayLog] =
+        await Promise.all([
+          api.get(`/clients/${clientId}`).then((res) => res.data),
+          settle(api.get("/classes/public?scope=today")),
+          settle(api.get("/ebooks/public")),
+          settle(api.get(`/courses/client/${clientId}`)),
+          settle(api.get(`/recorded-gallery/client/${clientId}`)),
+          settle(api.get("/daily-logs/today")),
+        ]);
+      setClient(clientData);
 
       const now = new Date();
       const startOfToday = new Date(now);
@@ -178,7 +190,7 @@ const Profile = () => {
       // Includes classes already conducted earlier today (not just ones still
       // upcoming) — renderClassCard marks those "Conducted" rather than
       // hiding them, so today's full schedule always shows all 11 slots.
-      const upcoming = classesRes.data
+      const upcoming = (classes || [])
         .filter((c) => {
           const d = new Date(c.datetime);
           return d >= startOfToday && d <= sevenDaysOut;
@@ -186,35 +198,16 @@ const Profile = () => {
         .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
       setAllUpcomingClasses(upcoming);
 
-      const purchasedIds = (clientRes.data.purchased_ebooks || []).map((id) =>
+      const purchasedIds = (clientData.purchased_ebooks || []).map((id) =>
         id.toString(),
       );
-      setEbooks(ebooksRes.data.filter((e) => purchasedIds.includes(e._id)));
-
-      try {
-        const coursesRes = await api.get(`/courses/client/${clientId}`);
-        setCourses(coursesRes.data);
-      } catch (coursesErr) {
-        console.error(coursesErr);
-      }
-
-      if (clientRes.data.has_workout) {
-        try {
-          const galleryRes = await api.get(
-            `/recorded-gallery/client/${clientId}`,
-          );
-          setRecordedGallery(galleryRes.data);
-        } catch (galleryErr) {
-          console.error(galleryErr);
-        }
-      }
-
-      try {
-        const todayLogRes = await api.get("/daily-logs/today");
-        setDailySteps(todayLogRes.data.steps || "");
-        setDailyWater(todayLogRes.data.water_liters || "");
-      } catch (logErr) {
-        console.error(logErr);
+      setEbooks((allEbooks || []).filter((e) => purchasedIds.includes(e._id)));
+      if (clientCourses) setCourses(clientCourses);
+      // Recordings only matter with the workout package.
+      if (clientData.has_workout && gallery) setRecordedGallery(gallery);
+      if (todayLog) {
+        setDailySteps(todayLog.steps || "");
+        setDailyWater(todayLog.water_liters || "");
       }
     } catch (err) {
       console.error(err);
