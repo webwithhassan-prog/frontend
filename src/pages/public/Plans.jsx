@@ -504,7 +504,10 @@ const Plans = () => {
         )}
 
         {loading ? (
-          <Loader />
+          // Holds the cards' space so the FAQ below doesn't jump when they load.
+          <div className="min-h-[600px]">
+            <Loader />
+          </div>
         ) : durations.length === 0 ? (
           <p className="text-center text-brand-blue/60">
             No {packageLabels[selectedType] || ""} packages are available right

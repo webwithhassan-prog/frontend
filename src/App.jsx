@@ -85,9 +85,15 @@ function PublicLayout({ children }) {
       {/* Suspense lives here, not around the whole route tree, so a lazy
           page load only swaps the content area — the navbar/footer chrome
           stays mounted instead of flashing away on every navigation. */}
-      <Suspense fallback={<Loader size={56} className="py-32" />}>
-        {children}
-      </Suspense>
+      {/* <main> marks the page content for screen readers. Its minimum
+          height keeps the footer below the screen while a page and its data
+          load — the footer used to show near the top, then jump down when
+          the content arrived (Google counted it as layout shift). */}
+      <main id="main-content" className="min-h-[100svh]">
+        <Suspense fallback={<Loader size={56} className="py-32" />}>
+          {children}
+        </Suspense>
+      </main>
       <Footer />
       <OfferPopup />
       <CountryPrompt />

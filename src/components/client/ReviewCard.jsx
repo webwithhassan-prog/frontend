@@ -84,7 +84,7 @@ const ReviewCard = () => {
           <div className="flex items-center justify-between gap-3 mb-2">
             <p
               className="flex gap-0.5"
-              aria-label={`${review.rating} out of 5 stars`}
+              role="img" aria-label={`${review.rating} out of 5 stars`}
             >
               {[1, 2, 3, 4, 5].map((n) => (
                 <Star

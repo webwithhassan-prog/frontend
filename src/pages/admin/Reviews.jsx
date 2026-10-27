@@ -159,7 +159,7 @@ const Reviews = () => {
               </div>
               <p
                 className="flex gap-0.5 mb-2"
-                aria-label={`${r.rating} out of 5 stars`}
+                role="img" aria-label={`${r.rating} out of 5 stars`}
               >
                 {[1, 2, 3, 4, 5].map((n) => (
                   <Star
