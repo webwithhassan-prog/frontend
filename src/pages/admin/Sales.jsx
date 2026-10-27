@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Download, FileText } from "lucide-react";
+import { Download, FileText } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import api from "../../services/api";
 import Card from "../../components/common/Card";
 import SkeletonTable from "../../components/common/SkeletonTable";
-import Button from "../../components/common/Button";
 import { useCurrency } from "../../context/CurrencyContext";
 import logo from "../../assets/logo.jpeg";
 
@@ -17,7 +16,24 @@ const BRAND_BLUE_LIGHT = [44, 68, 209];
 const BRAND_ORANGE = [247, 107, 28];
 const BRAND_BLUE_PALE = [234, 241, 255];
 
-const categories = ["plan", "package", "ebook", "course", "custom"];
+const categories = [
+  ["package", "Packages"],
+  ["ebook", "E-books"],
+  ["course", "Courses"],
+  ["custom", "Custom invoices"],
+];
+
+// "2026-10" -> "October 2026"
+const monthLabel = (key) =>
+  key
+    ? new Date(`${key}-01T00:00:00`).toLocaleDateString("en-GB", {
+        month: "long",
+        year: "numeric",
+      })
+    : "";
+
+const gbp = (n) =>
+  `£${(n || 0).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 // Escapes a value for a CSV cell — wraps in quotes and doubles any embedded
 // quotes whenever the value itself could contain a comma, quote, or newline.
@@ -47,6 +63,7 @@ const Sales = () => {
     monthly_total_settled: 0,
   });
   const [category, setCategory] = useState("");
+  const [month, setMonth] = useState("");
   const [searchResults, setSearchResults] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
@@ -66,23 +83,27 @@ const Sales = () => {
     }
   };
 
-  useEffect(() => {
-    fetchSummary();
-  }, []);
-
-  const handleSearch = async () => {
+  // One calendar month (Pakistan time) of website card payments.
+  const loadMonth = async (nextMonth, nextCategory) => {
     setSearching(true);
     try {
-      const res = await api.get("/sales/search", {
-        params: category ? { category } : {},
-      });
+      const params = {};
+      if (nextMonth) params.month = nextMonth;
+      if (nextCategory) params.category = nextCategory;
+      const res = await api.get("/sales/search", { params });
       setSearchResults(res.data);
+      setMonth(res.data.month);
     } catch (err) {
       console.error(err);
     } finally {
       setSearching(false);
     }
   };
+
+  useEffect(() => {
+    fetchSummary();
+    loadMonth("", "");
+  }, []);
 
   const loadImageAsDataUrl = (src) =>
     fetch(src)
@@ -132,7 +153,7 @@ const Sales = () => {
       { align: "right" },
     );
     doc.text(
-      `Category: ${category ? category[0].toUpperCase() + category.slice(1) : "All"}`,
+      `${monthLabel(month)} · ${category ? categories.find(([k]) => k === category)?.[1] : "All categories"}`,
       pageWidth - 14,
       22,
       { align: "right" },
@@ -150,12 +171,12 @@ const Sales = () => {
 
     autoTable(doc, {
       startY: 48,
-      head: [["Date", "Category", "Currency", "Amount Paid", "Base Price (INR)"]],
+      head: [["Date", "Category", "Price shown", "Charged (GBP)", "Base Price (INR)"]],
       body: searchResults.logs.map((log) => [
         new Date(log.date).toLocaleDateString(),
         log.category,
-        log.currency_code || "INR",
-        `${symbolFor(log.currency_code)}${(log.amount_display ?? log.amount).toLocaleString(undefined, { maximumFractionDigits: 2 })}`,
+        `${log.currency_code || "INR"} ${(log.amount_display ?? log.amount).toLocaleString(undefined, { maximumFractionDigits: 2 })}`,
+        `GBP ${(log.amount_settled || 0).toFixed(2)}`,
         `INR ${log.amount.toLocaleString("en-IN")}`,
       ]),
       theme: "striped",
@@ -185,25 +206,23 @@ const Sales = () => {
       },
     });
 
-    doc.save(`sales-${category || "all"}-${today.toISOString().slice(0, 10)}.pdf`);
+    doc.save(`sales-${month}-${category || "all"}.pdf`);
   };
 
   const handleExportCsv = () => {
     if (!searchResults) return;
     const rows = [
-      ["Date", "Category", "Currency", "Amount Paid", "Base Price (INR)"],
+      ["Date", "Category", "Currency", "Price shown", "Charged (GBP)", "Base Price (INR)"],
       ...searchResults.logs.map((log) => [
         new Date(log.date).toLocaleDateString(),
         log.category,
         log.currency_code || "INR",
-        (log.amount_display ?? log.amount).toLocaleString(undefined, {
-          maximumFractionDigits: 2,
-        }),
+        log.amount_display ?? log.amount,
+        (log.amount_settled || 0).toFixed(2),
         log.amount,
       ]),
     ];
-    const today = new Date().toISOString().slice(0, 10);
-    downloadCsv(`sales-${category || "all"}-${today}.csv`, rows);
+    downloadCsv(`sales-${month}-${category || "all"}.csv`, rows);
   };
 
   return (
@@ -252,29 +271,47 @@ const Sales = () => {
         </Card>
       </div>
 
-      {/* Category Search (30-day retained log) */}
-      <h2 className="text-lg font-bold text-brand-blue mb-4">
-        Search Sales by Category (last 30 days)
-      </h2>
+      {/* Monthly sales — website card payments only. Manual bank/wallet
+          payments are listed under Manual Payments. */}
+      <h2 className="text-lg font-bold text-brand-blue mb-1">Monthly Sales</h2>
+      <p className="text-xs text-brand-blue-light mb-4">
+        Website card payments only, in Pakistan time. Manual bank/wallet
+        payments are under Manual Payments.
+      </p>
       <Card className="mb-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange capitalize"
-          >
-            <option value="">All Categories</option>
-            {categories.map((c) => (
-              <option key={c} value={c} className="capitalize">
-                {c}
-              </option>
-            ))}
-          </select>
-          <Button onClick={handleSearch}>
-            <span className="flex items-center gap-2">
-              <Search size={16} /> Search
-            </span>
-          </Button>
+        <div className="flex flex-wrap items-end gap-3">
+          <label className="flex flex-col gap-1 text-xs font-semibold text-brand-blue">
+            Month
+            <select
+              value={month}
+              onChange={(e) => loadMonth(e.target.value, category)}
+              className="border border-brand-blue-pale rounded-lg px-4 py-3 text-sm font-normal bg-white focus:outline-none focus:ring-2 focus:ring-brand-orange"
+            >
+              {(searchResults?.months || (month ? [month] : [])).map((m) => (
+                <option key={m} value={m}>
+                  {monthLabel(m)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-semibold text-brand-blue">
+            Category
+            <select
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value);
+                loadMonth(month, e.target.value);
+              }}
+              className="border border-brand-blue-pale rounded-lg px-4 py-3 text-sm font-normal bg-white focus:outline-none focus:ring-2 focus:ring-brand-orange"
+            >
+              <option value="">All categories</option>
+              {categories.map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
       </Card>
 
@@ -284,11 +321,10 @@ const Sales = () => {
         <Card className="overflow-x-auto">
           <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
             <p className="text-brand-blue font-semibold">
-              Total: £
-              {searchResults.total_settled.toLocaleString("en-GB", {
-                maximumFractionDigits: 2,
-              })}{" "}
-              ({searchResults.count} entries)
+              {monthLabel(searchResults.month)}: {gbp(searchResults.total_settled)}{" "}
+              <span className="font-normal text-brand-blue-light">
+                ({searchResults.count} sale{searchResults.count === 1 ? "" : "s"})
+              </span>
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -314,11 +350,20 @@ const Sales = () => {
               <tr className="text-left text-brand-blue border-b border-brand-blue-pale">
                 <th className="py-3 px-2">Date</th>
                 <th className="py-3 px-2">Category</th>
-                <th className="py-3 px-2">Amount Paid</th>
+                <th className="py-3 px-2">Price shown</th>
+                <th className="py-3 px-2">Charged</th>
                 <th className="py-3 px-2">Base Price</th>
               </tr>
             </thead>
             <tbody>
+              {searchResults.logs.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="py-6 px-2 text-center text-brand-blue-light">
+                    No website sales in {monthLabel(searchResults.month)}
+                    {category ? " for this category" : ""}.
+                  </td>
+                </tr>
+              )}
               {searchResults.logs.map((log) => (
                 <motion.tr
                   key={log._id}
@@ -338,6 +383,9 @@ const Sales = () => {
                       undefined,
                       { maximumFractionDigits: 2 },
                     )}
+                  </td>
+                  <td className="py-3 px-2 text-brand-blue font-semibold tabular-nums">
+                    {gbp(log.amount_settled)}
                   </td>
                   <td className="py-3 px-2 text-brand-blue-light">
                     ₹{log.amount.toLocaleString("en-IN")}

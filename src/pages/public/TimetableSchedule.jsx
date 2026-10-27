@@ -4,6 +4,9 @@ import { Sunrise, Sun, Sunset, Moon } from "lucide-react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import Card from "../../components/common/Card";
+import TimeZonePicker from "../../components/common/TimeZonePicker";
+import { useTimeZone } from "../../context/TimeZoneContext";
+import { placeName } from "../../utils/timezones";
 
 const dayNames = [
   "Sunday",
@@ -15,28 +18,6 @@ const dayNames = [
   "Saturday",
 ];
 const dayDisplayOrder = [1, 2, 3, 4, 5, 6, 0]; // Monday first, Sunday last
-
-// The 6 fixed timezones clients most often ask about, plus a 7th "My Local
-// Time" option that auto-detects wherever the visitor actually is —
-// covering every other country without listing them all individually.
-const fixedTimezones = [
-  { label: "Pakistan", flag: "🇵🇰", timeZone: "Asia/Karachi" },
-  { label: "India", flag: "🇮🇳", timeZone: "Asia/Kolkata" },
-  { label: "Saudi Arabia", flag: "🇸🇦", timeZone: "Asia/Riyadh" },
-  { label: "UAE", flag: "🇦🇪", timeZone: "Asia/Dubai" },
-  { label: "United Kingdom", flag: "🇬🇧", timeZone: "Europe/London" },
-  { label: "United States (ET)", flag: "🇺🇸", timeZone: "America/New_York" },
-];
-
-const getGlobalOption = () => {
-  let timeZone = "UTC";
-  try {
-    timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-  } catch {
-    // fall back to UTC
-  }
-  return { label: "My Local Time", flag: "🌍", timeZone };
-};
 
 // Slots are grouped by the hour they fall on in the selected timezone, so
 // someone in London sees their own mornings and evenings, not Pakistan's.
@@ -74,18 +55,10 @@ const TimetableSchedule = () => {
   const [dayPlans, setDayPlans] = useState([]);
   const [timeSlots, setTimeSlots] = useState([]);
   const [loading, setLoading] = useState(true);
-  const globalOption = getGlobalOption();
-  const timezoneOptions = [...fixedTimezones, globalOption];
-
-  // Default to a fixed zone if the visitor's detected timezone matches one
-  // of the 6 exactly; otherwise default straight to "My Local Time" so
-  // anyone anywhere still sees correctly converted times immediately.
-  const [selectedZone, setSelectedZone] = useState(() => {
-    const detected = getGlobalOption().timeZone;
-    return (
-      fixedTimezones.find((c) => c.timeZone === detected) || getGlobalOption()
-    );
-  });
+  // Shared with the client dashboard (TimeZoneContext): the device's zone
+  // unless the visitor picked another.
+  const { timeZone } = useTimeZone();
+  const selectedZone = { timeZone, label: placeName(timeZone) };
 
   useEffect(() => {
     const fetchSchedule = async () => {
@@ -184,32 +157,7 @@ const TimetableSchedule = () => {
         </Link>
       </p>
 
-      <div className="flex flex-col items-center gap-1.5 mb-6 md:mb-8">
-        <label htmlFor="timezone" className="sr-only">
-          Show times for
-        </label>
-        <select
-          id="timezone"
-          value={selectedZone.label}
-          onChange={(e) =>
-            setSelectedZone(
-              timezoneOptions.find((c) => c.label === e.target.value),
-            )
-          }
-          className="max-w-full border border-brand-blue-pale rounded-full px-5 py-2.5 text-sm text-brand-blue font-medium bg-white focus:outline-none focus:ring-2 focus:ring-brand-orange"
-        >
-          {timezoneOptions.map((c) => (
-            <option key={c.label} value={c.label}>
-              {c.flag} Show times for {c.label}
-            </option>
-          ))}
-        </select>
-        <p className="text-xs text-brand-blue/50 text-center">
-          {selectedZone.label === "My Local Time"
-            ? "Detected from your device — change it if that's wrong."
-            : "Change this to see times in another timezone."}
-        </p>
-      </div>
+      <TimeZonePicker className="mb-6 md:mb-8" />
 
       {loading ? (
         <p className="text-center text-brand-blue/70">Loading schedule...</p>

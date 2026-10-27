@@ -27,6 +27,7 @@ import {
   Landmark,
   Wallet,
   Flag,
+  Star,
 } from "lucide-react";
 
 // Grouped instead of one flat 17-item list — a section header every few
@@ -76,6 +77,7 @@ const navGroups = [
   {
     label: "System",
     items: [
+      { label: "Client Reviews", to: "/admin/reviews", icon: Star },
       { label: "Reported Issues", to: "/admin/issues", icon: Flag },
       { label: "Settings", to: "/admin/settings", icon: SettingsIcon },
     ],

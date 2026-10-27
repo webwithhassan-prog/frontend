@@ -18,6 +18,10 @@ import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import FormImageActions from "../../components/client/FormImageActions";
+import ReviewCard from "../../components/client/ReviewCard";
+import TimeZonePicker from "../../components/common/TimeZonePicker";
+import { useTimeZone } from "../../context/TimeZoneContext";
+import { dateKeyIn } from "../../utils/timezones";
 import Modal from "../../components/admin/Modal";
 import { useSettings } from "../../context/SettingsContext";
 import { getErrorMessage } from "../../utils/errors";
@@ -117,6 +121,7 @@ const Profile = () => {
   const [pushBusy, setPushBusy] = useState(false);
 
   const [pendingManualPayments, setPendingManualPayments] = useState([]);
+  const { timeZone } = useTimeZone();
 
   useEffect(() => {
     setPushStatus(getPushStatus());
@@ -348,17 +353,12 @@ const Profile = () => {
     window.location.href = `${import.meta.env.VITE_API_URL}/join/class/${classId}?client_id=${clientId}`;
   };
 
-  // Only today's fixed daily classes — no next-days view, per the client
-  // panel showing exactly the day's schedule (currently 11 classes/day).
-  const todayClasses = allUpcomingClasses.filter((c) => {
-    const d = new Date(c.datetime);
-    const now = new Date();
-    return (
-      d.getFullYear() === now.getFullYear() &&
-      d.getMonth() === now.getMonth() &&
-      d.getDate() === now.getDate()
-    );
-  });
+  // Only today's fixed daily classes — "today" in the timezone the client
+  // has chosen to see times in (TimeZonePicker), not just the device's.
+  const todayKey = dateKeyIn(new Date(), timeZone);
+  const todayClasses = allUpcomingClasses.filter(
+    (c) => dateKeyIn(new Date(c.datetime), timeZone) === todayKey,
+  );
 
   // Classes run for an hour (matches the Zoom meeting duration) — a class
   // is only "done" once that hour has actually elapsed, not the instant
@@ -396,10 +396,11 @@ const Profile = () => {
           with {c.trainer_ref?.name || "Fitness Zone Trainer"}
         </p>
         <p className="text-brand-blue/70 text-xs mb-4">
-          {new Date(c.datetime).toLocaleTimeString(undefined, {
-            hour: "2-digit",
+          {new Date(c.datetime).toLocaleTimeString("en-US", {
+            hour: "numeric",
             minute: "2-digit",
             hour12: true,
+            timeZone,
           })}
         </p>
         {isCancelled ? (
@@ -954,10 +955,11 @@ const Profile = () => {
                   TODAY'S CLASSES
                 </h2>
               </div>
-              <p className="text-brand-blue/50 text-xs mb-4">
+              <p className="text-brand-blue/50 text-xs mb-3">
                 Class times are the same every day — join links are added fresh
                 before each session.
               </p>
+              <TimeZonePicker align="start" className="mb-5" />
 
               {client?.status !== "active" ? (
                 <Card className="mb-12 border-brand-orange border-2 text-center max-w-lg">
@@ -1401,6 +1403,19 @@ const Profile = () => {
               )}
             </div>
           )}
+        </>
+      )}
+
+      {!loading && client && (
+        <>
+          <h2 className="font-display text-lg text-brand-blue mb-2 mt-12">
+            YOUR REVIEW
+          </h2>
+          <p className="text-brand-blue/70 text-sm mb-4">
+            Tell other women how Fitness Zone has helped you — approved
+            reviews appear on our Success Stories page.
+          </p>
+          <ReviewCard />
         </>
       )}
 

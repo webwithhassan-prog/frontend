@@ -7,6 +7,7 @@ import {
 } from "react";
 import api from "../services/api";
 import { CURRENCY_TO_COUNTRY } from "../utils/currencyToCountry";
+import { roundForCurrency } from "../utils/currencyRounding";
 
 const CurrencyContext = createContext();
 
@@ -145,22 +146,17 @@ export const CurrencyProvider = ({ children }) => {
   const format = (inrAmount) => {
     if (!inrAmount && inrAmount !== 0) return "";
     if (currency.code === "INR") {
-      return `₹${Math.round(inrAmount).toLocaleString("en-IN")}`;
+      return `₹${roundForCurrency(inrAmount, "INR").toLocaleString("en-IN")}`;
     }
     const raw = inrAmount * (rates[currency.code] || 1);
     if (raw <= 0) return `${currency.symbol}0`;
-    // Small amounts (e.g. a per-day estimate in a strong currency like GBP
-    // or EUR) get up to 2 decimals so the real cost shows instead of being
-    // rounded away to "0" or padded up to a misleading "1". Larger amounts
-    // stay whole numbers — no one wants "$23.47" on a plan total.
-    if (raw < 10) {
-      const converted = Math.round(raw * 100) / 100;
-      return `${currency.symbol}${converted.toLocaleString(undefined, {
-        maximumFractionDigits: 2,
-      })}`;
-    }
-    const converted = Math.round(raw);
-    return `${currency.symbol}${converted.toLocaleString()}`;
+    // Rounded per currency (utils/currencyRounding — the server uses the
+    // same rule): PKR prices to the nearest 10, others to whole units, and
+    // small amounts such as a per-day price keep up to 2 decimals.
+    const converted = roundForCurrency(raw, currency.code);
+    return `${currency.symbol}${converted.toLocaleString("en-US", {
+      maximumFractionDigits: 2,
+    })}`;
   };
 
   return (

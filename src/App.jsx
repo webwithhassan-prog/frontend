@@ -4,6 +4,7 @@ import { Toaster } from "react-hot-toast";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CurrencyProvider } from "./context/CurrencyContext";
 import { SettingsProvider } from "./context/SettingsContext";
+import { TimeZoneProvider } from "./context/TimeZoneContext";
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
 import OfferPopup from "./components/common/OfferPopup";
@@ -60,6 +61,7 @@ const Analytics = lazy(() => import("./pages/admin/Analytics"));
 const ManualPayments = lazy(() => import("./pages/admin/ManualPayments"));
 const ManualPaymentMethods = lazy(() => import("./pages/admin/ManualPaymentMethods"));
 const IssueReports = lazy(() => import("./pages/admin/IssueReports"));
+const AdminReviews = lazy(() => import("./pages/admin/Reviews"));
 
 const ClientLayout = lazy(() => import("./components/client/ClientLayout"));
 const Profile = lazy(() => import("./pages/client/Profile"));
@@ -361,6 +363,7 @@ function AppRoutes() {
           <Route path="manual-payment-methods" element={<ManualPaymentMethods />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="issues" element={<IssueReports />} />
+          <Route path="reviews" element={<AdminReviews />} />
           <Route path="analytics" element={<Analytics />} />
         </Route>
       </Routes>
@@ -374,6 +377,7 @@ function App() {
     <AuthProvider>
       <SettingsProvider>
       <CurrencyProvider>
+      <TimeZoneProvider>
       <Toaster
         position="top-center"
         toastOptions={{
@@ -394,6 +398,7 @@ function App() {
         }}
       />
       <AppRoutes />
+      </TimeZoneProvider>
       </CurrencyProvider>
       </SettingsProvider>
     </AuthProvider>

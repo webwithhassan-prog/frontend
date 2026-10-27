@@ -4,9 +4,12 @@ import { Link } from "react-router-dom";
 import api from "../../services/api";
 import Loader from "../../components/common/Loader";
 import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
+import { Star } from "lucide-react";
 
 const SuccessStories = () => {
   const [images, setImages] = useState([]);
+  // Reviews clients wrote from their dashboard, once approved by admin.
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,6 +24,10 @@ const SuccessStories = () => {
       }
     };
     fetchTestimonials();
+    api
+      .get("/reviews/public")
+      .then((res) => setReviews(res.data))
+      .catch((err) => console.error(err));
   }, []);
 
   return (
@@ -70,6 +77,49 @@ const SuccessStories = () => {
           </Link>
         </p>
       </div>
+
+      {reviews.length > 0 && (
+        <section aria-labelledby="member-reviews" className="mb-12">
+          <h2
+            id="member-reviews"
+            className="font-display text-xl md:text-2xl text-brand-blue text-center mb-6"
+          >
+            What our members say
+          </h2>
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {reviews.map((r) => (
+              <li
+                key={r._id}
+                className="bg-white border border-brand-blue-pale rounded-2xl shadow-sm p-5"
+              >
+                <p
+                  className="flex gap-0.5 mb-2"
+                  aria-label={`${r.rating} out of 5 stars`}
+                >
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Star
+                      key={n}
+                      size={16}
+                      aria-hidden="true"
+                      className={
+                        n <= r.rating
+                          ? "fill-brand-gold text-brand-gold"
+                          : "text-brand-blue-pale"
+                      }
+                    />
+                  ))}
+                </p>
+                <p className="text-brand-blue/85 leading-relaxed">
+                  “{r.text}”
+                </p>
+                <p className="text-sm font-semibold text-brand-blue mt-3">
+                  {r.display_name}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Nothing in place of an empty or unreachable list: a "no stories
           yet" message is what got this page reported as a soft 404. */}

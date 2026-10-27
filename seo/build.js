@@ -113,7 +113,7 @@ const getJson = async (path) => {
 };
 
 export const loadSiteData = async () => {
-  const [heroBanners, plans, dayPlans, timeSlots, trainers, ebooks, courses, settings] = await Promise.all([
+  const [heroBanners, plans, dayPlans, timeSlots, trainers, ebooks, courses, settings, reviews] = await Promise.all([
     getJson("/hero-banners/public"),
     getJson("/plans/public"),
     getJson("/day-plans/public"),
@@ -122,9 +122,11 @@ export const loadSiteData = async () => {
     getJson("/ebooks/public"),
     getJson("/courses/public"),
     getJson("/settings"),
+    getJson("/reviews/public"),
   ]);
   return {
     heroBanners: Array.isArray(heroBanners) ? heroBanners : [],
+    reviews: Array.isArray(reviews) ? reviews : [],
     plans: Array.isArray(plans) ? plans : [],
     dayPlans: Array.isArray(dayPlans) ? dayPlans : [],
     timeSlots: Array.isArray(timeSlots) ? timeSlots : [],
@@ -239,8 +241,14 @@ ${week.length ? `<h2>Weekly plan</h2>${ul(week.map((w) => `${w.day}: ${w.type}`)
       trainersFaqs,
     )}`,
 
-  "/success-stories": () =>
-    `<p>${esc(pageMeta["/success-stories"].description)}</p>
+  "/success-stories": (data) =>
+    `<p>${esc(pageMeta["/success-stories"].description)}</p>${
+      data.reviews.length
+        ? `<h2>What our members say</h2>${data.reviews
+            .map((r) => `<blockquote><p>${esc(r.text)}</p><p>— ${esc(r.display_name)} (${r.rating}/5)</p></blockquote>`)
+            .join("")}`
+        : ""
+    }
 <p>These weight loss success stories are real check-ins shared by Fitness Zone members — women following a customized diet plan built from their own home food, live online workout classes with female trainers, or both together.</p>
 <p>Diet plan members track their meals daily and check in with our team every week, so progress is followed, not guessed.</p>
 <p><a href="/online-diet-plan">How the diet plan works</a> · <a href="/online-workout-classes">Live workout classes</a> · <a href="/plans">Packages and prices</a></p>`,
