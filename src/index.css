@@ -86,3 +86,50 @@ body {
     opacity: 0;
   }
 }
+
+/* Homepage reviews ribbon (HomeReviews): each row is the list twice, so
+   moving it by half its width loops seamlessly. Transform-only, so the
+   browser animates it without any JavaScript. Pauses on hover, on keyboard
+   focus and with the pause button; edges fade out instead of cutting off. */
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.reviews-marquee {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
+.marquee-track {
+  animation: marquee-scroll var(--marquee-duration, 60s) linear infinite;
+}
+
+.marquee-track.marquee-reverse {
+  animation-direction: reverse;
+}
+
+.reviews-marquee:hover .marquee-track,
+.reviews-marquee:focus-within .marquee-track,
+.reviews-marquee[data-paused] .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Reduced motion: a still row people can swipe through instead. */
+@media (prefers-reduced-motion: reduce) {
+  .reviews-marquee {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .marquee-track {
+    animation: none;
+  }
+  .marquee-track > li[aria-hidden="true"] {
+    display: none;
+  }
+}

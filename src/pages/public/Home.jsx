@@ -18,6 +18,7 @@ import Card from "../../components/common/Card";
 import IconDraw from "../../components/common/IconDraw";
 import AnimatedCounter from "../../components/common/AnimatedCounter";
 import TestimonialsSlider from "../../components/common/TestimonialsSlider";
+import HomeReviews from "../../components/common/HomeReviews";
 import AchievementMarquee from "../../components/common/AchievementMarquee";
 import ComboPlans from "../../components/common/ComboPlans";
 import QuickLinks from "../../components/common/QuickLinks";
@@ -588,6 +589,8 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      <HomeReviews />
 
       <FaqSection />
 
