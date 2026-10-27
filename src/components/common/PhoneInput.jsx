@@ -29,8 +29,11 @@ const parseInternational = (text) => {
 };
 
 const parseValue = (value) => {
-  if (!value || !value.startsWith("+")) {
-    return { dial: DEFAULT_COUNTRY.dial, number: value || "" };
+  // Nothing yet: no country code until the visitor's country is known (or
+  // they pick one) — better an empty box than a wrong guess.
+  if (!value) return { dial: "", number: "" };
+  if (!value.startsWith("+")) {
+    return { dial: DEFAULT_COUNTRY.dial, number: value };
   }
   const digits = value.slice(1);
   const match = BY_DIAL_LENGTH.find((c) => digits.startsWith(c.dial));
@@ -89,6 +92,10 @@ const PhoneInput = ({
   // The national "0" in front of local numbers (0300 1234567) isn't part
   // of the international number — "+92 0300…" isn't a real number.
   const emit = (nextDial, nextNumber) => {
+    if (!nextDial) {
+      onChange("");
+      return;
+    }
     const local = nextNumber.replace(/^0+/, "");
     onChange(local ? `+${nextDial}${local}` : "");
   };
@@ -170,6 +177,9 @@ const PhoneInput = ({
             value={dial}
             onChange={handleDialChange}
             aria-label="Country dial code"
+            placeholder="code"
+            required={required}
+            title="Your country code, e.g. 92 for Pakistan or 44 for the UK"
             className="w-11 text-brand-blue text-sm py-3 pl-0.5 focus:outline-none bg-transparent"
           />
         </div>
