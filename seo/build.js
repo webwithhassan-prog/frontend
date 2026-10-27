@@ -23,7 +23,7 @@ import { dietitian, reviewers } from "../src/content/team.js";
 import { trainersIntro, trainersSections, trainersLinks, trainersFaqs } from "../src/content/trainers.js";
 import { optimizeCloudinaryUrl } from "../src/utils/cloudinary.js";
 
-const API = process.env.SEO_API_URL || "https://fitnesszone-backend.onrender.com/api";
+const API = process.env.SEO_API_URL || "https://fitnesszone-api.onrender.com/api";
 
 const ORG = {
   name: "Fitness Zone",
