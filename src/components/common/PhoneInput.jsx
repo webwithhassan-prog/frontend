@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Search, Globe } from "lucide-react";
 import { COUNTRY_CODES, flagEmoji } from "../../utils/countryCodes";
 import WhatsAppIcon from "./WhatsAppIcon";
+import { useCurrency } from "../../context/CurrencyContext";
 
 const DEFAULT_COUNTRY = COUNTRY_CODES.find((c) => c.iso === "PK");
 
@@ -15,6 +16,18 @@ const BY_DIAL_LENGTH = [...COUNTRY_CODES].sort(
 // number, for pre-filling the picker when editing an existing phone number.
 // Legacy numbers saved without a leading "+" (from before this component
 // existed) fall back to the default country with the raw digits as-is.
+// "+44 7700 900123" / "0044…" → { dial: "44", number: "7700900123" }, or
+// null when the text doesn't start with an international prefix.
+const parseInternational = (text) => {
+  const trimmed = text.trim();
+  if (!/^(\+|00)/.test(trimmed)) return null;
+  const digits = trimmed.replace(/\D/g, "").replace(/^00/, "");
+  const match = BY_DIAL_LENGTH.find((c) => digits.startsWith(c.dial));
+  return match
+    ? { dial: match.dial, number: digits.slice(match.dial.length) }
+    : null;
+};
+
 const parseValue = (value) => {
   if (!value || !value.startsWith("+")) {
     return { dial: DEFAULT_COUNTRY.dial, number: value || "" };
@@ -55,28 +68,62 @@ const PhoneInput = ({
   const initial = parseValue(value);
   const [dial, setDial] = useState(initial.dial);
   const [number, setNumber] = useState(initial.number);
+  // Once the person picks or types a country code themselves, it's theirs.
+  const dialTouched = useRef(!!value);
+
+  // Start from the visitor's own country (their "Where are you joining
+  // from?" answer, else the detected one) instead of always Pakistan —
+  // people abroad didn't notice +92 and typed their local number after it.
+  const { choice, countryCode } = useCurrency() || {};
+  const visitorCountry = choice?.country || countryCode;
+  useEffect(() => {
+    if (dialTouched.current || !visitorCountry) return;
+    const c = COUNTRY_CODES.find((x) => x.iso === visitorCountry);
+    if (c) setDial(c.dial);
+  }, [visitorCountry]);
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
 
   const matchedCountry = COUNTRY_CODES.find((c) => c.dial === dial);
 
+  // The national "0" in front of local numbers (0300 1234567) isn't part
+  // of the international number — "+92 0300…" isn't a real number.
   const emit = (nextDial, nextNumber) => {
-    onChange(nextNumber ? `+${nextDial}${nextNumber}` : "");
+    const local = nextNumber.replace(/^0+/, "");
+    onChange(local ? `+${nextDial}${local}` : "");
   };
 
   const handleDialChange = (e) => {
+    dialTouched.current = true;
     const digits = e.target.value.replace(/\D/g, "").slice(0, 4);
     setDial(digits);
     emit(digits, number);
   };
 
   const handleNumberChange = (e) => {
+    // A full international number typed or pasted here sets the country too.
+    const intl = parseInternational(e.target.value);
+    if (intl) {
+      dialTouched.current = true;
+      setDial(intl.dial);
+      setNumber(intl.number);
+      emit(intl.dial, intl.number);
+      return;
+    }
+    // Still typing an international prefix ("+4" on the way to "+44"):
+    // keep the "+" in the box until a country code is recognised.
+    if (/^\s*(\+|00)/.test(e.target.value)) {
+      setNumber(e.target.value.replace(/[^\d+]/g, ""));
+      onChange("");
+      return;
+    }
     const digits = e.target.value.replace(/\D/g, "");
     setNumber(digits);
     emit(dial, digits);
   };
 
   const handleSelectCountry = (c) => {
+    dialTouched.current = true;
     setDial(c.dial);
     setIsOpen(false);
     setQuery("");
@@ -102,7 +149,7 @@ const PhoneInput = ({
             onClick={() => setIsOpen(!isOpen)}
             title="Choose country"
             aria-label={`Choose country, current: ${matchedCountry ? matchedCountry.name : "unknown"}`}
-            className="flex items-center text-brand-blue/60 hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+            className="flex items-center gap-0.5 min-h-[44px] px-1 text-brand-blue/70 hover:text-brand-orange transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
           >
             {matchedCountry ? (
               <span className="text-base leading-none">
@@ -112,7 +159,7 @@ const PhoneInput = ({
               <Globe size={15} />
             )}
             <ChevronDown
-              size={12}
+              size={14}
               className={`ml-0.5 transition-transform ${isOpen ? "rotate-180" : ""}`}
             />
           </button>
@@ -123,12 +170,13 @@ const PhoneInput = ({
             value={dial}
             onChange={handleDialChange}
             aria-label="Country dial code"
-            className="w-9 text-brand-blue text-sm py-3 pl-0.5 focus:outline-none bg-transparent"
+            className="w-11 text-brand-blue text-sm py-3 pl-0.5 focus:outline-none bg-transparent"
           />
         </div>
         <input
           type="tel"
-          inputMode="numeric"
+          inputMode="tel"
+          autoComplete="tel-national"
           placeholder={placeholder}
           value={number}
           onChange={handleNumberChange}
