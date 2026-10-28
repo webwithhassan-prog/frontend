@@ -19,6 +19,7 @@ import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import FormImageActions from "../../components/client/FormImageActions";
 import ReviewCard from "../../components/client/ReviewCard";
+import DashboardQuickLinks from "../../components/client/DashboardQuickLinks";
 import TimeZonePicker from "../../components/common/TimeZonePicker";
 import { useTimeZone } from "../../context/TimeZoneContext";
 import { dateKeyIn } from "../../utils/timezones";
@@ -569,6 +570,17 @@ const Profile = () => {
             </motion.div>
           )}
 
+          <DashboardQuickLinks
+            hasWorkout={hasWorkout}
+            hasDietplan={hasDietplan}
+            onboardingPending={hasDietplan && !client?.onboarding_completed}
+            dietitianWhatsapp={
+              hasDietplan && settings.whatsapp_dietician
+                ? `https://wa.me/${settings.whatsapp_dietician}`
+                : null
+            }
+          />
+
           {/* Services — compact tiles, two per row on phones. The whole
               tile is the button: it jumps to that section, or to the
               matching package when the service isn't active. */}
@@ -751,7 +763,10 @@ const Profile = () => {
               above the weekly check-in: both go to the dietitian. */}
           {hasDietplan && !client?.onboarding_completed && (
             <>
-              <h2 className="font-display text-lg text-brand-blue mb-2 mt-12">
+              <h2
+                id="onboarding-form"
+                className="font-display text-lg text-brand-blue mb-2 mt-12 scroll-mt-24"
+              >
                 DAY 1 — ONBOARDING FORM
               </h2>
               <p className="text-brand-blue/70 text-sm mb-6">
@@ -1409,7 +1424,10 @@ const Profile = () => {
 
       {!loading && client && (
         <>
-          <h2 className="font-display text-lg text-brand-blue mb-2 mt-12">
+          <h2
+            id="your-review"
+            className="font-display text-lg text-brand-blue mb-2 mt-12 scroll-mt-24"
+          >
             YOUR REVIEW
           </h2>
           <p className="text-brand-blue/70 text-sm mb-4">
