@@ -8,6 +8,7 @@ import {
 import api from "../services/api";
 import { CURRENCY_TO_COUNTRY } from "../utils/currencyToCountry";
 import { roundForCurrency } from "../utils/currencyRounding";
+import { choiceFor, deviceTimeZone } from "../utils/timezones";
 
 const CurrencyContext = createContext();
 
@@ -137,9 +138,19 @@ export const CurrencyProvider = ({ children }) => {
   }, [ready]);
 
   // Which country's local (manual) payment methods to show.
-  const paymentCountry = choice
-    ? choice.country
-    : (CURRENCY_TO_COUNTRY[currency.code] ?? null);
+  // Their own answer first; when that answer has no single country
+  // (Europe / "another country"), the detected country — so a Pakistani
+  // client who picked USD still sees JazzCash/Easypaisa.
+  const paymentCountry =
+    choice?.country ||
+    countryCode ||
+    (CURRENCY_TO_COUNTRY[currency.code] ?? null);
+
+  // Best guess at the visitor's country for things like the phone field's
+  // country code: their answer, else detection, else their device's own
+  // timezone (instant, and works even when detection fails).
+  const visitorCountry =
+    choice?.country || countryCode || choiceFor(deviceTimeZone())?.iso || null;
 
   // Every price in the app is stored/entered in INR — this converts to
   // whichever currency is currently selected for display only.
@@ -171,6 +182,7 @@ export const CurrencyProvider = ({ children }) => {
         choice,
         chooseCountry,
         paymentCountry,
+        visitorCountry,
         requestCountryChoice,
         promptOpen,
         setPromptOpen,

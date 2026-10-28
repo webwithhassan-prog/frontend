@@ -77,8 +77,7 @@ const PhoneInput = ({
   // Start from the visitor's own country (their "Where are you joining
   // from?" answer, else the detected one) instead of always Pakistan —
   // people abroad didn't notice +92 and typed their local number after it.
-  const { choice, countryCode } = useCurrency() || {};
-  const visitorCountry = choice?.country || countryCode;
+  const { visitorCountry } = useCurrency() || {};
   useEffect(() => {
     if (dialTouched.current || !visitorCountry) return;
     const c = COUNTRY_CODES.find((x) => x.iso === visitorCountry);

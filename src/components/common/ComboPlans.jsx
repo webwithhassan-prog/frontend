@@ -6,6 +6,7 @@ import api from "../../services/api";
 import Card from "./Card";
 import Button from "./Button";
 import ClassTimesLink from "./ClassTimesLink";
+import LocalPaymentOptions from "./LocalPaymentOptions";
 import CardSlider from "./CardSlider";
 import CardRow from "./CardRow";
 import CurrencySwitcher from "./CurrencySwitcher";
@@ -327,6 +328,8 @@ const ComboPlans = () => {
             />
           </>
         )}
+
+        <LocalPaymentOptions hidden={manualMethods.length > 0} className="mt-6" />
 
         {/* Onward to every package — Dietplan-only and Home Workouts-only
             live on the packages page, not here. */}

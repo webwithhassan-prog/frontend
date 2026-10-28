@@ -510,10 +510,248 @@ const Profile = () => {
             </Card>
           )}
 
-          {/* Day 1 Onboarding — shown once for new clients with a dietplan */}
+          {/* Header */}
+          <motion.div
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-gradient-to-r from-brand-blue to-brand-blue-light rounded-3xl px-6 py-6 mb-8 shadow-md"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div>
+              <p className="text-white/50 text-xs font-semibold tracking-wide mb-1">
+                WELCOME BACK
+              </p>
+              <h1 className="font-display text-2xl text-white">
+                Hi, {client?.name}!
+              </h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <span
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold uppercase ${statusColors[client?.status]}`}
+              >
+                {client?.status}
+              </span>
+              <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-white/15 text-white">
+                {client?.days_remaining} days left
+              </span>
+            </div>
+          </motion.div>
+
+          {/* Dietplan renewal notification */}
+          {hasDietplan && client?.dietplan_notification_pending && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8"
+            >
+              <Card className="border-brand-orange border-2 bg-brand-orange/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="inline-flex shrink-0 bg-brand-orange/10 rounded-full p-2.5">
+                    <UtensilsCrossed size={20} className="text-brand-orange" />
+                  </div>
+                  <div>
+                    <p className="font-display text-brand-blue text-sm mb-1">
+                      TIME FOR YOUR NEW DIETPLAN
+                    </p>
+                    <p className="text-brand-blue/70 text-sm">
+                      It's been 15 days — your next diet plan is ready. Our team
+                      will reach out to you on WhatsApp shortly.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={handleDismissDietplanNotification}
+                  className="sm:shrink-0"
+                >
+                  Got it
+                </Button>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Services — compact tiles, two per row on phones. The whole
+              tile is the button: it jumps to that section, or to the
+              matching package when the service isn't active. */}
+          <h2 className="font-display text-sm text-brand-blue/60 tracking-wide mb-3">
+            YOUR SERVICES
+          </h2>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-10">
+            {services.map((s) => {
+              const overdue = s.key === "followup" && hasDietplan && checkinDue;
+              const open = () => {
+                if (!s.active) {
+                  if (s.key === "ebooks") navigate("/ebooks");
+                  else navigate(`/plans?type=${s.upgradeType}`);
+                  return;
+                }
+                const target = {
+                  workout: "upcoming-classes",
+                  ebooks: "my-ebooks",
+                  followup: "weekly-progress",
+                  dailylog: "daily-log",
+                }[s.key];
+                document
+                  .getElementById(target)
+                  ?.scrollIntoView({ behavior: "smooth" });
+              };
+              return (
+                <button
+                  key={s.key}
+                  type="button"
+                  onClick={open}
+                  className={`flex flex-col text-left rounded-xl bg-white shadow-sm hover:shadow-md p-3 sm:p-4 transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
+                    overdue
+                      ? "border-2 border-brand-orange"
+                      : "border border-brand-blue-pale"
+                  }`}
+                >
+                  {s.active ? (
+                    <span className="self-start inline-flex items-center gap-1 text-[10px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                      <Check size={10} /> ACTIVE
+                    </span>
+                  ) : (
+                    <span className="self-start inline-flex items-center gap-1 text-[10px] font-bold text-brand-blue-light bg-brand-blue-pale px-2 py-0.5 rounded-full">
+                      <Lock size={10} /> LOCKED
+                    </span>
+                  )}
+                  <span className="font-display text-brand-blue text-xs sm:text-sm leading-snug mt-2">
+                    {s.label}
+                  </span>
+                  <span className="flex-1 text-brand-blue/70 text-[11px] sm:text-xs leading-snug mt-1">
+                    {s.subtitle}
+                  </span>
+                  <span className="inline-flex items-center gap-1 mt-2.5 text-[11px] sm:text-xs font-semibold text-brand-blue-light">
+                    {s.active ? "View" : "Unlock"} <ArrowRight size={12} />
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Upcoming classes + daily log + recorded gallery — workout clients only */}
+          {hasWorkout && (
+            <>
+              <div id="upcoming-classes" className="mb-1">
+                <h2 className="font-display text-lg text-brand-blue">
+                  TODAY'S CLASSES
+                </h2>
+              </div>
+              <p className="text-brand-blue/50 text-xs mb-3">
+                Class times are the same every day — join links are added fresh
+                before each session.
+              </p>
+              <TimeZonePicker align="start" className="mb-5" />
+
+              {client?.status !== "active" ? (
+                <Card className="mb-12 border-brand-orange border-2 text-center max-w-lg">
+                  <p className="text-brand-blue font-semibold mb-4">
+                    Your Workout package isn't active — reactivate it to see and
+                    join your home workouts.
+                  </p>
+                  <Button onClick={() => navigate("/plans?type=workout")}>
+                    View Workout Packages
+                  </Button>
+                </Card>
+              ) : classesToShow.length === 0 ? (
+                <p className="text-brand-blue/70 mb-12">
+                  No classes scheduled for today.
+                </p>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                    {classesToShow.map(renderClassCard)}
+                  </div>
+                  {allClassesDone && (
+                    <p className="text-brand-blue/70 text-sm mb-12">
+                      That's all for today — new schedule drops tomorrow!
+                    </p>
+                  )}
+                  {!allClassesDone && <div className="mb-12" />}
+                </>
+              )}
+
+              {/* Recorded Gallery — weekly session recordings, separate
+                  from the Recorded Content below */}
+              <h2 className="font-display text-lg text-brand-blue mb-4">
+                RECORDED GALLERY
+              </h2>
+              {recordedGallery.length === 0 ? (
+                <p className="text-brand-blue/70 mb-12">
+                  No session recordings yet — check back after this week's
+                  classes.
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                  {recordedGallery.map((item) => (
+                    <Card key={item._id}>
+                      <div className="aspect-video mb-3 rounded-lg overflow-hidden bg-brand-blue-pale">
+                        <YouTubeFacade
+                          link={item.youtube_link}
+                          title={item.title}
+                          className="w-full h-full"
+                        />
+                      </div>
+                      <h3 className="font-display text-brand-blue text-sm mb-1">
+                        {item.title}
+                      </h3>
+                      <p className="text-brand-blue/50 text-xs">
+                        Added {new Date(item.createdAt).toLocaleDateString()}
+                      </p>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Today's Log — open to every client, active or not, and
+              regardless of purchased service (steps/water tracking isn't
+              tied to a package). */}
+          <h2
+            id="daily-log"
+            className="font-display text-lg text-brand-blue mb-4"
+          >
+            TODAY'S LOG
+          </h2>
+          <Card className="max-w-md mb-12">
+            <form onSubmit={handleSaveDailyLog} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="flex items-center gap-1 text-sm text-brand-blue/60 mb-1">
+                    <Footprints size={14} /> Steps
+                  </label>
+                  <input
+                    type="number"
+                    value={dailySteps}
+                    onChange={(e) => setDailySteps(e.target.value)}
+                    className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                  />
+                </div>
+                <div>
+                  <label className="flex items-center gap-1 text-sm text-brand-blue/60 mb-1">
+                    <Droplet size={14} /> Water (liters)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={dailyWater}
+                    onChange={(e) => setDailyWater(e.target.value)}
+                    className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                  />
+                </div>
+              </div>
+              {dailyLogMessage && (
+                <p className="text-brand-blue text-sm">{dailyLogMessage}</p>
+              )}
+              <Button type="submit">Save Today's Log</Button>
+            </form>
+          </Card>
+
+          {/* Day 1 Onboarding — shown once for new dietplan clients, right
+              above the weekly check-in: both go to the dietitian. */}
           {hasDietplan && !client?.onboarding_completed && (
             <>
-              <h2 className="font-display text-lg text-brand-blue mb-2">
+              <h2 className="font-display text-lg text-brand-blue mb-2 mt-12">
                 DAY 1 — ONBOARDING FORM
               </h2>
               <p className="text-brand-blue/70 text-sm mb-6">
@@ -828,243 +1066,6 @@ const Profile = () => {
               </AnimatePresence>
             </>
           )}
-
-          {/* Header */}
-          <motion.div
-            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-gradient-to-r from-brand-blue to-brand-blue-light rounded-3xl px-6 py-6 mb-8 shadow-md"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <div>
-              <p className="text-white/50 text-xs font-semibold tracking-wide mb-1">
-                WELCOME BACK
-              </p>
-              <h1 className="font-display text-2xl text-white">
-                Hi, {client?.name}!
-              </h1>
-            </div>
-            <div className="flex items-center gap-3">
-              <span
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold uppercase ${statusColors[client?.status]}`}
-              >
-                {client?.status}
-              </span>
-              <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-white/15 text-white">
-                {client?.days_remaining} days left
-              </span>
-            </div>
-          </motion.div>
-
-          {/* Dietplan renewal notification */}
-          {hasDietplan && client?.dietplan_notification_pending && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-8"
-            >
-              <Card className="border-brand-orange border-2 bg-brand-orange/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="inline-flex shrink-0 bg-brand-orange/10 rounded-full p-2.5">
-                    <UtensilsCrossed size={20} className="text-brand-orange" />
-                  </div>
-                  <div>
-                    <p className="font-display text-brand-blue text-sm mb-1">
-                      TIME FOR YOUR NEW DIETPLAN
-                    </p>
-                    <p className="text-brand-blue/70 text-sm">
-                      It's been 15 days — your next diet plan is ready. Our team
-                      will reach out to you on WhatsApp shortly.
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  onClick={handleDismissDietplanNotification}
-                  className="sm:shrink-0"
-                >
-                  Got it
-                </Button>
-              </Card>
-            </motion.div>
-          )}
-
-          {/* Services — compact tiles, two per row on phones. The whole
-              tile is the button: it jumps to that section, or to the
-              matching package when the service isn't active. */}
-          <h2 className="font-display text-sm text-brand-blue/60 tracking-wide mb-3">
-            YOUR SERVICES
-          </h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-10">
-            {services.map((s) => {
-              const overdue = s.key === "followup" && hasDietplan && checkinDue;
-              const open = () => {
-                if (!s.active) {
-                  if (s.key === "ebooks") navigate("/ebooks");
-                  else navigate(`/plans?type=${s.upgradeType}`);
-                  return;
-                }
-                const target = {
-                  workout: "upcoming-classes",
-                  ebooks: "my-ebooks",
-                  followup: "weekly-progress",
-                  dailylog: "daily-log",
-                }[s.key];
-                document
-                  .getElementById(target)
-                  ?.scrollIntoView({ behavior: "smooth" });
-              };
-              return (
-                <button
-                  key={s.key}
-                  type="button"
-                  onClick={open}
-                  className={`flex flex-col text-left rounded-xl bg-white shadow-sm hover:shadow-md p-3 sm:p-4 transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
-                    overdue
-                      ? "border-2 border-brand-orange"
-                      : "border border-brand-blue-pale"
-                  }`}
-                >
-                  {s.active ? (
-                    <span className="self-start inline-flex items-center gap-1 text-[10px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
-                      <Check size={10} /> ACTIVE
-                    </span>
-                  ) : (
-                    <span className="self-start inline-flex items-center gap-1 text-[10px] font-bold text-brand-blue-light bg-brand-blue-pale px-2 py-0.5 rounded-full">
-                      <Lock size={10} /> LOCKED
-                    </span>
-                  )}
-                  <span className="font-display text-brand-blue text-xs sm:text-sm leading-snug mt-2">
-                    {s.label}
-                  </span>
-                  <span className="flex-1 text-brand-blue/70 text-[11px] sm:text-xs leading-snug mt-1">
-                    {s.subtitle}
-                  </span>
-                  <span className="inline-flex items-center gap-1 mt-2.5 text-[11px] sm:text-xs font-semibold text-brand-blue-light">
-                    {s.active ? "View" : "Unlock"} <ArrowRight size={12} />
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Upcoming classes + daily log + recorded gallery — workout clients only */}
-          {hasWorkout && (
-            <>
-              <div id="upcoming-classes" className="mb-1">
-                <h2 className="font-display text-lg text-brand-blue">
-                  TODAY'S CLASSES
-                </h2>
-              </div>
-              <p className="text-brand-blue/50 text-xs mb-3">
-                Class times are the same every day — join links are added fresh
-                before each session.
-              </p>
-              <TimeZonePicker align="start" className="mb-5" />
-
-              {client?.status !== "active" ? (
-                <Card className="mb-12 border-brand-orange border-2 text-center max-w-lg">
-                  <p className="text-brand-blue font-semibold mb-4">
-                    Your Workout package isn't active — reactivate it to see and
-                    join your home workouts.
-                  </p>
-                  <Button onClick={() => navigate("/plans?type=workout")}>
-                    View Workout Packages
-                  </Button>
-                </Card>
-              ) : classesToShow.length === 0 ? (
-                <p className="text-brand-blue/70 mb-12">
-                  No classes scheduled for today.
-                </p>
-              ) : (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                    {classesToShow.map(renderClassCard)}
-                  </div>
-                  {allClassesDone && (
-                    <p className="text-brand-blue/70 text-sm mb-12">
-                      That's all for today — new schedule drops tomorrow!
-                    </p>
-                  )}
-                  {!allClassesDone && <div className="mb-12" />}
-                </>
-              )}
-
-              {/* Recorded Gallery — weekly session recordings, separate
-                  from the Recorded Content below */}
-              <h2 className="font-display text-lg text-brand-blue mb-4">
-                RECORDED GALLERY
-              </h2>
-              {recordedGallery.length === 0 ? (
-                <p className="text-brand-blue/70 mb-12">
-                  No session recordings yet — check back after this week's
-                  classes.
-                </p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                  {recordedGallery.map((item) => (
-                    <Card key={item._id}>
-                      <div className="aspect-video mb-3 rounded-lg overflow-hidden bg-brand-blue-pale">
-                        <YouTubeFacade
-                          link={item.youtube_link}
-                          title={item.title}
-                          className="w-full h-full"
-                        />
-                      </div>
-                      <h3 className="font-display text-brand-blue text-sm mb-1">
-                        {item.title}
-                      </h3>
-                      <p className="text-brand-blue/50 text-xs">
-                        Added {new Date(item.createdAt).toLocaleDateString()}
-                      </p>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-
-          {/* Today's Log — open to every client, active or not, and
-              regardless of purchased service (steps/water tracking isn't
-              tied to a package). */}
-          <h2
-            id="daily-log"
-            className="font-display text-lg text-brand-blue mb-4"
-          >
-            TODAY'S LOG
-          </h2>
-          <Card className="max-w-md mb-12">
-            <form onSubmit={handleSaveDailyLog} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="flex items-center gap-1 text-sm text-brand-blue/60 mb-1">
-                    <Footprints size={14} /> Steps
-                  </label>
-                  <input
-                    type="number"
-                    value={dailySteps}
-                    onChange={(e) => setDailySteps(e.target.value)}
-                    className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                  />
-                </div>
-                <div>
-                  <label className="flex items-center gap-1 text-sm text-brand-blue/60 mb-1">
-                    <Droplet size={14} /> Water (liters)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={dailyWater}
-                    onChange={(e) => setDailyWater(e.target.value)}
-                    className="w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                  />
-                </div>
-              </div>
-              {dailyLogMessage && (
-                <p className="text-brand-blue text-sm">{dailyLogMessage}</p>
-              )}
-              <Button type="submit">Save Today's Log</Button>
-            </form>
-          </Card>
 
           {/* Weekly Progress form — dietplan clients only */}
           {hasDietplan && (
