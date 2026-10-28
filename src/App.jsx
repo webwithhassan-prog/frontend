@@ -8,7 +8,6 @@ import { TimeZoneProvider } from "./context/TimeZoneContext";
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
 import OfferPopup from "./components/common/OfferPopup";
-import CountryPrompt from "./components/common/CountryPrompt";
 import FloatingActions from "./components/common/FloatingActions";
 import Loader from "./components/common/Loader";
 import usePageTracking from "./hooks/usePageTracking";
@@ -96,7 +95,6 @@ function PublicLayout({ children }) {
       </main>
       <Footer />
       <OfferPopup />
-      <CountryPrompt />
       <FloatingActions />
     </>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Check, Tag, X } from "lucide-react";
 import toast from "react-hot-toast";
@@ -18,8 +18,6 @@ import ManualPaymentPanel from "../../components/common/ManualPaymentPanel";
 import CardSlider from "../../components/common/CardSlider";
 import CardRow from "../../components/common/CardRow";
 import ClassTimesLink from "../../components/common/ClassTimesLink";
-import LocalPaymentOptions from "../../components/common/LocalPaymentOptions";
-import { useAskCountryWhenVisible } from "../../hooks/useAskCountryWhenVisible";
 import { durationsForType, popularFlags } from "../../utils/packages";
 
 const packageLabels = {
@@ -66,8 +64,6 @@ const Plans = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { format, currency, paymentCountry } = useCurrency();
   // Asks "Where are you joining from?" once these prices are on screen.
-  const pricingRef = useRef(null);
-  useAskCountryWhenVisible(pricingRef);
 
   const [couponInput, setCouponInput] = useState("");
   const [couponChecking, setCouponChecking] = useState(false);
@@ -423,7 +419,7 @@ const Plans = () => {
 
   return (
     <>
-      <section ref={pricingRef} className="max-w-5xl mx-auto px-6 pt-20 pb-4">
+      <section className="max-w-5xl mx-auto px-6 pt-20 pb-4">
         <motion.h1
           className="font-display text-3xl md:text-4xl text-brand-blue text-center mb-4"
           initial={{ opacity: 0, y: 20 }}
@@ -560,7 +556,6 @@ const Plans = () => {
             />
           )}
         </Modal>
-        <LocalPaymentOptions hidden={manualMethods.length > 0} className="mt-8" />
       </section>
       {/* Answers to what people ask before choosing a package — also in
           the page's FAQPage structured data (seo/build.js). */}

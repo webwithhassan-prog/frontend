@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState, useRef } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Check } from "lucide-react";
 import toast from "react-hot-toast";
@@ -6,7 +6,6 @@ import api from "../../services/api";
 import Card from "./Card";
 import Button from "./Button";
 import ClassTimesLink from "./ClassTimesLink";
-import LocalPaymentOptions from "./LocalPaymentOptions";
 import CardSlider from "./CardSlider";
 import CardRow from "./CardRow";
 import CurrencySwitcher from "./CurrencySwitcher";
@@ -15,7 +14,6 @@ import Modal from "../admin/Modal";
 // country list for the phone field, which the homepage doesn't need up front.
 const ManualPaymentPanel = lazy(() => import("./ManualPaymentPanel"));
 import { useCurrency } from "../../context/CurrencyContext";
-import { useAskCountryWhenVisible } from "../../hooks/useAskCountryWhenVisible";
 import { getErrorMessage } from "../../utils/errors";
 import { trackEvent } from "../../utils/analytics";
 import { popularFlags } from "../../utils/packages";
@@ -197,8 +195,6 @@ const ComboPlans = () => {
   const [manualPayFor, setManualPayFor] = useState(null); // { plan, amountLabel }
   const { format, currency, paymentCountry } = useCurrency();
   // Asks "Where are you joining from?" once these prices are on screen.
-  const pricingRef = useRef(null);
-  useAskCountryWhenVisible(pricingRef);
 
   useEffect(() => {
     api
@@ -267,7 +263,7 @@ const ComboPlans = () => {
   });
 
   return (
-    <section ref={pricingRef} className="py-16 md:py-20">
+    <section className="py-16 md:py-20">
       <div className="max-w-6xl mx-auto px-6">
         <motion.h2
           className="font-display text-2xl md:text-3xl text-brand-blue text-center mb-3"
@@ -328,8 +324,6 @@ const ComboPlans = () => {
             />
           </>
         )}
-
-        <LocalPaymentOptions hidden={manualMethods.length > 0} className="mt-6" />
 
         {/* Onward to every package — Dietplan-only and Home Workouts-only
             live on the packages page, not here. */}

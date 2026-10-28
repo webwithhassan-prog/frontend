@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { BookOpen, GraduationCap, Video } from "lucide-react";
 import api from "../../services/api";
@@ -11,7 +11,6 @@ import { getErrorMessage } from "../../utils/errors";
 import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
 import Modal from "../../components/admin/Modal";
 import ManualPaymentPanel from "../../components/common/ManualPaymentPanel";
-import { useAskCountryWhenVisible } from "../../hooks/useAskCountryWhenVisible";
 
 const EBooks = () => {
   const [ebooks, setEbooks] = useState([]);
@@ -21,8 +20,6 @@ const EBooks = () => {
   const [error, setError] = useState("");
   const { format, currency, paymentCountry } = useCurrency();
   // Asks "Where are you joining from?" once these prices are on screen.
-  const pricingRef = useRef(null);
-  useAskCountryWhenVisible(pricingRef);
   const [manualMethods, setManualMethods] = useState([]);
   const [manualPayFor, setManualPayFor] = useState(null); // { type, id, itemLabel, amountLabel }
 
@@ -101,7 +98,7 @@ const EBooks = () => {
   };
 
   return (
-    <section ref={pricingRef} className="max-w-5xl mx-auto px-6 py-20">
+    <section className="max-w-5xl mx-auto px-6 py-20">
       <motion.h1
         className="font-display text-3xl md:text-4xl text-brand-blue text-center mb-4"
         initial={{ opacity: 0, y: 20 }}

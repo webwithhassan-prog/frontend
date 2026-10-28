@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useState,
-  useEffect,
-} from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import api from "../services/api";
 import { CURRENCY_TO_COUNTRY } from "../utils/currencyToCountry";
 import { roundForCurrency } from "../utils/currencyRounding";
@@ -14,11 +8,9 @@ const CurrencyContext = createContext();
 
 const DEFAULT_CURRENCY = { code: "INR", symbol: "₹", rate: 1 };
 
-// The visitor's own answer to "Where are you joining from?" (asked the first
-// time they reach prices — see CountryPrompt). IP/timezone detection guesses
-// wrong for VPN users and travellers, and sometimes fails outright, so once
-// a visitor has answered, their answer wins over detection on every visit.
-// { country: ISO code or null, currency: code }.
+// The currency a visitor picked from the currency dropdown (plus the
+// country it implies). Once they've picked one, it wins over location
+// detection on every visit. { country: ISO code or null, currency: code }.
 const CHOICE_KEY = "country_choice";
 
 const readChoice = () => {
@@ -54,8 +46,6 @@ export const CurrencyProvider = ({ children }) => {
   const [rates, setRates] = useState({ INR: 1 });
   const [countryCode, setCountryCode] = useState(null);
   const [choice, setChoice] = useState(readChoice);
-  const [ready, setReady] = useState(false);
-  const [promptOpen, setPromptOpen] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -81,9 +71,8 @@ export const CurrencyProvider = ({ children }) => {
       if (detectResult.status === "fulfilled") {
         setCountryCode(detectResult.value.data.country_code || null);
       }
-      setReady(true);
 
-      // 1. The visitor's own answer, if they've given one.
+      // 1. The currency they picked themselves, if any.
       const saved = readChoice();
       const chosen =
         saved && fetchedCurrencies.find((c) => c.code === saved.currency);
@@ -92,8 +81,7 @@ export const CurrencyProvider = ({ children }) => {
         return;
       }
 
-      // 2. Otherwise the detected location's currency — a starting guess,
-      //    which the visitor confirms or corrects when asked.
+      // 2. Otherwise the detected location's currency.
       if (
         detectResult.status === "fulfilled" &&
         detectResult.value.data.show_conversion
@@ -107,21 +95,8 @@ export const CurrencyProvider = ({ children }) => {
     init();
   }, []);
 
-  // The visitor answered "Where are you joining from?".
-  const chooseCountry = useCallback(
-    ({ country, currency: code }) => {
-      const match = currencies.find((c) => c.code === code);
-      if (match) setCurrencyState(match);
-      const next = { country: country ?? null, currency: code };
-      setChoice(next);
-      saveChoice(next);
-      setPromptOpen(false);
-    },
-    [currencies],
-  );
-
-  // A pick from the currency dropdown counts as an answer too, with the
-  // country taken from the currency where there's a clear match.
+  // A pick from the currency dropdown, with the country taken from the
+  // currency where there's a clear match.
   const setCurrency = (code) => {
     const match = currencies.find((c) => c.code === code);
     if (!match) return;
@@ -131,23 +106,17 @@ export const CurrencyProvider = ({ children }) => {
     saveChoice(next);
   };
 
-  // Called by the pricing sections when a visitor reaches them: asks once,
-  // only after currencies have loaded, and never again once answered.
-  const requestCountryChoice = useCallback(() => {
-    if (ready && !readChoice()) setPromptOpen(true);
-  }, [ready]);
-
   // Which country's local (manual) payment methods to show.
-  // Their own answer first; when that answer has no single country
-  // (Europe / "another country"), the detected country — so a Pakistani
-  // client who picked USD still sees JazzCash/Easypaisa.
+  // The country of the currency they picked; when that has no single
+  // country (EUR, USD…), the detected country — so a Pakistani client who
+  // picked USD still sees JazzCash/Easypaisa.
   const paymentCountry =
     choice?.country ||
     countryCode ||
     (CURRENCY_TO_COUNTRY[currency.code] ?? null);
 
   // Best guess at the visitor's country for things like the phone field's
-  // country code: their answer, else detection, else their device's own
+  // country code: their pick, else detection, else their device's own
   // timezone (instant, and works even when detection fails).
   const visitorCountry =
     choice?.country || countryCode || choiceFor(deviceTimeZone())?.iso || null;
@@ -180,12 +149,8 @@ export const CurrencyProvider = ({ children }) => {
         rates,
         countryCode,
         choice,
-        chooseCountry,
         paymentCountry,
         visitorCountry,
-        requestCountryChoice,
-        promptOpen,
-        setPromptOpen,
       }}
     >
       {children}
