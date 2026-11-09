@@ -17,6 +17,16 @@ export const AuthProvider = ({ children }) => {
       setRole(storedRole);
     }
     setLoading(false);
+
+    // Keep every open tab in step: logging out (or in) in one tab used to
+    // leave the others showing a dashboard that couldn't load anything.
+    const onStorage = (e) => {
+      if (e.key !== "token" && e.key !== "role" && e.key !== null) return;
+      const token = localStorage.getItem("token");
+      setRole(token ? localStorage.getItem("role") : null);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   const login = (token, userRole, clientId) => {

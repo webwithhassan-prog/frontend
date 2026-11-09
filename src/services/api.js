@@ -24,8 +24,15 @@ api.interceptors.response.use(
   (err) => {
     const status = err.response?.status;
     const hadToken = !!localStorage.getItem("token");
+    // On a dashboard page with no token left (logged out in another tab),
+    // every action failed with "Not authorized, no token" and the page
+    // stayed put — send them to log in instead.
+    const onDashboard = /^\/(client|admin)(\/|$)/.test(window.location.pathname);
 
-    if (hadToken && (status === 401 || err.response?.data?.banned)) {
+    if (
+      (hadToken || onDashboard) &&
+      (status === 401 || err.response?.data?.banned)
+    ) {
       localStorage.removeItem("token");
       localStorage.removeItem("role");
       localStorage.removeItem("client_id");
