@@ -73,6 +73,7 @@ const PlanCard = ({
   onPayWithCard,
   onManualPay,
 }) => {
+  const { payLabel } = useCurrency();
   const total = priceOf(plan);
   const hasDiscount = total < plan.price;
   const discountPercent = hasDiscount
@@ -157,7 +158,7 @@ const PlanCard = ({
         variant={isPopular ? "primary" : "secondary"}
         className="w-full"
       >
-        {checkingOut ? "Redirecting..." : "Pay with Card"}
+        {checkingOut ? "Redirecting..." : payLabel}
       </Button>
       <p className="text-[10px] text-brand-blue-light text-center mt-1">
         Instant Access

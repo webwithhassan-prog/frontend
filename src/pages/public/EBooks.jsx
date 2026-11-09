@@ -18,7 +18,7 @@ const EBooks = () => {
   const [loading, setLoading] = useState(true);
   const [buyingId, setBuyingId] = useState(null);
   const [error, setError] = useState("");
-  const { format, currency, paymentCountry } = useCurrency();
+  const { format, currency, paymentCountry, payLabel } = useCurrency();
   // Asks "Where are you joining from?" once these prices are on screen.
   const [manualMethods, setManualMethods] = useState([]);
   const [manualPayFor, setManualPayFor] = useState(null); // { type, id, itemLabel, amountLabel }
@@ -173,7 +173,7 @@ const EBooks = () => {
                       >
                         {buyingId === ebook._id
                           ? "Redirecting..."
-                          : "Pay with Card"}
+                          : payLabel}
                       </Button>
                       <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
                         Instant Access
@@ -262,7 +262,7 @@ const EBooks = () => {
                       >
                         {buyingId === course._id
                           ? "Redirecting..."
-                          : "Pay with Card"}
+                          : payLabel}
                       </Button>
                       <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
                         Instant Access

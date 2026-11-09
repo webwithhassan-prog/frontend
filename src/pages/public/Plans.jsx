@@ -62,7 +62,7 @@ const Plans = () => {
   const [checkingOutDuration, setCheckingOutDuration] = useState(null);
   const [error, setError] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
-  const { format, currency, paymentCountry } = useCurrency();
+  const { format, currency, paymentCountry, payLabel } = useCurrency();
   // Asks "Where are you joining from?" once these prices are on screen.
 
   const [couponInput, setCouponInput] = useState("");
@@ -388,9 +388,7 @@ const Plans = () => {
           variant={isPopular ? "primary" : "secondary"}
           className="w-full"
         >
-          {checkingOutDuration === duration
-            ? "Redirecting..."
-            : "Pay with Card"}
+          {checkingOutDuration === duration ? "Redirecting..." : payLabel}
         </Button>
         <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
           Instant Access

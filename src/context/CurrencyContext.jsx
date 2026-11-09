@@ -121,6 +121,9 @@ export const CurrencyProvider = ({ children }) => {
   const visitorCountry =
     choice?.country || countryCode || choiceFor(deviceTimeZone())?.iso || null;
 
+  // Rupee prices are charged in rupees, where Stripe also offers UPI.
+  const payLabel = currency.code === "INR" ? "Pay with Card or UPI" : "Pay with Card";
+
   // Every price in the app is stored/entered in INR — this converts to
   // whichever currency is currently selected for display only.
   const format = (inrAmount) => {
@@ -151,6 +154,7 @@ export const CurrencyProvider = ({ children }) => {
         choice,
         paymentCountry,
         visitorCountry,
+        payLabel,
       }}
     >
       {children}
