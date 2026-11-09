@@ -22,11 +22,34 @@ const PaymentSuccess = () => {
     trackEvent("payment_success_viewed", "/payment-success");
 
     if (!sessionId) return;
-    api
-      .get(`/payments/session/${sessionId}`)
-      .then((res) => setReceipt(res.data))
-      .catch(() => setReceipt(null))
-      .finally(() => setLoading(false));
+    // The payment can still be confirming when Stripe sends the visitor
+    // here (UPI confirms a few seconds after checkout, and our webhook may
+    // not have run yet), so keep asking for a while before giving up.
+    let cancelled = false;
+    let timer;
+    const load = (attempt) =>
+      api
+        .get(`/payments/session/${sessionId}`)
+        .then((res) => {
+          if (cancelled) return;
+          setReceipt(res.data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          if (cancelled) return;
+          const pending = [400, 404].includes(err.response?.status);
+          if (pending && attempt < 15) {
+            timer = setTimeout(() => load(attempt + 1), 3000);
+            return;
+          }
+          setReceipt(null);
+          setLoading(false);
+        });
+    load(1);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [sessionId]);
 
   const handleSaveReceipt = async () => {
