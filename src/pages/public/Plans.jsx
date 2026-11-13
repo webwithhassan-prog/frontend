@@ -26,11 +26,21 @@ const packageLabels = {
   combo: "Both Combined",
 };
 
+// Both Combined first: it's what most clients buy, and the page used to
+// open on Dietplan — a client meaning to buy the combo paid for a 90-day
+// Dietplan card that looked almost the same.
 const packageTabs = [
+  { type: "combo", label: "Both Combined" },
   { type: "dietplan", label: "Dietplan" },
   { type: "workout", label: "Home Workouts" },
-  { type: "combo", label: "Both Combined" },
 ];
+
+// Says on every card exactly what it includes.
+const cardTypeLabels = {
+  combo: "Dietplan + Home Workouts",
+  dietplan: "Dietplan only",
+  workout: "Home Workouts only",
+};
 
 const featuresByType = {
   dietplan: [
@@ -73,7 +83,7 @@ const Plans = () => {
   const [manualMethods, setManualMethods] = useState([]);
   const [manualPayFor, setManualPayFor] = useState(null); // { duration, planIds, amountLabel }
 
-  const selectedType = searchParams.get("type") || "dietplan";
+  const selectedType = searchParams.get("type") || "combo";
 
   // Which manual (non-Stripe) payment methods, if any, apply to the
   // country tied to the client's currently-selected currency — entirely
@@ -279,9 +289,14 @@ const Plans = () => {
         {/* Badge shares the title row so every card is the same height —
             in the phone slider the arrows and dots stay put. */}
         <div className="flex items-center justify-between gap-2 mb-1">
-          <h3 className="font-display text-brand-blue text-lg">
-            {duration} Days
-          </h3>
+          <div>
+            <h3 className="font-display text-brand-blue text-lg">
+              {duration} Days
+            </h3>
+            <p className="text-xs font-semibold text-brand-orange">
+              {cardTypeLabels[selectedType]}
+            </p>
+          </div>
           {isPopular && (
             <span className="bg-brand-orange text-white text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap">
               MOST POPULAR
