@@ -370,6 +370,17 @@ const CouponsTab = () => {
     }
   };
 
+  const resetUses = async (coupon) => {
+    if (!window.confirm(`Reset ${coupon.code}'s uses to 0? Clients can use it again up to its limit.`)) return;
+    try {
+      await api.put(`/coupons/${coupon._id}`, { used_count: 0 });
+      toast.success(`${coupon.code} can be used again`);
+      fetchData();
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to reset uses"));
+    }
+  };
+
   const toggleActive = async (coupon) => {
     try {
       await api.put(`/coupons/${coupon._id}`, { active: !coupon.active });
@@ -453,6 +464,14 @@ const CouponsTab = () => {
                   >
                     {coupon.active ? "Turn Off" : "Turn On"}
                   </button>
+                  {coupon.used_count > 0 && (
+                    <button
+                      onClick={() => resetUses(coupon)}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-full bg-brand-blue-pale text-brand-blue hover:bg-brand-blue-pale/70 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                    >
+                      Reset uses
+                    </button>
+                  )}
                   <button
                     onClick={() => openEditModal(coupon)}
                     className="text-brand-blue-light hover:text-brand-blue rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"

@@ -170,10 +170,12 @@ const Plans = () => {
     setCouponChecking(true);
     setCouponError("");
     try {
-      const typePlans = plans.filter((p) =>
-        selectedType === "combo"
-          ? p.product_type === "dietplan" || p.product_type === "workout"
-          : p.product_type === selectedType,
+      // Exactly the plans this tab sells — on Both Combined that's the
+      // combo plan where one exists, not the separate Dietplan/Workout
+      // plans (checking those let a Dietplan-only coupon say "applied"
+      // while the combo price didn't change).
+      const typePlans = durationsForType(plans, selectedType).flatMap(
+        getSelectionForDuration,
       );
       const res = await api.post("/coupons/validate", {
         code,
