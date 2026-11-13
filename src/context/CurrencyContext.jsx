@@ -107,11 +107,13 @@ export const CurrencyProvider = ({ children }) => {
   };
 
   // Which country's local (manual) payment methods to show.
-  // The country of the currency they picked; when that has no single
-  // country (EUR, USD…), the detected country — so a Pakistani client who
-  // picked USD still sees JazzCash/Easypaisa.
+  // The country of the currency they picked (INR → India, so rupee prices
+  // never come with Pakistani bank options); when that has no single
+  // country (EUR), the detected country. Picks saved before INR mapped to
+  // India stored country null — the currency lookup covers those.
   const paymentCountry =
     choice?.country ||
+    CURRENCY_TO_COUNTRY[choice?.currency] ||
     countryCode ||
     (CURRENCY_TO_COUNTRY[currency.code] ?? null);
 
