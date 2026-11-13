@@ -13,6 +13,7 @@ const appliesToLabels = {
   all: "All Packages",
   dietplan: "Dietplan Only",
   workout: "Workout Sessions Only",
+  combo: "Both Combined Only",
 };
 
 const emptyOfferForm = {
@@ -259,6 +260,7 @@ const OffersTab = () => {
               <option value="all">All Packages</option>
               <option value="dietplan">Dietplan Only</option>
               <option value="workout">Workout Sessions Only</option>
+              <option value="combo">Both Combined Only</option>
             </select>
           </div>
           <p className="text-xs text-brand-blue-light -mt-2">
@@ -530,6 +532,7 @@ const CouponsTab = () => {
               <option value="all">All Packages</option>
               <option value="dietplan">Dietplan Only</option>
               <option value="workout">Workout Sessions Only</option>
+              <option value="combo">Both Combined Only</option>
             </select>
           </div>
 
