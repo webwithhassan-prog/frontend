@@ -45,6 +45,7 @@ export const CurrencyProvider = ({ children }) => {
   const [currencies, setCurrencies] = useState([DEFAULT_CURRENCY]);
   const [rates, setRates] = useState({ INR: 1 });
   const [countryCode, setCountryCode] = useState(null);
+  const [detectDone, setDetectDone] = useState(false);
   const [choice, setChoice] = useState(readChoice);
 
   useEffect(() => {
@@ -71,6 +72,7 @@ export const CurrencyProvider = ({ children }) => {
       if (detectResult.status === "fulfilled") {
         setCountryCode(detectResult.value.data.country_code || null);
       }
+      setDetectDone(true);
 
       // 1. The currency they picked themselves, if any.
       const saved = readChoice();
@@ -111,11 +113,14 @@ export const CurrencyProvider = ({ children }) => {
   // never come with Pakistani bank options); when that has no single
   // country (EUR), the detected country. Picks saved before INR mapped to
   // India stored country null — the currency lookup covers those.
+  // Until detection has finished the starting INR currency says nothing
+  // about the visitor, so no country yet (it used to fetch India's methods
+  // for everyone first).
   const paymentCountry =
     choice?.country ||
     CURRENCY_TO_COUNTRY[choice?.currency] ||
     countryCode ||
-    (CURRENCY_TO_COUNTRY[currency.code] ?? null);
+    (detectDone ? (CURRENCY_TO_COUNTRY[currency.code] ?? null) : null);
 
   // Best guess at the visitor's country for things like the phone field's
   // country code: their pick, else detection, else their device's own

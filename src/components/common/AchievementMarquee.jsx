@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Footprints, Droplet } from "lucide-react";
-import axios from "axios";
+import api from "../../services/api";
 
 const AchievementMarquee = () => {
   const [entries, setEntries] = useState([]);
@@ -10,9 +10,7 @@ const AchievementMarquee = () => {
   useEffect(() => {
     const fetchEntries = async () => {
       try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/daily-logs/recent-activity`,
-        );
+        const res = await api.get("/daily-logs/recent-activity");
         setEntries(res.data);
       } catch (err) {
         console.error(err);
