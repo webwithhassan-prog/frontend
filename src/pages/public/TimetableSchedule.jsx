@@ -54,6 +54,7 @@ const slotInstant = (hour, minute) => {
 const TimetableSchedule = () => {
   const [dayPlans, setDayPlans] = useState([]);
   const [timeSlots, setTimeSlots] = useState([]);
+  const [pickedDay, setPickedDay] = useState(null);
   const [loading, setLoading] = useState(true);
   // Shared with the client dashboard (TimeZoneContext): the device's zone
   // unless the visitor picked another.
@@ -98,12 +99,31 @@ const TimetableSchedule = () => {
       timeZone: selectedZone.timeZone,
     });
 
+  const todayIndex = (() => {
+    try {
+      const weekday = new Intl.DateTimeFormat("en-US", {
+        weekday: "long",
+        timeZone: selectedZone.timeZone,
+      }).format(new Date());
+      return dayNames.indexOf(weekday);
+    } catch {
+      return new Date().getDay();
+    }
+  })();
+
+  // Classes differ by day (Sundays only have one or two), so the list
+  // shows one day at a time — today unless the visitor picks another.
+  const shownDay = pickedDay ?? todayIndex;
+  const runsOn = (slot, day) =>
+    (slot.days?.length ? slot.days : [0, 1, 2, 3, 4, 5, 6]).includes(day);
+  const daySlots = timeSlots.filter((slot) => runsOn(slot, shownDay));
+
   // Ordered by the visitor's own clock (a slot can cross midnight once
   // converted), then bucketed into parts of their day.
   const slotsByPeriod = periods
     .map((period) => ({
       ...period,
-      slots: timeSlots
+      slots: daySlots
         .map((slot) => {
           const local = localParts(slot.hour, slot.minute);
           return {
@@ -116,18 +136,6 @@ const TimetableSchedule = () => {
         .sort((a, b) => a.sortKey - b.sortKey),
     }))
     .filter((period) => period.slots.length > 0);
-
-  const todayIndex = (() => {
-    try {
-      const weekday = new Intl.DateTimeFormat("en-US", {
-        weekday: "long",
-        timeZone: selectedZone.timeZone,
-      }).format(new Date());
-      return dayNames.indexOf(weekday);
-    } catch {
-      return new Date().getDay();
-    }
-  })();
 
   const weekPlans = dayDisplayOrder
     .map((dayIndex) => ({
@@ -148,7 +156,7 @@ const TimetableSchedule = () => {
       </motion.h1>
       <p className="text-brand-blue/70 text-center text-sm md:text-base mb-4">
         Live online workout classes for women, led by female trainers. The same
-        slots run every day — join from your Profile once active.{" "}
+        classes run Monday to Saturday, with fewer on Sunday — join from your Profile once active.{" "}
         <Link
           to="/online-workout-classes"
           className="font-semibold text-brand-blue-light hover:text-brand-orange rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
@@ -165,16 +173,47 @@ const TimetableSchedule = () => {
         <>
           <div className="flex items-baseline justify-between gap-3 mb-3">
             <h2 className="font-display text-sm text-brand-orange tracking-wide">
-              DAILY TIME SLOTS
+              CLASS TIMES
             </h2>
             <p className="text-xs text-brand-blue/50">
               {selectedZone.label} time
             </p>
           </div>
+          <div
+            className="flex gap-1.5 overflow-x-auto no-scrollbar mb-3 -mx-1 px-1"
+            role="tablist"
+            aria-label="Day of the week"
+          >
+            {dayDisplayOrder.map((d) => {
+              const count = timeSlots.filter((slot) => runsOn(slot, d)).length;
+              const active = d === shownDay;
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setPickedDay(d)}
+                  className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
+                    active
+                      ? "bg-brand-blue text-white border-brand-blue"
+                      : "bg-white text-brand-blue border-brand-blue-pale hover:border-brand-blue"
+                  }`}
+                >
+                  {d === todayIndex ? "Today" : dayNames[d].slice(0, 3)}
+                  <span className={active ? "text-white/70" : "text-brand-blue/50"}>
+                    {" "}· {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
           <Card padding="p-3.5 sm:p-5" className="mb-8 md:mb-10">
             {slotsByPeriod.length === 0 ? (
               <p className="text-brand-blue/50 text-sm py-2">
-                No time slots scheduled yet.
+                {timeSlots.length === 0
+                  ? "No time slots scheduled yet."
+                  : `No classes on ${dayNames[shownDay]}.`}
               </p>
             ) : (
               <div className="space-y-3 sm:space-y-4">

@@ -366,14 +366,15 @@ const Profile = () => {
   // its start time passes, since it's still live and joinable until then.
   const CLASS_DURATION_MS = 60 * 60 * 1000;
 
-  const classesToShow = todayClasses;
-  const allClassesDone =
-    classesToShow.length > 0 &&
-    classesToShow.every(
-      (c) =>
-        c.status === "cancelled" ||
-        new Date(c.datetime).getTime() + CLASS_DURATION_MS < Date.now(),
-    );
+  // Only classes still to come (or live now) — a client opening the
+  // dashboard on a Sunday saw every weekday time, finished ones included.
+  const isFinished = (c) =>
+    new Date(c.datetime).getTime() + CLASS_DURATION_MS < Date.now();
+  const classesToShow = todayClasses.filter((c) => !isFinished(c));
+  const finishedToday = todayClasses.filter(
+    (c) => isFinished(c) && c.status !== "cancelled",
+  ).length;
+  const allClassesDone = todayClasses.length > 0 && classesToShow.length === 0;
 
   const renderClassCard = (c) => {
     const isCancelled = c.status === "cancelled";
@@ -442,8 +443,8 @@ const Profile = () => {
     {
       key: "workout",
       label: "DAILY CLASSES",
-      subtitle: todayClasses[0]
-        ? `Next: ${todayClasses[0].type} today`
+      subtitle: classesToShow[0]
+        ? `Next: ${classesToShow[0].type} today`
         : "No class today",
       active: client?.status === "active" && client?.has_workout,
       upgradeType: "workout",
@@ -649,8 +650,8 @@ const Profile = () => {
                 </h2>
               </div>
               <p className="text-brand-blue/50 text-xs mb-3">
-                Class times are the same every day — join links are added fresh
-                before each session.
+                Monday to Saturday share the same times; Sunday has fewer classes.
+                Each class has its own join button.
               </p>
               <TimeZonePicker align="start" className="mb-5" />
 
@@ -664,6 +665,11 @@ const Profile = () => {
                     View Workout Packages
                   </Button>
                 </Card>
+              ) : allClassesDone ? (
+                <p className="text-brand-blue/70 mb-12">
+                  That's all for today — {finishedToday} class
+                  {finishedToday === 1 ? "" : "es"} done. See you tomorrow!
+                </p>
               ) : classesToShow.length === 0 ? (
                 <p className="text-brand-blue/70 mb-12">
                   No classes scheduled for today.
@@ -673,12 +679,11 @@ const Profile = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                     {classesToShow.map(renderClassCard)}
                   </div>
-                  {allClassesDone && (
-                    <p className="text-brand-blue/70 text-sm mb-12">
-                      That's all for today — new schedule drops tomorrow!
-                    </p>
-                  )}
-                  {!allClassesDone && <div className="mb-12" />}
+                  <p className="text-brand-blue/50 text-xs mb-12">
+                    {finishedToday > 0
+                      ? `${finishedToday} class${finishedToday === 1 ? "" : "es"} already finished earlier today.`
+                      : ""}
+                  </p>
                 </>
               )}
 

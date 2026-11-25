@@ -16,6 +16,26 @@ import api from "../../services/api";
 import Button from "../../components/common/Button";
 import Loader from "../../components/common/Loader";
 import Modal from "../../components/admin/Modal";
+
+// Monday first, as the admin reads the week; values are JS day numbers
+// (0 = Sunday), matching the server.
+const WEEKDAYS = [
+  { value: 1, short: "Mon" },
+  { value: 2, short: "Tue" },
+  { value: 3, short: "Wed" },
+  { value: 4, short: "Thu" },
+  { value: 5, short: "Fri" },
+  { value: 6, short: "Sat" },
+  { value: 0, short: "Sun" },
+];
+const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
+const daysOf = (slot) => (slot.days?.length ? slot.days : ALL_DAYS);
+const daysLabel = (days) =>
+  days.length === 7
+    ? "Every day"
+    : days.length === 6 && !days.includes(0)
+      ? "Mon–Sat"
+      : WEEKDAYS.filter((d) => days.includes(d.value)).map((d) => d.short).join(", ");
 import { getErrorMessage } from "../../utils/errors";
 
 const dayNames = [
@@ -161,7 +181,8 @@ const Timetable = () => {
   // Daily Time Slot handlers
   const openAddSlotModal = () => {
     setEditingSlotId(null);
-    setSlotForm({ trainer_ref: "", time: "" });
+    // New classes usually run Monday to Saturday; Sunday has its own few.
+    setSlotForm({ trainer_ref: "", time: "", days: [1, 2, 3, 4, 5, 6], class_zoom_url: "" });
     setIsSlotModalOpen(true);
   };
 
@@ -170,6 +191,8 @@ const Timetable = () => {
     setSlotForm({
       trainer_ref: slot.trainer_ref?._id || slot.trainer_ref,
       time: `${String(slot.hour).padStart(2, "0")}:${String(slot.minute).padStart(2, "0")}`,
+      days: [...daysOf(slot)],
+      class_zoom_url: slot.class_zoom_url || "",
     });
     setIsSlotModalOpen(true);
   };
@@ -178,26 +201,53 @@ const Timetable = () => {
     setSlotForm({ ...slotForm, [e.target.name]: e.target.value });
   };
 
+  const toggleSlotDay = (day) =>
+    setSlotForm((f) => ({
+      ...f,
+      days: f.days.includes(day) ? f.days.filter((d) => d !== day) : [...f.days, day],
+    }));
+
+  const [savingSlot, setSavingSlot] = useState(false);
   const handleSaveSlot = async (e) => {
     e.preventDefault();
+    if (slotForm.days.length === 0) {
+      toast.error("Tick at least one day for this class");
+      return;
+    }
     const [hour, minute] = slotForm.time.split(":").map(Number);
     const payload = {
       trainer_ref: slotForm.trainer_ref,
       hour,
       minute,
+      days: slotForm.days,
+      class_zoom_url: slotForm.class_zoom_url.trim(),
     };
-    if (editingSlotId) {
-      await api.put(`/time-slots/${editingSlotId}`, payload);
-    } else {
-      await api.post("/time-slots", payload);
+    setSavingSlot(true);
+    try {
+      if (editingSlotId) {
+        await api.put(`/time-slots/${editingSlotId}`, payload);
+      } else {
+        await api.post("/time-slots", payload);
+      }
+      toast.success("Saved — upcoming classes updated");
+      setIsSlotModalOpen(false);
+      fetchData();
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Couldn't save this time slot"));
+    } finally {
+      setSavingSlot(false);
     }
-    setIsSlotModalOpen(false);
-    fetchData();
   };
 
-  const handleDeleteSlot = async (id) => {
-    await api.delete(`/time-slots/${id}`);
-    fetchData();
+  const handleDeleteSlot = async (slot) => {
+    if (!window.confirm(`Delete the ${formatTime(slot.hour, slot.minute)} class (${slot.trainer_ref?.name || "trainer"})? Its upcoming sessions are removed too.`)) return;
+    try {
+      await api.delete(`/time-slots/${slot._id}`);
+      toast.success("Time slot removed");
+      fetchData();
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Couldn't delete this time slot"));
+    }
   };
 
   const handleRegenerate = async () => {
@@ -520,7 +570,7 @@ const Timetable = () => {
             </Button>
           </div>
           <p className="text-brand-blue-light text-sm mb-4">
-            The fixed trainer & time pattern, repeated every day.
+            Each class time, the days it runs on and its Zoom link. Untick Sunday on classes that don't run then.
           </p>
           <div className="mb-12">
             <StaticCard>
@@ -534,6 +584,8 @@ const Timetable = () => {
                     <tr className="text-left text-brand-blue border-b border-brand-blue-pale">
                       <th className="py-3 px-2">Trainer</th>
                       <th className="py-3 px-2">Time</th>
+                      <th className="py-3 px-2">Runs on</th>
+                      <th className="py-3 px-2">Zoom link</th>
                       <th className="py-3 px-2">Actions</th>
                     </tr>
                   </thead>
@@ -549,6 +601,16 @@ const Timetable = () => {
                         <td className="py-3 px-2 text-brand-blue-light">
                           {formatTime(slot.hour, slot.minute)}
                         </td>
+                        <td className="py-3 px-2 text-brand-blue-light">
+                          {daysLabel(daysOf(slot))}
+                        </td>
+                        <td className="py-3 px-2 text-brand-blue-light">
+                          {slot.class_zoom_url ? (
+                            <span className="text-green-700 font-medium">Own link</span>
+                          ) : (
+                            "Shared link"
+                          )}
+                        </td>
                         <td className="py-3 px-2">
                           <div className="flex gap-3">
                             <button
@@ -559,7 +621,7 @@ const Timetable = () => {
                               <Pencil size={16} />
                             </button>
                             <button
-                              onClick={() => handleDeleteSlot(slot._id)}
+                              onClick={() => handleDeleteSlot(slot)}
                               className="text-red-400 hover:text-red-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
                               aria-label={`Delete ${slot.trainer_ref?.name || "time slot"} slot`}
                             >
@@ -630,8 +692,47 @@ const Timetable = () => {
           <p className="text-xs text-brand-blue-light">
             Time is in Pakistan time.
           </p>
-          <Button type="submit" className="w-full">
-            {editingSlotId ? "Save Changes" : "Add Slot"}
+          <fieldset>
+            <legend className="text-sm font-medium text-brand-blue mb-2">
+              Runs on
+            </legend>
+            <div className="flex flex-wrap gap-2">
+              {WEEKDAYS.map((d) => {
+                const on = slotForm.days?.includes(d.value);
+                return (
+                  <button
+                    key={d.value}
+                    type="button"
+                    onClick={() => toggleSlotDay(d.value)}
+                    aria-pressed={on}
+                    className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
+                      on
+                        ? "bg-brand-blue text-white border-brand-blue"
+                        : "bg-white text-brand-blue border-brand-blue-pale hover:border-brand-blue"
+                    }`}
+                  >
+                    {d.short}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+          <div>
+            <label htmlFor="class_zoom_url" className="text-sm font-medium text-brand-blue">
+              This class's Zoom link
+            </label>
+            <input
+              id="class_zoom_url"
+              type="url"
+              name="class_zoom_url"
+              value={slotForm.class_zoom_url || ""}
+              onChange={handleSlotChange}
+              placeholder="https://us06web.zoom.us/j/… (leave empty to use the shared link)"
+              className="mt-1 w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
+            />
+          </div>
+          <Button type="submit" className="w-full" disabled={savingSlot}>
+            {savingSlot ? "Saving…" : editingSlotId ? "Save Changes" : "Add Slot"}
           </Button>
         </form>
       </Modal>
