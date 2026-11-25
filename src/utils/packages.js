@@ -66,3 +66,11 @@ export const featuresFor = (plans, type, days) => {
   )[0];
   return nearest ? nearest.features : DEFAULT_FEATURES[type] || [];
 };
+
+// A plan's offer discount, or 0 once a limited-time offer has ended — the
+// page may have been loaded before the end (and cached responses can lag
+// a few minutes), and checkout charges the full price after it.
+export const liveOfferPercent = (plan) =>
+  plan.discount_ends_at && new Date(plan.discount_ends_at) <= new Date()
+    ? 0
+    : plan.discount_percent || 0;

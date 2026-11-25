@@ -19,7 +19,8 @@ import ManualPaymentPanel from "../../components/common/ManualPaymentPanel";
 import CardSlider from "../../components/common/CardSlider";
 import CardRow from "../../components/common/CardRow";
 import ClassTimesLink from "../../components/common/ClassTimesLink";
-import { durationsForType, popularFlags, featuresFor } from "../../utils/packages";
+import { durationsForType, popularFlags, featuresFor, liveOfferPercent } from "../../utils/packages";
+import OfferCountdown from "../../components/common/OfferCountdown";
 
 const packageLabels = {
   dietplan: "Customized Dietplan",
@@ -60,6 +61,8 @@ const Plans = () => {
   const [manualMethods, setManualMethods] = useState([]);
   const [manualPayFor, setManualPayFor] = useState(null); // { duration, planIds, amountLabel }
   const [jumpTo, setJumpTo] = useState(null);
+  // Re-renders the prices the moment a limited-time offer ends.
+  const [, setOfferEnded] = useState(0);
   const [activeCard, setActiveCard] = useState(0);
 
   const selectedType = searchParams.get("type") || "combo";
@@ -185,7 +188,7 @@ const Plans = () => {
   };
 
   const getBestDiscountPercent = (plan) => {
-    const offerPercent = plan.discount_percent || 0;
+    const offerPercent = liveOfferPercent(plan);
     const couponPercent =
       appliedCoupon &&
       (appliedCoupon.applies_to === "all" ||
@@ -478,6 +481,8 @@ const Plans = () => {
         {error && (
           <p className="text-red-500 text-center text-sm mb-8">{error}</p>
         )}
+
+        <OfferCountdown className="mb-6" onEnded={() => setOfferEnded((n) => n + 1)} />
 
         {!loading && (
           <DurationChips

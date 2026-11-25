@@ -17,11 +17,12 @@ const ManualPaymentPanel = lazy(() => import("./ManualPaymentPanel"));
 import { useCurrency } from "../../context/CurrencyContext";
 import { getErrorMessage } from "../../utils/errors";
 import { trackEvent } from "../../utils/analytics";
-import { popularFlags, featuresFor } from "../../utils/packages";
+import { popularFlags, featuresFor, liveOfferPercent } from "../../utils/packages";
+import OfferCountdown from "./OfferCountdown";
 
 // Offer discount only — the coupon field lives on the packages page.
 const priceOf = (plan) =>
-  Math.round(plan.price * (1 - (plan.discount_percent || 0) / 100));
+  Math.round(plan.price * (1 - liveOfferPercent(plan) / 100));
 
 const FeatureColumn = ({ title, features, className }) => (
   <div className={className}>
@@ -168,6 +169,7 @@ const ComboPlans = () => {
   const [manualMethods, setManualMethods] = useState([]);
   const [manualPayFor, setManualPayFor] = useState(null); // { plan, amountLabel }
   const [jumpTo, setJumpTo] = useState(null);
+  const [, setOfferEnded] = useState(0);
   const [activeCard, setActiveCard] = useState(0);
   const { format, currency, paymentCountry } = useCurrency();
   // Asks "Where are you joining from?" once these prices are on screen.
@@ -254,6 +256,7 @@ const ComboPlans = () => {
         <div className="flex justify-center mb-4">
           <CurrencySwitcher />
         </div>
+        <OfferCountdown className="mb-6" onEnded={() => setOfferEnded((n) => n + 1)} />
         <DurationChips
           className="mb-8"
           durations={plans.map((p) => p.duration_days)}

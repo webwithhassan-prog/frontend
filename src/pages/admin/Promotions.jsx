@@ -16,6 +16,27 @@ const appliesToLabels = {
   combo: "Both Combined Only",
 };
 
+// <input type="datetime-local"> works in the admin's own local time.
+const toLocalInput = (iso) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+const fromLocalInput = (value) => (value ? new Date(value).toISOString() : null);
+
+// Live, Scheduled or Ended, from the switch and the offer's time window.
+const offerState = (offer, now = new Date()) => {
+  if (!offer.active) return { label: "Off", tone: "bg-gray-100 text-gray-500" };
+  if (offer.starts_at && new Date(offer.starts_at) > now)
+    return { label: "Scheduled", tone: "bg-blue-100 text-blue-700" };
+  if (offer.ends_at && new Date(offer.ends_at) <= now)
+    return { label: "Ended", tone: "bg-gray-100 text-gray-500" };
+  return { label: "Live", tone: "bg-green-100 text-green-700" };
+};
+const fmtWhen = (iso) =>
+  new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+
 const emptyOfferForm = {
   title: "",
   message: "",
@@ -24,6 +45,8 @@ const emptyOfferForm = {
   discount_percent: "",
   applies_to: "all",
   active: true,
+  starts_at: "",
+  ends_at: "",
 };
 
 const emptyCouponForm = {
@@ -72,6 +95,8 @@ const OffersTab = () => {
       discount_percent: offer.discount_percent || "",
       applies_to: offer.applies_to || "all",
       active: offer.active,
+      starts_at: toLocalInput(offer.starts_at),
+      ends_at: toLocalInput(offer.ends_at),
     });
     setEditingId(offer._id);
     setIsModalOpen(true);
@@ -84,9 +109,15 @@ const OffersTab = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (formData.starts_at && formData.ends_at && formData.ends_at <= formData.starts_at) {
+      toast.error("The end must be after the start");
+      return;
+    }
     const payload = {
       ...formData,
       discount_percent: Number(formData.discount_percent) || 0,
+      starts_at: fromLocalInput(formData.starts_at),
+      ends_at: fromLocalInput(formData.ends_at),
     };
     try {
       if (editingId) {
@@ -146,21 +177,23 @@ const OffersTab = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {offers.map((offer) => (
-            <Card key={offer._id} className={!offer.active ? "opacity-60" : ""}>
+            <Card key={offer._id} className={offerState(offer).label === "Live" ? "" : "opacity-60"}>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-brand-blue font-bold text-lg">
                   {offer.title}
                 </h3>
                 <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
-                    offer.active
-                      ? "bg-green-100 text-green-700"
-                      : "bg-gray-100 text-gray-500"
-                  }`}
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${offerState(offer).tone}`}
                 >
-                  {offer.active ? "Live" : "Off"}
+                  {offerState(offer).label}
                 </span>
               </div>
+              {(offer.starts_at || offer.ends_at) && (
+                <p className="text-xs text-brand-blue/70 mb-2">
+                  {offer.starts_at ? `From ${fmtWhen(offer.starts_at)}` : "From now"}
+                  {offer.ends_at ? ` until ${fmtWhen(offer.ends_at)}` : ", no end date"}
+                </p>
+              )}
               {offer.discount_percent > 0 && (
                 <span className="inline-block text-xs font-bold text-white bg-brand-orange px-2.5 py-1 rounded-full mb-2">
                   {offer.discount_percent}% OFF ·{" "}
@@ -267,6 +300,39 @@ const OffersTab = () => {
             Leave discount at 0 for an announcement-only popup. A discount
             here actually applies at checkout — it's not just text.
           </p>
+
+          <fieldset className="border border-brand-blue-pale rounded-lg p-3">
+            <legend className="px-1 text-sm font-medium text-brand-blue">
+              Limited time (optional)
+            </legend>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className="text-xs text-brand-blue">
+                Starts
+                <input
+                  type="datetime-local"
+                  name="starts_at"
+                  value={formData.starts_at}
+                  onChange={handleChange}
+                  className="mt-1 w-full border border-brand-blue-pale rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                />
+              </label>
+              <label className="text-xs text-brand-blue">
+                Ends
+                <input
+                  type="datetime-local"
+                  name="ends_at"
+                  value={formData.ends_at}
+                  onChange={handleChange}
+                  className="mt-1 w-full border border-brand-blue-pale rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                />
+              </label>
+            </div>
+            <p className="text-xs text-brand-blue-light mt-2">
+              In your local time. The discount starts and stops by itself; with
+              an end date, packages show a countdown. Leave both empty for an
+              offer that runs until you turn it off.
+            </p>
+          </fieldset>
 
           <label className="flex items-center gap-2 text-sm text-brand-blue">
             <input
