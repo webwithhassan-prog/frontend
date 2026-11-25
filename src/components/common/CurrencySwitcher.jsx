@@ -8,9 +8,13 @@ const CurrencySwitcher = ({ className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
 
-  const filtered = query.trim()
-    ? currencies.filter((c) =>
-        c.code.toLowerCase().includes(query.trim().toLowerCase()),
+  // Search by code or country ("myr", "malaysia").
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? currencies.filter(
+        (c) =>
+          c.code.toLowerCase().includes(q) ||
+          (c.label || "").toLowerCase().includes(q),
       )
     : currencies;
 
@@ -48,7 +52,7 @@ const CurrencySwitcher = ({ className = "" }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15 }}
-              className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-brand-blue-pale py-1.5 z-20"
+              className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-lg border border-brand-blue-pale py-1.5 z-20"
             >
               <div className="px-2 pb-1.5 mb-1 border-b border-brand-blue-pale/60 relative">
                 <Search
@@ -60,7 +64,7 @@ const CurrencySwitcher = ({ className = "" }) => {
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search currency..."
+                  placeholder="Search country or currency..."
                   className="w-full pl-6 pr-2 py-1.5 text-sm text-brand-blue outline-none"
                 />
               </div>
@@ -80,8 +84,15 @@ const CurrencySwitcher = ({ className = "" }) => {
                           : "text-brand-blue hover:bg-brand-blue-pale"
                       }`}
                     >
-                      <span>{c.code}</span>
-                      <span className="text-brand-blue/50">
+                      <span className="min-w-0">
+                        <span className="block">{c.code}</span>
+                        {c.label && (
+                          <span className="block text-xs font-normal text-brand-blue/50 truncate">
+                            {c.label}
+                          </span>
+                        )}
+                      </span>
+                      <span className="text-brand-blue/50 shrink-0 ml-2">
                         {c.symbol.trim()}
                       </span>
                     </button>

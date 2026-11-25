@@ -7,6 +7,7 @@ import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import { useSettings } from "../../context/SettingsContext";
 import { getErrorMessage } from "../../utils/errors";
+import CurrencySettings from "../../components/admin/CurrencySettings";
 
 const Settings = () => {
   const { settings, refetchSettings } = useSettings();
@@ -100,6 +101,7 @@ const Settings = () => {
       </motion.h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <CurrencySettings />
         <Card>
           <div className="flex items-center gap-3 mb-5">
             <div className="w-9 h-9 rounded-full bg-brand-blue-light/10 flex items-center justify-center shrink-0">
