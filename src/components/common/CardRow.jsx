@@ -16,6 +16,7 @@ const CardRow = ({
   renderItem,
   itemName = "item",
   className = "",
+  jumpTo = null,
 }) => {
   const trackRef = useRef(null);
   const [state, setState] = useState({
@@ -69,6 +70,11 @@ const CardRow = ({
       behavior: "smooth",
     });
   };
+
+  // Duration quick buttons: bring the chosen card into view.
+  useEffect(() => {
+    if (jumpTo) scrollToPosition(jumpTo.index);
+  }, [jumpTo]);
 
   const scrollByCard = (dir) => {
     const track = trackRef.current;

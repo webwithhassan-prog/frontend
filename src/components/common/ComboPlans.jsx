@@ -9,6 +9,7 @@ import ClassTimesLink from "./ClassTimesLink";
 import CardSlider from "./CardSlider";
 import CardRow from "./CardRow";
 import CurrencySwitcher from "./CurrencySwitcher";
+import DurationChips from "./DurationChips";
 import Modal from "../admin/Modal";
 // Loaded only when someone opens manual payment — it carries the full
 // country list for the phone field, which the homepage doesn't need up front.
@@ -16,27 +17,7 @@ const ManualPaymentPanel = lazy(() => import("./ManualPaymentPanel"));
 import { useCurrency } from "../../context/CurrencyContext";
 import { getErrorMessage } from "../../utils/errors";
 import { trackEvent } from "../../utils/analytics";
-import { popularFlags } from "../../utils/packages";
-
-// Same fallbacks the packages page uses when a plan has no features set.
-const defaultFeatures = {
-  dietplan: [
-    "Dietitian support",
-    "Home-based menu",
-    "Health-specific / preferred food only",
-    "Daily meal tracking",
-    "Weekly follow-up",
-    "Renews every 15 days",
-  ],
-  workout: [
-    "Flexible timings",
-    "50-55 minute sessions",
-    "6 days a week",
-    "Different workout daily",
-    "Female trainers",
-    "Recordings provided",
-  ],
-};
+import { popularFlags, featuresFor } from "../../utils/packages";
 
 // Offer discount only — the coupon field lives on the packages page.
 const priceOf = (plan) =>
@@ -134,20 +115,12 @@ const PlanCard = ({
       <div className="grid grid-cols-2 gap-3 my-3 flex-1">
         <FeatureColumn
           title="Dietplan"
-          features={
-            dietplan?.features?.length
-              ? dietplan.features
-              : defaultFeatures.dietplan
-          }
+          features={dietplan}
           className="pr-3 border-r border-brand-blue-pale"
         />
         <FeatureColumn
           title="Home Workouts"
-          features={
-            workout?.features?.length
-              ? workout.features
-              : defaultFeatures.workout
-          }
+          features={workout}
         />
       </div>
 
@@ -194,6 +167,8 @@ const ComboPlans = () => {
   const [checkingOutId, setCheckingOutId] = useState(null);
   const [manualMethods, setManualMethods] = useState([]);
   const [manualPayFor, setManualPayFor] = useState(null); // { plan, amountLabel }
+  const [jumpTo, setJumpTo] = useState(null);
+  const [activeCard, setActiveCard] = useState(0);
   const { format, currency, paymentCountry } = useCurrency();
   // Asks "Where are you joining from?" once these prices are on screen.
 
@@ -227,8 +202,6 @@ const ComboPlans = () => {
 
   if (loaded && plans.length === 0) return null;
 
-  const findPlan = (type, days) =>
-    allPlans.find((p) => p.product_type === type && p.duration_days === days);
   const popular = popularFlags(plans.map((p) => !!p.is_popular));
 
   const payWithCard = async (plan) => {
@@ -251,8 +224,8 @@ const ComboPlans = () => {
 
   const cardProps = (plan, i, inSlider) => ({
     plan,
-    dietplan: findPlan("dietplan", plan.duration_days),
-    workout: findPlan("workout", plan.duration_days),
+    dietplan: featuresFor(allPlans, "dietplan", plan.duration_days),
+    workout: featuresFor(allPlans, "workout", plan.duration_days),
     isPopular: popular[i],
     inSlider,
     format,
@@ -278,9 +251,18 @@ const ComboPlans = () => {
           Both combined — your meals and your workouts, planned together in one
           package.
         </p>
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center mb-4">
           <CurrencySwitcher />
         </div>
+        <DurationChips
+          className="mb-8"
+          durations={plans.map((p) => p.duration_days)}
+          activeIndex={activeCard}
+          onSelect={(i) => {
+            setActiveCard(i);
+            setJumpTo({ index: i });
+          }}
+        />
 
         {/* Tablet and up: a centred row, which becomes a slider with
             arrows once there are more packages than fit (3 on desktop,
@@ -302,6 +284,7 @@ const ComboPlans = () => {
         ) : (
           <>
             <CardRow
+              jumpTo={jumpTo}
               className="hidden md:block max-w-5xl mx-auto"
               items={plans}
               getKey={(plan) => plan._id}
@@ -314,6 +297,8 @@ const ComboPlans = () => {
 
             {/* Phones: one card at a time */}
             <CardSlider
+              jumpTo={jumpTo}
+              onIndexChange={setActiveCard}
               className="md:hidden"
               items={plans}
               getKey={(plan) => plan._id}

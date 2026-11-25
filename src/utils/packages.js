@@ -24,3 +24,45 @@ export const popularFlags = (flagged) => {
   const middle = flagged.length >= 3 ? Math.floor((flagged.length - 1) / 2) : -1;
   return flagged.map((_, i) => i === middle);
 };
+
+// Shown only until the admin sets features on a plan of that type.
+export const DEFAULT_FEATURES = {
+  dietplan: [
+    "Dietitian support",
+    "Home-based menu",
+    "Health-specific / preferred food only",
+    "Daily meal tracking",
+    "Weekly follow-up",
+    "Renews every 15 days",
+  ],
+  workout: [
+    "Flexible timings",
+    "50-55 minute sessions",
+    "6 days a week",
+    "Different workout daily",
+    "Female trainers",
+    "Recordings provided",
+  ],
+  combo: [
+    "Everything in Customized Dietplan",
+    "Everything in Home Workouts",
+    "One package, one price",
+  ],
+};
+
+// Features to list for a package type and length: that plan's own, else
+// the ones the admin set on the nearest length of the same type, else the
+// defaults. Durations without their own Dietplan / Home Workouts plan
+// (e.g. 30-day combos) used to show the defaults while the 90-day card
+// showed the admin's edited text ("50-55 minute zoom sessions").
+export const featuresFor = (plans, type, days) => {
+  const withFeatures = plans.filter(
+    (p) => p.product_type === type && p.features?.length,
+  );
+  const own = withFeatures.find((p) => p.duration_days === days);
+  if (own) return own.features;
+  const nearest = [...withFeatures].sort(
+    (a, b) => Math.abs(a.duration_days - days) - Math.abs(b.duration_days - days),
+  )[0];
+  return nearest ? nearest.features : DEFAULT_FEATURES[type] || [];
+};

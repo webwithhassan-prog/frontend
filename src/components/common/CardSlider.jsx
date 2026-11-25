@@ -35,6 +35,10 @@ const CardSlider = ({
   tone = "light",
   autoAdvanceMs = 0,
   className = "",
+  // { index } — a new object each time moves to that card (duration
+  // quick buttons); onIndexChange reports where the visitor is.
+  jumpTo = null,
+  onIndexChange,
 }) => {
   const [slide, setSlide] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -54,9 +58,26 @@ const CardSlider = ({
     return () => clearInterval(timer);
   }, [autoAdvanceMs, hasMany, interacted, count]);
 
-  if (count === 0) return null;
   // Items can shrink under us (e.g. a package removed); stay in range.
-  const current = Math.min(slide, count - 1);
+  const current = Math.min(slide, Math.max(count - 1, 0));
+
+  // Only a new jump request moves the slider (adjusted during render,
+  // React's pattern for state that follows a prop).
+  const [lastJump, setLastJump] = useState(jumpTo);
+  if (jumpTo !== lastJump) {
+    setLastJump(jumpTo);
+    if (jumpTo && jumpTo.index >= 0 && jumpTo.index < count) {
+      setInteracted(true);
+      setDirection(jumpTo.index >= current ? 1 : -1);
+      setSlide(jumpTo.index);
+    }
+  }
+
+  useEffect(() => {
+    onIndexChange?.(current);
+  }, [current, onIndexChange]);
+
+  if (count === 0) return null;
 
   const goTo = (target, dir) => {
     setInteracted(true);

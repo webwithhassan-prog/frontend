@@ -10,6 +10,7 @@ import Loader from "../../components/common/Loader";
 import { trackEvent } from "../../utils/analytics";
 import { useCurrency } from "../../context/CurrencyContext";
 import CurrencySwitcher from "../../components/common/CurrencySwitcher";
+import DurationChips from "../../components/common/DurationChips";
 import { getErrorMessage } from "../../utils/errors";
 import Modal from "../../components/admin/Modal";
 import FaqSection from "../../components/common/FaqSection";
@@ -18,7 +19,7 @@ import ManualPaymentPanel from "../../components/common/ManualPaymentPanel";
 import CardSlider from "../../components/common/CardSlider";
 import CardRow from "../../components/common/CardRow";
 import ClassTimesLink from "../../components/common/ClassTimesLink";
-import { durationsForType, popularFlags } from "../../utils/packages";
+import { durationsForType, popularFlags, featuresFor } from "../../utils/packages";
 
 const packageLabels = {
   dietplan: "Customized Dietplan",
@@ -42,30 +43,6 @@ const cardTypeLabels = {
   workout: "Home Workouts only",
 };
 
-const featuresByType = {
-  dietplan: [
-    "Dietitian support",
-    "Home-based menu",
-    "Health-specific / preferred food only",
-    "Daily meal tracking",
-    "Weekly follow-up",
-    "Renews every 15 days",
-  ],
-  workout: [
-    "Flexible timings",
-    "50-55 minute sessions",
-    "6 days a week",
-    "Different workout daily",
-    "Female trainers",
-    "Recordings provided",
-  ],
-  combo: [
-    "Everything in Customized Dietplan",
-    "Everything in Home Workouts",
-    "One package, one price",
-  ],
-};
-
 const Plans = () => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -82,6 +59,8 @@ const Plans = () => {
 
   const [manualMethods, setManualMethods] = useState([]);
   const [manualPayFor, setManualPayFor] = useState(null); // { duration, planIds, amountLabel }
+  const [jumpTo, setJumpTo] = useState(null);
+  const [activeCard, setActiveCard] = useState(0);
 
   const selectedType = searchParams.get("type") || "combo";
 
@@ -259,16 +238,6 @@ const Plans = () => {
       ? Math.round((1 - total / originalTotal) * 100)
       : 0;
     const dietplan = selection.find((p) => p.product_type === "dietplan");
-    // Looked up independently of `selection` because once a dedicated combo
-    // plan exists, selection is just [combo] — but the combo card should
-    // still show both plans' real feature lists side by side, not only the
-    // combo's own summary.
-    const dietplanForDuration = plans.find(
-      (p) => p.product_type === "dietplan" && p.duration_days === duration,
-    );
-    const workoutForDuration = plans.find(
-      (p) => p.product_type === "workout" && p.duration_days === duration,
-    );
     const isDedicatedCombo =
       selectedType === "combo" &&
       selection.length === 1 &&
@@ -339,10 +308,7 @@ const Plans = () => {
                 Dietplan
               </p>
               <ul className="space-y-2">
-                {(dietplanForDuration?.features?.length
-                  ? dietplanForDuration.features
-                  : featuresByType.dietplan
-                ).map((f) => (
+                {featuresFor(plans, "dietplan", duration).map((f) => (
                   <li
                     key={f}
                     className="flex items-start gap-1.5 text-xs text-brand-blue/70"
@@ -361,10 +327,7 @@ const Plans = () => {
                 Home Workouts
               </p>
               <ul className="space-y-2">
-                {(workoutForDuration?.features?.length
-                  ? workoutForDuration.features
-                  : featuresByType.workout
-                ).map((f) => (
+                {featuresFor(plans, "workout", duration).map((f) => (
                   <li
                     key={f}
                     className="flex items-start gap-1.5 text-xs text-brand-blue/70"
@@ -381,10 +344,7 @@ const Plans = () => {
           </div>
         ) : (
           <ul className="space-y-2.5 my-4 flex-1">
-            {(selection.length === 1 && selection[0].features?.length
-              ? selection[0].features
-              : featuresByType[selectedType] || []
-            ).map((f) => (
+            {featuresFor(plans, selectedType, duration).map((f) => (
               <li
                 key={f}
                 className="flex items-start gap-2 text-sm text-brand-blue/70"
@@ -455,7 +415,11 @@ const Plans = () => {
           {packageTabs.map((tab) => (
             <button
               key={tab.type}
-              onClick={() => setSearchParams({ type: tab.type })}
+              onClick={() => {
+                setSearchParams({ type: tab.type });
+                setActiveCard(0);
+                setJumpTo(null);
+              }}
               className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${
                 selectedType === tab.type
                   ? "bg-brand-blue text-white"
@@ -515,6 +479,19 @@ const Plans = () => {
           <p className="text-red-500 text-center text-sm mb-8">{error}</p>
         )}
 
+        {!loading && (
+          <DurationChips
+            key={selectedType}
+            className="mb-8"
+            durations={durations}
+            activeIndex={activeCard}
+            onSelect={(i) => {
+              setActiveCard(i);
+              setJumpTo({ index: i });
+            }}
+          />
+        )}
+
         {loading ? (
           // Holds the cards' space so the FAQ below doesn't jump when they load.
           <div className="min-h-[600px]">
@@ -532,6 +509,7 @@ const Plans = () => {
               2 on tablets); keyed by tab so each type starts at its first. */}
             <CardRow
               key={`row-${selectedType}`}
+              jumpTo={jumpTo}
               className="hidden md:block"
               items={durations}
               getKey={(duration) => duration}
@@ -544,6 +522,8 @@ const Plans = () => {
               type starts again from the first card. */}
             <CardSlider
               key={selectedType}
+              jumpTo={jumpTo}
+              onIndexChange={setActiveCard}
               className="md:hidden"
               items={durations}
               getKey={(duration) => duration}
