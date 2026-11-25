@@ -139,6 +139,33 @@ const Timetable = () => {
   };
 
   const [savingZoom, setSavingZoom] = useState(false);
+  const [switchingMode, setSwitchingMode] = useState(false);
+  // Safety switch: each class's own Zoom link on/off (off = shared link).
+  const handleToggleOwnLinks = async () => {
+    const next = !zoomLink?.use_class_zoom_links;
+    if (
+      next &&
+      !window.confirm(
+        `Switch to each class's own Zoom link? ${zoomLink?.slots_with_own_link || 0} of ${zoomLink?.slots_total || 0} classes have one; the rest keep the shared link.`,
+      )
+    )
+      return;
+    setSwitchingMode(true);
+    try {
+      const res = await api.put("/timetable/zoom-mode", { use_class_zoom_links: next });
+      setZoomLink((z) => ({ ...z, ...res.data }));
+      toast.success(
+        next
+          ? "Classes now use their own Zoom links"
+          : "All classes are back on the shared Zoom link",
+      );
+      fetchData();
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Couldn't change the Zoom link setting"));
+    } finally {
+      setSwitchingMode(false);
+    }
+  };
   const handleSaveZoomLink = async () => {
     if (!zoomLinkInput.trim()) {
       toast.error("Enter a Zoom link first");
@@ -405,6 +432,38 @@ const Timetable = () => {
                 {savingZoom ? "Saving..." : "Save Link"}
               </button>
             </div>
+
+            <div className="mt-5 pt-4 border-t border-brand-blue-pale flex items-start justify-between gap-4">
+              <div>
+                <p className="text-brand-blue text-sm font-semibold">
+                  Use each class's own Zoom link
+                </p>
+                <p className="text-brand-blue-light text-xs mt-0.5">
+                  {zoomLink?.slots_with_own_link || 0} of {zoomLink?.slots_total || 0} classes
+                  have their own link (add one by editing a time slot below).{" "}
+                  {zoomLink?.use_class_zoom_links
+                    ? "On: those classes use their own link; the rest use the shared link above. Turn off to put every class back on the shared link."
+                    : "Off: every class uses the shared link above. Turn on once all the links are added."}
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={!!zoomLink?.use_class_zoom_links}
+                aria-label="Use each class's own Zoom link"
+                onClick={handleToggleOwnLinks}
+                disabled={switchingMode}
+                className={`relative shrink-0 w-12 h-7 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange disabled:opacity-50 ${
+                  zoomLink?.use_class_zoom_links ? "bg-green-500" : "bg-gray-300"
+                }`}
+              >
+                <span
+                  className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+                    zoomLink?.use_class_zoom_links ? "translate-x-5" : ""
+                  }`}
+                />
+              </button>
+            </div>
           </StaticCard>
 
           {/* Upcoming Sessions — real instances, cancel/restore per session */}
@@ -606,7 +665,11 @@ const Timetable = () => {
                         </td>
                         <td className="py-3 px-2 text-brand-blue-light">
                           {slot.class_zoom_url ? (
-                            <span className="text-green-700 font-medium">Own link</span>
+                            zoomLink?.use_class_zoom_links ? (
+                              <span className="text-green-700 font-medium">Own link</span>
+                            ) : (
+                              <span className="text-brand-blue font-medium">Own link saved (switch off)</span>
+                            )
                           ) : (
                             "Shared link"
                           )}
@@ -728,9 +791,13 @@ const Timetable = () => {
               value={slotForm.class_zoom_url || ""}
               onChange={handleSlotChange}
               placeholder="https://us06web.zoom.us/j/… (leave empty to use the shared link)"
+              aria-describedby="class_zoom_hint"
               className="mt-1 w-full border border-brand-blue-pale rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-orange"
             />
           </div>
+          <p id="class_zoom_hint" className="text-xs text-brand-blue-light -mt-2">
+            Used only while "Use each class's own Zoom link" is on.
+          </p>
           <Button type="submit" className="w-full" disabled={savingSlot}>
             {savingSlot ? "Saving…" : editingSlotId ? "Save Changes" : "Add Slot"}
           </Button>
