@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { BookOpen, GraduationCap, Video } from "lucide-react";
 import api from "../../services/api";
-import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
 import Button from "../../components/common/Button";
 import { useCurrency } from "../../context/CurrencyContext";
@@ -12,11 +11,46 @@ import { optimizeCloudinaryUrl } from "../../utils/cloudinary";
 import Modal from "../../components/admin/Modal";
 import ManualPaymentPanel from "../../components/common/ManualPaymentPanel";
 
+// Shop grid tile: cover, name and price only. Tapping it opens the full
+// description and payment options (the page used to show everything for
+// every item at once).
+const ShopTile = ({ item, price, Icon, onOpen }) => (
+  <button
+    type="button"
+    onClick={onOpen}
+    className="group flex flex-col text-left h-full rounded-2xl bg-white border border-brand-blue-pale shadow-sm hover:shadow-md hover:border-brand-orange transition-all overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+  >
+    <span className="block aspect-[4/3] bg-brand-blue-pale overflow-hidden">
+      {item.banner_url ? (
+        <img
+          src={optimizeCloudinaryUrl(item.banner_url, 400)}
+          alt=""
+          loading="lazy"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+      ) : (
+        <span className="w-full h-full flex items-center justify-center">
+          <Icon className="text-brand-orange" size={32} aria-hidden="true" />
+        </span>
+      )}
+    </span>
+    <span className="flex flex-col flex-1 p-3">
+      <span className="font-display text-brand-blue text-sm leading-snug line-clamp-2 flex-1">
+        {item.title}
+      </span>
+      <span className="font-display text-base text-brand-blue mt-2">{price}</span>
+      <span className="text-[11px] font-semibold text-brand-orange mt-1">View details</span>
+    </span>
+  </button>
+);
+
 const EBooks = () => {
   const [ebooks, setEbooks] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [buyingId, setBuyingId] = useState(null);
+  // The e-book / course whose details are open: { type, item }.
+  const [viewing, setViewing] = useState(null);
   const [error, setError] = useState("");
   const { format, currency, paymentCountry, payLabel } = useCurrency();
   // Asks "Where are you joining from?" once these prices are on screen.
@@ -127,81 +161,15 @@ const EBooks = () => {
               <p className="font-display text-brand-orange text-xs tracking-[0.15em] text-center mb-6">
                 E-BOOKS
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {ebooks.map((ebook, i) => (
-                  <motion.div
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                {ebooks.map((ebook) => (
+                  <ShopTile
                     key={ebook._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.3 }}
-                    transition={{ duration: 0.4, delay: i * 0.08 }}
-                  >
-                    <Card className="h-full flex flex-col">
-                      {ebook.banner_url ? (
-                        <a
-                          href={ebook.banner_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title="Tap to view full image"
-                          aria-label={`View full cover image for ${ebook.title}`}
-                          className="aspect-video -mt-1 mb-3 rounded-lg overflow-hidden bg-brand-blue-pale block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
-                        >
-                          <img
-                            src={optimizeCloudinaryUrl(ebook.banner_url, 500)}
-                            alt={ebook.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </a>
-                      ) : (
-                        <BookOpen
-                          className="text-brand-orange mb-3"
-                          size={28}
-                        />
-                      )}
-                      <h3 className="font-display text-brand-blue text-base mb-2">
-                        {ebook.title}
-                      </h3>
-                      <p className="text-brand-blue/70 text-sm mb-4 flex-1">
-                        {ebook.description}
-                      </p>
-                      <p className="font-display text-xl text-brand-blue mb-4">
-                        {format(ebook.price)}
-                      </p>
-                      <Button
-                        onClick={() => handleBuyEbook(ebook)}
-                        disabled={buyingId === ebook._id}
-                      >
-                        {buyingId === ebook._id
-                          ? "Redirecting..."
-                          : payLabel}
-                      </Button>
-                      <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
-                        Instant Access
-                      </p>
-                      {manualMethods.length > 0 && (
-                        <>
-                          <Button
-                            variant="secondary"
-                            className="w-full mt-3"
-                            onClick={() =>
-                              handleManualPayClick({
-                                type: "ebook",
-                                id: ebook._id,
-                                itemLabel: ebook.title,
-                                amountLabel: format(ebook.price),
-                              })
-                            }
-                          >
-                            {manualMethods.map((m) => m.name).join(" / ")}
-                          </Button>
-                          <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
-                            Instant Access (once your payment is verified by our
-                            team)
-                          </p>
-                        </>
-                      )}
-                    </Card>
-                  </motion.div>
+                    item={ebook}
+                    price={format(ebook.price)}
+                    Icon={BookOpen}
+                    onOpen={() => setViewing({ type: "ebook", item: ebook })}
+                  />
                 ))}
               </div>
             </div>
@@ -212,85 +180,15 @@ const EBooks = () => {
               <p className="font-display text-brand-orange text-xs tracking-[0.15em] text-center mb-6">
                 COURSES
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {courses.map((course, i) => (
-                  <motion.div
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                {courses.map((course) => (
+                  <ShopTile
                     key={course._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.3 }}
-                    transition={{ duration: 0.4, delay: i * 0.08 }}
-                  >
-                    <Card className="h-full flex flex-col">
-                      {course.banner_url ? (
-                        <a
-                          href={course.banner_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title="Tap to view full image"
-                          aria-label={`View full cover image for ${course.title}`}
-                          className="aspect-video -mt-1 mb-3 rounded-lg overflow-hidden bg-brand-blue-pale block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
-                        >
-                          <img
-                            src={optimizeCloudinaryUrl(course.banner_url, 500)}
-                            alt={course.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </a>
-                      ) : (
-                        <GraduationCap
-                          className="text-brand-blue-light mb-3"
-                          size={28}
-                        />
-                      )}
-                      <h3 className="font-display text-brand-blue text-base mb-2">
-                        {course.title}
-                      </h3>
-                      <p className="text-brand-blue/70 text-sm mb-3 flex-1">
-                        {course.description}
-                      </p>
-                      <p className="flex items-center gap-1.5 text-xs text-brand-blue/50 mb-3">
-                        <Video size={13} /> {course.lesson_count} lesson
-                        {course.lesson_count === 1 ? "" : "s"}
-                      </p>
-                      <p className="font-display text-xl text-brand-blue mb-4">
-                        {format(course.price)}
-                      </p>
-                      <Button
-                        onClick={() => handleBuyCourse(course)}
-                        disabled={buyingId === course._id}
-                      >
-                        {buyingId === course._id
-                          ? "Redirecting..."
-                          : payLabel}
-                      </Button>
-                      <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
-                        Instant Access
-                      </p>
-                      {manualMethods.length > 0 && (
-                        <>
-                          <Button
-                            variant="secondary"
-                            className="w-full mt-3"
-                            onClick={() =>
-                              handleManualPayClick({
-                                type: "course",
-                                id: course._id,
-                                itemLabel: course.title,
-                                amountLabel: format(course.price),
-                              })
-                            }
-                          >
-                            {manualMethods.map((m) => m.name).join(" / ")}
-                          </Button>
-                          <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
-                            Instant Access (once your payment is verified by our
-                            team)
-                          </p>
-                        </>
-                      )}
-                    </Card>
-                  </motion.div>
+                    item={course}
+                    price={format(course.price)}
+                    Icon={GraduationCap}
+                    onOpen={() => setViewing({ type: "course", item: course })}
+                  />
                 ))}
               </div>
             </div>
@@ -303,6 +201,82 @@ const EBooks = () => {
           )}
         </>
       )}
+
+      {/* Full details and payment options for the tapped e-book / course */}
+      <Modal
+        isOpen={!!viewing}
+        onClose={() => setViewing(null)}
+        title={viewing?.type === "course" ? "Course" : "E-Book"}
+      >
+        {viewing && (() => {
+          const { type, item } = viewing;
+          const isCourse = type === "course";
+          return (
+            <div>
+              {item.banner_url && (
+                <a
+                  href={item.banner_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Open the full image"
+                  className="block aspect-video mb-4 rounded-lg overflow-hidden bg-brand-blue-pale focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+                >
+                  <img
+                    src={optimizeCloudinaryUrl(item.banner_url, 800)}
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                  />
+                </a>
+              )}
+              <h3 className="font-display text-brand-blue text-lg mb-2">{item.title}</h3>
+              {item.description && (
+                <p className="text-brand-blue/70 text-sm mb-3 whitespace-pre-line">
+                  {item.description}
+                </p>
+              )}
+              {isCourse && (
+                <p className="flex items-center gap-1.5 text-xs text-brand-blue/50 mb-3">
+                  <Video size={13} /> {item.lesson_count} lesson
+                  {item.lesson_count === 1 ? "" : "s"}
+                </p>
+              )}
+              <p className="font-display text-2xl text-brand-blue mb-4">{format(item.price)}</p>
+              <Button
+                className="w-full"
+                onClick={() => (isCourse ? handleBuyCourse(item) : handleBuyEbook(item))}
+                disabled={buyingId === item._id}
+              >
+                {buyingId === item._id ? "Redirecting..." : payLabel}
+              </Button>
+              <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
+                Instant Access
+              </p>
+              {manualMethods.length > 0 && (
+                <>
+                  <Button
+                    variant="secondary"
+                    className="w-full mt-3"
+                    onClick={() => {
+                      setViewing(null);
+                      handleManualPayClick({
+                        type,
+                        id: item._id,
+                        itemLabel: item.title,
+                        amountLabel: format(item.price),
+                      });
+                    }}
+                  >
+                    {manualMethods.map((m) => m.name).join(" / ")}
+                  </Button>
+                  <p className="text-[11px] text-brand-blue-light text-center mt-1.5">
+                    Instant Access (once your payment is verified by our team)
+                  </p>
+                </>
+              )}
+            </div>
+          );
+        })()}
+      </Modal>
 
       <Modal
         isOpen={!!manualPayFor}
