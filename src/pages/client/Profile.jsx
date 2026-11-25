@@ -10,6 +10,7 @@ import {
   Check,
   UtensilsCrossed,
   Bell,
+  BellRing,
   ArrowRight,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -32,6 +33,18 @@ import {
   unsubscribeFromPush,
 } from "../../utils/push";
 import YouTubeFacade from "../../components/common/YouTubeFacade";
+import ProgressChart from "../../components/client/ProgressChart";
+import FirstWeekChecklist from "../../components/client/FirstWeekChecklist";
+import InstallAppCard from "../../components/client/InstallAppCard";
+
+// A class's start as Pakistan-time "HH:MM" — the key for "Remind me".
+const pktTimeKey = (datetime) =>
+  new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZone: "Asia/Karachi",
+  }).format(new Date(datetime));
 
 const statusColors = {
   active: "bg-green-100 text-green-700",
@@ -116,6 +129,8 @@ const Profile = () => {
 
   const [dailySteps, setDailySteps] = useState("");
   const [dailyWater, setDailyWater] = useState("");
+  // Today's log saved (not just typed) — ticks the first-week checklist.
+  const [logSavedToday, setLogSavedToday] = useState(false);
   const [dailyLogMessage, setDailyLogMessage] = useState("");
 
   const [pushStatus, setPushStatus] = useState("unsupported");
@@ -149,6 +164,44 @@ const Profile = () => {
       toast.error(getErrorMessage(err, "Couldn't enable notifications"));
     } finally {
       setPushBusy(false);
+    }
+  };
+
+  // "Remind me" on a class card: a notification ~10 minutes before that
+  // class time every day. Needs notifications on, so it asks first.
+  const [alertBusy, setAlertBusy] = useState(null);
+  const toggleClassAlert = async (cls) => {
+    const key = pktTimeKey(cls.datetime);
+    const current = client?.class_alert_times || [];
+    const turningOn = !current.includes(key);
+    setAlertBusy(key);
+    try {
+      if (turningOn && pushStatus !== "granted") {
+        const clientId = localStorage.getItem("client_id");
+        const result = await subscribeToPush(clientId);
+        setPushStatus(result);
+        if (result !== "granted") {
+          toast.error(
+            result === "denied"
+              ? "Notifications are blocked — allow them in your browser settings to get class reminders."
+              : "Allow notifications to get class reminders.",
+          );
+          return;
+        }
+      }
+      const times = turningOn ? [...current, key] : current.filter((t) => t !== key);
+      const clientId = localStorage.getItem("client_id");
+      const res = await api.put(`/clients/${clientId}/class-alerts`, { times });
+      setClient((prev) => ({ ...prev, class_alert_times: res.data.class_alert_times }));
+      toast.success(
+        turningOn
+          ? "We'll remind you about 10 minutes before this class, every day."
+          : "Reminder off for this class.",
+      );
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Couldn't change the reminder"));
+    } finally {
+      setAlertBusy(null);
     }
   };
 
@@ -214,6 +267,7 @@ const Profile = () => {
       if (todayLog) {
         setDailySteps(todayLog.steps || "");
         setDailyWater(todayLog.water_liters || "");
+        setLogSavedToday((todayLog.steps || 0) > 0 || (todayLog.water_liters || 0) > 0);
       }
     } catch (err) {
       console.error(err);
@@ -286,7 +340,13 @@ const Profile = () => {
   const recordProgressCheckin = async () => {
     try {
       const clientId = localStorage.getItem("client_id");
-      await api.put(`/clients/${clientId}/progress-checkin`);
+      // Weight and inch loss feed the progress chart; the rest of the form
+      // only goes to the dietitian as the image.
+      await api.put(`/clients/${clientId}/progress-checkin`, {
+        weight_kg: progressForm.current_weight,
+        starting_weight_kg: progressForm.starting_weight,
+        inch_loss: progressForm.inch_loss,
+      });
       setClient((prev) => ({
         ...prev,
         last_progress_checkin: new Date().toISOString(),
@@ -334,6 +394,7 @@ const Profile = () => {
         water_liters: Number(dailyWater) || 0,
       });
       setDailyLogMessage("Saved! Keep it up.");
+      setLogSavedToday(Number(dailySteps) > 0 || Number(dailyWater) > 0);
     } catch (err) {
       setDailyLogMessage("Something went wrong.");
     }
@@ -405,6 +466,26 @@ const Profile = () => {
             timeZone,
           })}
         </p>
+        {!isCancelled && pushStatus !== "unsupported" && (() => {
+          const key = pktTimeKey(c.datetime);
+          const on = (client?.class_alert_times || []).includes(key);
+          return (
+            <button
+              type="button"
+              onClick={() => toggleClassAlert(c)}
+              disabled={alertBusy === key}
+              aria-pressed={on}
+              className={`mb-3 inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange disabled:opacity-50 ${
+                on
+                  ? "bg-brand-orange/10 border-brand-orange text-brand-orange"
+                  : "border-brand-blue-pale text-brand-blue hover:border-brand-blue"
+              }`}
+            >
+              {on ? <BellRing size={14} aria-hidden="true" /> : <Bell size={14} aria-hidden="true" />}
+              {on ? "Reminder on" : "Remind me"}
+            </button>
+          );
+        })()}
         {isCancelled ? (
           <span className="inline-block text-xs font-semibold px-3 py-1.5 rounded-full bg-red-100 text-red-700">
             Cancelled{c.cancel_reason ? ` — ${c.cancel_reason}` : ""}
@@ -579,6 +660,19 @@ const Profile = () => {
               </Card>
             </motion.div>
           )}
+
+          <FirstWeekChecklist
+            className="mb-6"
+            client={client}
+            hasDietplan={hasDietplan}
+            hasWorkout={hasWorkout && client?.status === "active"}
+            loggedToday={logSavedToday}
+            pushOn={pushStatus === "granted"}
+            onEnablePush={pushStatus === "unsupported" ? null : handleEnableNotifications}
+          />
+          <div id="install-app" className="scroll-mt-24">
+            <InstallAppCard className="mb-6" />
+          </div>
 
           <DashboardQuickLinks
             hasWorkout={hasWorkout}
@@ -1106,11 +1200,16 @@ const Profile = () => {
                 WEEKLY PROGRESS CHECK-IN
               </h2>
               <p className="text-brand-blue/70 text-sm mb-6">
-                Fill this in weekly to track your progress — nothing here is
-                saved on our servers except the date of your last check-in (so
-                we can remind you). Save the image and send it to us on
+                Fill this in weekly to track your progress. Only your weight
+                and inch loss are saved (for your progress chart) — the rest
+                stays on your phone. Save the image and send it to us on
                 WhatsApp.
               </p>
+              <ProgressChart
+                className="mb-6 max-w-xl"
+                clientId={client?._id}
+                refreshKey={client?.last_progress_checkin}
+              />
 
               <AnimatePresence mode="wait">
                 {!progressImageGenerated ? (

@@ -2,6 +2,8 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
+// Catches the browser's install offer early (see utils/installPrompt.js).
+import "./utils/installPrompt";
 
 // A tab opened before a deploy still references the previous build's
 // lazy-route chunks, which no longer exist — reload once to pick up the
