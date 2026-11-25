@@ -380,7 +380,7 @@ const Enrollments = () => {
   const handleFreeze = async (id) => {
     try {
       await api.put(`/clients/${id}/freeze`);
-      toast.success("Client frozen");
+      toast.success("Client frozen — their days stop counting until resumed");
       fetchClients();
     } catch (err) {
       toast.error(getErrorMessage(err, "Failed to freeze client"));
@@ -389,8 +389,13 @@ const Enrollments = () => {
 
   const handleResume = async (id) => {
     try {
-      await api.put(`/clients/${id}/resume`);
-      toast.success("Client resumed");
+      const res = await api.put(`/clients/${id}/resume`);
+      const back = res.data?.days_given_back || 0;
+      toast.success(
+        back > 0
+          ? `Client resumed — ${back} frozen day${back === 1 ? "" : "s"} added back`
+          : "Client resumed",
+      );
       fetchClients();
     } catch (err) {
       toast.error(getErrorMessage(err, "Failed to resume client"));
@@ -504,7 +509,9 @@ const Enrollments = () => {
   const handleUnban = async (id) => {
     setOpenMenuId(null);
     try {
-      await api.put(`/clients/${id}/unban`);
+      const res = await api.put(`/clients/${id}/unban`);
+      const back = res.data?.days_given_back || 0;
+      if (back > 0) toast.success(`${back} locked day${back === 1 ? "" : "s"} added back`);
       toast.success("Client unbanned");
       fetchClients();
     } catch (err) {

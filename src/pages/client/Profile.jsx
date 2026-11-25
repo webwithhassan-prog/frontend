@@ -423,7 +423,12 @@ const Profile = () => {
   // A dietplan-only client sees onboarding/check-ins, not live classes; a
   // workout-only client sees classes, not diet forms. A combo client (both
   // flags true) sees everything — nothing here needs a separate branch.
-  const hasDietplan = !!client?.has_dietplan;
+  // Diet features (weekly follow-up, Day 1 form, check-in reminders) are for
+  // Dietplan and Both Combined clients while their plan runs — not
+  // workout-only clients, and not once it has expired or is frozen. The
+  // flag alone stayed on after expiry, so the follow-up kept showing.
+  const boughtDietplan = !!client?.has_dietplan;
+  const hasDietplan = boughtDietplan && client?.status === "active";
   const hasWorkout = !!client?.has_workout;
   const dietWhatsappLink = `https://wa.me/${settings.whatsapp_dietician}?text=${encodeURIComponent(
     "Hi! I just saved my check-in image and I'm sending it here.",
@@ -458,7 +463,11 @@ const Profile = () => {
             ? "You haven't checked in yet"
             : `Overdue by ${daysSinceCheckin - 7} day(s)`
           : `Days remaining: ${daysUntilCheckin}`
-        : "Weekly check-in for dietplan clients",
+        : boughtDietplan
+          ? client?.status === "paused"
+            ? "Paused while your account is frozen"
+            : "Your dietplan has ended — renew to continue"
+          : "Weekly check-in for dietplan clients",
       active: hasDietplan,
       upgradeType: "dietplan",
     },
